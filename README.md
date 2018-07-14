@@ -48,7 +48,7 @@ var movieReviewService = restClientFactory
             .Build<IMovieReviewService>();
 
 Review review = new Review(stars: 3, "This was a delightful comedy, but not terribly realistic.");
-await movieReviewService.submitReview(movieId, review);
+await movieReviewService.SubmitReview(movieId, review);
 ```
 
 This allows for a much more natural coding style, and the underlying implementation handles the communication between the client and service - it makes the HTTP connection, serializes the Review object to JSON/etc. so that the remote service can process it.
