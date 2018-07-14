@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2035
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Activout.RestClient", "Activout.RestClient\Activout.RestClient.csproj", "{1C0382A9-31AA-47E8-84FD-A6A6346C23A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Activout.RestClient.Test", "Activout.RestClient.Test\Activout.RestClient.Test.csproj", "{C8B95066-254F-4D82-9FF4-B4233AC476F2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1C0382A9-31AA-47E8-84FD-A6A6346C23A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C0382A9-31AA-47E8-84FD-A6A6346C23A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C0382A9-31AA-47E8-84FD-A6A6346C23A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C0382A9-31AA-47E8-84FD-A6A6346C23A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8B95066-254F-4D82-9FF4-B4233AC476F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8B95066-254F-4D82-9FF4-B4233AC476F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8B95066-254F-4D82-9FF4-B4233AC476F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8B95066-254F-4D82-9FF4-B4233AC476F2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0170318A-D14C-43D9-A333-5D88A82F3137}
+	EndGlobalSection
+EndGlobal
