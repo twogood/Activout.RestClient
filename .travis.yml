@@ -1,2 +1,7 @@
 language: csharp
 solution: ActivoutRestClient.sln
+mono: none
+dotnet: 2.1.302
+script:
+  - dotnet build ./Activout.RestClient/
+  - dotnet test ./Activout.RestClient.Test/
