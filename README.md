@@ -42,13 +42,13 @@ public interface IMovieReviewService
 Now we can use this interface as a means to invoke the actual remote review service like this:
 
 ```C#
-    private IMovieReviewService CreateMovieReviewService()
-    {
-        return restClientFactory
+var movieReviewService = restClientFactory
             .CreateBuilder(httpClient)
-            .BaseUri(new Uri(BASE_URI))
+            .BaseUri(new Uri("http://localhost:9080/movieReviewService"))
             .Build<IMovieReviewService>();
-    }
+
+Review review = new Review(stars: 3, "This was a delightful comedy, but not terribly realistic.");
+await movieReviewService.submitReview(movieId, review);
 ```
 
 This allows for a much more natural coding style, and the underlying implementation handles the communication between the client and service - it makes the HTTP connection, serializes the Review object to JSON/etc. so that the remote service can process it.
