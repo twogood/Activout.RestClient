@@ -53,5 +53,16 @@ await movieReviewService.submitReview(movieId, review);
 
 This allows for a much more natural coding style, and the underlying implementation handles the communication between the client and service - it makes the HTTP connection, serializes the Review object to JSON/etc. so that the remote service can process it.
 
+## Usage notes
+
+- Exceptions will be wrapped in AggregatedException
+- Both synchronous and asynchronous calls are supported. Asynchronous is recommended.
+- Additional serializers and deserializers can be added at will.
+- Support for custom error objects via \[ErrorResponse\] attribute. These will be included in a RestClientException that is thrown if the API call fails.
+
+## TODO
+
+- Query parameters are not yet implemented
+
 ## Collaborate
 This project is still under development - participation welcome!
