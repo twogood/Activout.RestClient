@@ -1,4 +1,6 @@
 # Activout Rest Client
+[![Build Status](https://travis-ci.org/twogood/Activout.RestClient.svg?branch=master)](https://travis-ci.org/twogood/Activout.RestClient)
+
 Create a REST(ish) API client only by defining the C# interface you want
 
 *Shamelessly inspired by [Rest Client for MicroProfile](https://github.com/eclipse/microprofile-rest-client).* 
