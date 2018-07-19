@@ -17,10 +17,10 @@ namespace Activout.RestClient.Implementation
         public RestClientBuilder(HttpClient httpClient, IDuckTyping duckTyping,
             ISerializationManager serializationManager, ITaskConverterFactory taskConverterFactory)
         {
-            this._httpClient = CheckNotNull(httpClient);
-            this._duckTyping = CheckNotNull(duckTyping);
-            this._taskConverterFactory = CheckNotNull(taskConverterFactory);
-            this._serializationManager = serializationManager;
+            _httpClient = CheckNotNull(httpClient);
+            _duckTyping = CheckNotNull(duckTyping);
+            _taskConverterFactory = CheckNotNull(taskConverterFactory);
+            _serializationManager = serializationManager;
         }
 
         public IRestClientBuilder BaseUri(Uri apiUri)

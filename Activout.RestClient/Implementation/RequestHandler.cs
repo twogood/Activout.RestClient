@@ -66,7 +66,7 @@ namespace Activout.RestClient.Implementation
                     _template = _template + routeAttribute.Template;
                 }
 
-            this._context = context;
+            _context = context;
         }
 
         private ITaskConverter CreateConverter(RestClientContext context)

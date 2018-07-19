@@ -13,9 +13,9 @@ namespace Activout.RestClient.Implementation
         public RestClientFactory(IDuckTyping duckTyping, ISerializationManager serializationManager,
             ITaskConverterFactory taskConverterFactory)
         {
-            this._duckTyping = duckTyping;
-            this._serializationManager = serializationManager;
-            this._taskConverterFactory = taskConverterFactory;
+            _duckTyping = duckTyping;
+            _serializationManager = serializationManager;
+            _taskConverterFactory = taskConverterFactory;
         }
 
         public IRestClientBuilder CreateBuilder(HttpClient httpClient = null)
