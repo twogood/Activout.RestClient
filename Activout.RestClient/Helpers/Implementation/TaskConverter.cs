@@ -59,7 +59,7 @@ namespace Activout.RestClient.Helpers.Implementation
             return lambda.Compile();
         }
 
-        private static LambdaExpression InvokeLambdaMethod(MethodInfo lambdaMethod, UnaryExpression expression,
+        private static LambdaExpression InvokeLambdaMethod(MethodBase lambdaMethod, UnaryExpression expression,
             ParameterExpression parameter)
         {
             return (LambdaExpression) lambdaMethod.Invoke(null, new object[] {expression, new[] {parameter}});
