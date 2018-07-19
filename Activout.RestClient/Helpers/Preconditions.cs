@@ -11,10 +11,10 @@ namespace Activout.RestClient.Helpers
         /// <param name="reference">an object reference</param>
         /// <param name="errorMessage">the exception message to use if the check fails</param>
         /// <returns>the non-null reference that was validated</returns>
-        /// <exception cref="NullReferenceException">if reference is null</exception>
+        /// <exception cref="ArgumentNullException">if reference is null</exception>
         public static T CheckNotNull<T>(T reference, string errorMessage = null)
         {
-            if (reference == null) throw new NullReferenceException(errorMessage);
+            if (reference == null) throw new ArgumentNullException(errorMessage);
 
             return reference;
         }
