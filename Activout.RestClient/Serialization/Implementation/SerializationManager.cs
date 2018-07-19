@@ -32,13 +32,15 @@ namespace Activout.RestClient.Serialization.Implementation
             if (mediaTypeCollection == null) return _serializers.First();
 
             foreach (var serializer in _serializers)
-            foreach (var supportedMediaTypeString in serializer.SupportedMediaTypes)
             {
-                var supportedMediaType = new MediaType(supportedMediaTypeString);
-                foreach (var mediaType in mediaTypeCollection)
+                foreach (var supportedMediaTypeString in serializer.SupportedMediaTypes)
                 {
-                    var inputMediaType = new MediaType(mediaType);
-                    if (inputMediaType.IsSubsetOf(supportedMediaType)) return serializer;
+                    var supportedMediaType = new MediaType(supportedMediaTypeString);
+                    foreach (var mediaType in mediaTypeCollection)
+                    {
+                        var inputMediaType = new MediaType(mediaType);
+                        if (inputMediaType.IsSubsetOf(supportedMediaType)) return serializer;
+                    }
                 }
             }
 
