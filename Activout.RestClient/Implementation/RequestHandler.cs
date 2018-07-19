@@ -159,7 +159,7 @@ namespace Activout.RestClient.Implementation
             return task.Result;
         }
 
-        private Dictionary<string, object> GetRouteParams(object[] args)
+        private Dictionary<string, object> GetRouteParams(IReadOnlyList<object> args)
         {
             var routeParams = new Dictionary<string, object>();
             for (var i = 0; i < _parameters.Length; i++)
