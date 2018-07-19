@@ -38,12 +38,8 @@ namespace Activout.RestClient.Implementation
             foreach (var attribute in attributes)
                 if (attribute is ConsumesAttribute consumesAttribute)
                     _context.DefaultContentTypes = consumesAttribute.ContentTypes;
-                else if (attribute is InterfaceConsumesAttribute interfaceConsumesAttribute)
-                    _context.DefaultContentTypes = interfaceConsumesAttribute.ContentTypes;
                 else if (attribute is RouteAttribute routeAttribute)
                     _context.BaseTemplate = routeAttribute.Template;
-                else if (attribute is InterfaceRouteAttribute interfaceRouteAttribute)
-                    _context.BaseTemplate = interfaceRouteAttribute.Template;
                 else if (attribute is ErrorResponseAttribute errorResponseAttribute)
                     _context.ErrorResponseType = errorResponseAttribute.Type;
         }
