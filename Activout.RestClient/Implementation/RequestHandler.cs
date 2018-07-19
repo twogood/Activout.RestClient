@@ -39,11 +39,11 @@ namespace Activout.RestClient.Implementation
 
             _bodyArgumentIndex = _parameters.Length - 1;
 
-            var attributes = method.GetCustomAttributes(true);
-            foreach (var attribute in attributes)
+            var templateBuilder = new StringBuilder(context.BaseTemplate ?? "");
+            foreach (var attribute in method.GetCustomAttributes(true))
                 if (attribute is HttpMethodAttribute httpMethodAttribute)
                 {
-                    _template = _template + httpMethodAttribute.Template;
+                    templateBuilder.Append(httpMethodAttribute.Template);
 
                     // TODO: support additional HTTP methods
                     if (attribute is HttpGetAttribute)
@@ -63,9 +63,10 @@ namespace Activout.RestClient.Implementation
                 }
                 else if (attribute is RouteAttribute routeAttribute)
                 {
-                    _template = _template + routeAttribute.Template;
+                    templateBuilder.Append(routeAttribute.Template);
                 }
 
+            _template = templateBuilder.ToString();
             _context = context;
         }
 
