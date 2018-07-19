@@ -6,9 +6,7 @@ namespace Activout.RestClient.Helpers.Implementation
     {
         public ITaskConverter CreateTaskConverter(Type actualReturnType)
         {
-            if (actualReturnType == typeof(void)) return null;
-
-            return new TaskConverter(actualReturnType);
+            return actualReturnType == typeof(void) ? null : new TaskConverter(actualReturnType);
         }
     }
 }
