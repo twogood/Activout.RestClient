@@ -14,74 +14,74 @@ namespace Activout.RestClient.Implementation
 {
     internal class RequestHandler
     {
-        private readonly Type actualReturnType;
-        private readonly int bodyArgumentIndex;
-        private readonly MediaTypeCollection contentTypes;
-        private readonly RestClientContext context;
-        private readonly ITaskConverter converter;
-        private readonly Type errorResponseType;
-        private readonly HttpMethod httpMethod = HttpMethod.Get;
-        private readonly ParameterInfo[] parameters;
-        private readonly Type returnType;
-        private readonly ISerializer serializer;
-        private readonly string template;
+        private readonly Type _actualReturnType;
+        private readonly int _bodyArgumentIndex;
+        private readonly MediaTypeCollection _contentTypes;
+        private readonly RestClientContext _context;
+        private readonly ITaskConverter _converter;
+        private readonly Type _errorResponseType;
+        private readonly HttpMethod _httpMethod = HttpMethod.Get;
+        private readonly ParameterInfo[] _parameters;
+        private readonly Type _returnType;
+        private readonly ISerializer _serializer;
+        private readonly string _template;
 
         public RequestHandler(MethodInfo method, RestClientContext context)
         {
-            returnType = method.ReturnType;
-            actualReturnType = GetActualReturnType();
-            parameters = method.GetParameters();
-            converter = CreateConverter(context);
-            template = context.BaseTemplate ?? "";
-            serializer = context.DefaultSerializer;
-            contentTypes = context.DefaultContentTypes;
-            errorResponseType = context.ErrorResponseType;
+            _returnType = method.ReturnType;
+            _actualReturnType = GetActualReturnType();
+            _parameters = method.GetParameters();
+            _converter = CreateConverter(context);
+            _template = context.BaseTemplate ?? "";
+            _serializer = context.DefaultSerializer;
+            _contentTypes = context.DefaultContentTypes;
+            _errorResponseType = context.ErrorResponseType;
 
-            bodyArgumentIndex = parameters.Length - 1;
+            _bodyArgumentIndex = _parameters.Length - 1;
 
             var attributes = method.GetCustomAttributes(true);
             foreach (var attribute in attributes)
                 if (attribute is HttpMethodAttribute httpMethodAttribute)
                 {
-                    template = template + httpMethodAttribute.Template;
+                    _template = _template + httpMethodAttribute.Template;
 
                     // TODO: support additional HTTP methods
                     if (attribute is HttpGetAttribute)
-                        httpMethod = HttpMethod.Get;
+                        _httpMethod = HttpMethod.Get;
                     else if (attribute is HttpPostAttribute)
-                        httpMethod = HttpMethod.Post;
-                    else if (attribute is HttpPutAttribute) httpMethod = HttpMethod.Put;
+                        _httpMethod = HttpMethod.Post;
+                    else if (attribute is HttpPutAttribute) _httpMethod = HttpMethod.Put;
                 }
                 else if (attribute is ErrorResponseAttribute errorResponseAttribute)
                 {
-                    errorResponseType = errorResponseAttribute.Type;
+                    _errorResponseType = errorResponseAttribute.Type;
                 }
                 else if (attribute is ConsumesAttribute consumesAttribute)
                 {
-                    contentTypes = consumesAttribute.ContentTypes;
-                    serializer = context.SerializationManager.GetSerializer(contentTypes);
+                    _contentTypes = consumesAttribute.ContentTypes;
+                    _serializer = context.SerializationManager.GetSerializer(_contentTypes);
                 }
                 else if (attribute is RouteAttribute routeAttribute)
                 {
-                    template = template + routeAttribute.Template;
+                    _template = _template + routeAttribute.Template;
                 }
 
-            this.context = context;
+            this._context = context;
         }
 
         private ITaskConverter CreateConverter(RestClientContext context)
         {
-            return context.TaskConverterFactory.CreateTaskConverter(actualReturnType);
+            return context.TaskConverterFactory.CreateTaskConverter(_actualReturnType);
         }
 
         private bool IsVoidTask()
         {
-            return returnType == typeof(Task);
+            return _returnType == typeof(Task);
         }
 
         private bool IsGenericTask()
         {
-            return returnType.BaseType == typeof(Task) && returnType.IsGenericType;
+            return _returnType.BaseType == typeof(Task) && _returnType.IsGenericType;
         }
 
         private Type GetActualReturnType()
@@ -89,13 +89,13 @@ namespace Activout.RestClient.Implementation
             if (IsVoidTask())
                 return typeof(void);
             if (IsGenericTask())
-                return returnType.GenericTypeArguments[0];
-            return returnType;
+                return _returnType.GenericTypeArguments[0];
+            return _returnType;
         }
 
         private string ExpandTemplate(Dictionary<string, object> routeParams)
         {
-            var expanded = template;
+            var expanded = _template;
             foreach (var entry in routeParams)
                 expanded = expanded.Replace("{" + entry.Key + "}", entry.Value.ToString());
 
@@ -105,7 +105,7 @@ namespace Activout.RestClient.Implementation
         // Based on PrepareRequestMessage at https://github.com/dotnet/corefx/blob/master/src/System.Net.Http/src/System/Net/Http/HttpClient.cs
         private void PrepareRequestMessage(HttpRequestMessage request)
         {
-            var baseUri = context.BaseUri;
+            var baseUri = _context.BaseUri;
             Uri requestUri = null;
             if (request.RequestUri == null && baseUri == null) throw new InvalidOperationException();
             if (request.RequestUri == null)
@@ -137,34 +137,34 @@ namespace Activout.RestClient.Implementation
 
         public object Send(object[] args)
         {
-            if (parameters.Length != args.Length)
-                throw new InvalidOperationException($"Expected {parameters.Length} parameters but got {args.Length}");
+            if (_parameters.Length != args.Length)
+                throw new InvalidOperationException($"Expected {_parameters.Length} parameters but got {args.Length}");
 
             var routeParams = GetRouteParams(args);
             var requestUri = ExpandTemplate(routeParams);
-            var request = new HttpRequestMessage(httpMethod, requestUri);
+            var request = new HttpRequestMessage(_httpMethod, requestUri);
 
-            if (httpMethod == HttpMethod.Post || httpMethod == HttpMethod.Put)
+            if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put)
             {
-                var mediaType = contentTypes[0];
-                request.Content = serializer.Serialize(args[bodyArgumentIndex], Encoding.UTF8, mediaType);
+                var mediaType = _contentTypes[0];
+                request.Content = _serializer.Serialize(args[_bodyArgumentIndex], Encoding.UTF8, mediaType);
             }
 
             var task = SendAsync(request);
 
             if (IsVoidTask())
                 return task;
-            if (returnType.BaseType == typeof(Task) && returnType.IsGenericType)
-                return converter.ConvertReturnType(task);
+            if (_returnType.BaseType == typeof(Task) && _returnType.IsGenericType)
+                return _converter.ConvertReturnType(task);
             return task.Result;
         }
 
         private Dictionary<string, object> GetRouteParams(object[] args)
         {
             var routeParams = new Dictionary<string, object>();
-            for (var i = 0; i < parameters.Length; i++)
+            for (var i = 0; i < _parameters.Length; i++)
             {
-                var parameterAttributes = parameters[i].GetCustomAttributes(false);
+                var parameterAttributes = _parameters[i].GetCustomAttributes(false);
                 foreach (var attribute in parameterAttributes)
                     if (attribute.GetType() == typeof(RouteParamAttribute))
                     {
@@ -180,7 +180,7 @@ namespace Activout.RestClient.Implementation
         {
             PrepareRequestMessage(request);
 
-            var response = await context.HttpClient.SendAsync(request);
+            var response = await _context.HttpClient.SendAsync(request);
 
             /*
              TODO: test cases
@@ -200,8 +200,8 @@ namespace Activout.RestClient.Implementation
                 if (response.Content != null)
                 {
                     var deserializer =
-                        context.SerializationManager.GetDeserializer(response.Content.Headers?.ContentType?.MediaType);
-                    var type = response.IsSuccessStatusCode ? actualReturnType : errorResponseType;
+                        _context.SerializationManager.GetDeserializer(response.Content.Headers?.ContentType?.MediaType);
+                    var type = response.IsSuccessStatusCode ? _actualReturnType : _errorResponseType;
                     data = await deserializer.Deserialize(response.Content, type);
                 }
             }

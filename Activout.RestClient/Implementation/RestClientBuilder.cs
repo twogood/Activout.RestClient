@@ -8,31 +8,31 @@ namespace Activout.RestClient.Implementation
 {
     internal class RestClientBuilder : IRestClientBuilder
     {
-        private readonly IDuckTyping duckTyping;
-        private readonly HttpClient httpClient;
-        private readonly ISerializationManager serializationManager;
-        private readonly ITaskConverterFactory taskConverterFactory;
-        private Uri baseUri;
+        private readonly IDuckTyping _duckTyping;
+        private readonly HttpClient _httpClient;
+        private readonly ISerializationManager _serializationManager;
+        private readonly ITaskConverterFactory _taskConverterFactory;
+        private Uri _baseUri;
 
         public RestClientBuilder(HttpClient httpClient, IDuckTyping duckTyping,
             ISerializationManager serializationManager, ITaskConverterFactory taskConverterFactory)
         {
-            this.httpClient = CheckNotNull(httpClient);
-            this.duckTyping = CheckNotNull(duckTyping);
-            this.taskConverterFactory = CheckNotNull(taskConverterFactory);
-            this.serializationManager = serializationManager;
+            this._httpClient = CheckNotNull(httpClient);
+            this._duckTyping = CheckNotNull(duckTyping);
+            this._taskConverterFactory = CheckNotNull(taskConverterFactory);
+            this._serializationManager = serializationManager;
         }
 
         public IRestClientBuilder BaseUri(Uri apiUri)
         {
-            baseUri = AddTrailingSlash(apiUri);
+            _baseUri = AddTrailingSlash(apiUri);
             return this;
         }
 
         public T Build<T>() where T : class
         {
-            var client = new RestClient<T>(baseUri, httpClient, serializationManager, taskConverterFactory);
-            return duckTyping.DuckType<T>(client);
+            var client = new RestClient<T>(_baseUri, _httpClient, _serializationManager, _taskConverterFactory);
+            return _duckTyping.DuckType<T>(client);
         }
 
         private static Uri AddTrailingSlash(Uri apiUri)

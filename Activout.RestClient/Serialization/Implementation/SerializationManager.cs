@@ -7,31 +7,31 @@ namespace Activout.RestClient.Serialization.Implementation
 {
     internal class SerializationManager : ISerializationManager
     {
-        private readonly List<IDeserializer> deserializers;
-        private readonly List<ISerializer> serializers;
+        private readonly List<IDeserializer> _deserializers;
+        private readonly List<ISerializer> _serializers;
 
         public SerializationManager(List<ISerializer> serializers = null, List<IDeserializer> deserializers = null)
         {
-            this.serializers = serializers ?? new List<ISerializer>();
-            this.deserializers = deserializers ?? new List<IDeserializer>();
+            this._serializers = serializers ?? new List<ISerializer>();
+            this._deserializers = deserializers ?? new List<IDeserializer>();
 
-            this.serializers.Add(new JsonSerializer());
-            this.serializers.Add(new TextSerializer());
+            this._serializers.Add(new JsonSerializer());
+            this._serializers.Add(new TextSerializer());
 
-            this.deserializers.Add(new JsonDeserializer());
+            this._deserializers.Add(new JsonDeserializer());
         }
 
         public IDeserializer GetDeserializer(string mediaType)
         {
             CheckNotNull(mediaType);
-            return deserializers.First(s => s.SupportedMediaTypes.Contains(mediaType));
+            return _deserializers.First(s => s.SupportedMediaTypes.Contains(mediaType));
         }
 
         public ISerializer GetSerializer(MediaTypeCollection mediaTypeCollection)
         {
-            if (mediaTypeCollection == null) return serializers.First();
+            if (mediaTypeCollection == null) return _serializers.First();
 
-            foreach (var serializer in serializers)
+            foreach (var serializer in _serializers)
             foreach (var supportedMediaTypeString in serializer.SupportedMediaTypes)
             {
                 var supportedMediaType = new MediaType(supportedMediaTypeString);

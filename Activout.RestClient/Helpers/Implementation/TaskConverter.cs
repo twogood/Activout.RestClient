@@ -13,26 +13,26 @@ namespace Activout.RestClient.Helpers.Implementation
      */
     internal class TaskConverter : ITaskConverter
     {
-        private static readonly Type objectTaskType = typeof(Task<object>);
-        private readonly MethodInfo continueWith;
-        private readonly Delegate lambda;
+        private static readonly Type ObjectTaskType = typeof(Task<object>);
+        private readonly MethodInfo _continueWith;
+        private readonly Delegate _lambda;
 
         public TaskConverter(Type actualReturnType)
         {
-            lambda = CreateLambda(actualReturnType);
-            continueWith = GetContinueWithMethod(actualReturnType);
+            _lambda = CreateLambda(actualReturnType);
+            _continueWith = GetContinueWithMethod(actualReturnType);
         }
 
         public object ConvertReturnType(Task<object> task)
         {
-            return continueWith.Invoke(task, new object[] {lambda});
+            return _continueWith.Invoke(task, new object[] {_lambda});
         }
 
         private static MethodInfo GetContinueWithMethod(Type actualReturnType)
         {
             // Inspired by https://stackoverflow.com/a/3632196/20444
             var baseFuncType = typeof(Func<,>);
-            var continueWithMethod = objectTaskType.GetMethods()
+            var continueWithMethod = ObjectTaskType.GetMethods()
                 .Where(x => x.Name == nameof(Task.ContinueWith) && x.GetParameters().Length == 1)
                 .Select(x => new {M = x, P = x.GetParameters()})
                 .Where(x => x.P[0].ParameterType.IsGenericType &&
@@ -47,7 +47,7 @@ namespace Activout.RestClient.Helpers.Implementation
 
         private static Delegate CreateLambda(Type actualReturnType)
         {
-            var constantExpression = Expression.Parameter(objectTaskType);
+            var constantExpression = Expression.Parameter(ObjectTaskType);
             var propertyExpression = Expression.Property(constantExpression, "Result");
             var conversion = Expression.Convert(propertyExpression, actualReturnType);
 

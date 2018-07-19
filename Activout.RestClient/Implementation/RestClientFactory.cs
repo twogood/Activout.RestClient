@@ -6,21 +6,21 @@ namespace Activout.RestClient.Implementation
 {
     internal class RestClientFactory : IRestClientFactory
     {
-        private readonly IDuckTyping duckTyping;
-        private readonly ISerializationManager serializationManager;
-        private readonly ITaskConverterFactory taskConverterFactory;
+        private readonly IDuckTyping _duckTyping;
+        private readonly ISerializationManager _serializationManager;
+        private readonly ITaskConverterFactory _taskConverterFactory;
 
         public RestClientFactory(IDuckTyping duckTyping, ISerializationManager serializationManager,
             ITaskConverterFactory taskConverterFactory)
         {
-            this.duckTyping = duckTyping;
-            this.serializationManager = serializationManager;
-            this.taskConverterFactory = taskConverterFactory;
+            this._duckTyping = duckTyping;
+            this._serializationManager = serializationManager;
+            this._taskConverterFactory = taskConverterFactory;
         }
 
         public IRestClientBuilder CreateBuilder(HttpClient httpClient = null)
         {
-            return new RestClientBuilder(httpClient, duckTyping, serializationManager, taskConverterFactory);
+            return new RestClientBuilder(httpClient, _duckTyping, _serializationManager, _taskConverterFactory);
         }
     }
 }

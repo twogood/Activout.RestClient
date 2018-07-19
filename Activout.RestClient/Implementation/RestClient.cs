@@ -12,14 +12,14 @@ namespace Activout.RestClient.Implementation
 {
     internal class RestClient<T> : DynamicObject where T : class
     {
-        private readonly RestClientContext context;
-        private readonly Type type;
+        private readonly RestClientContext _context;
+        private readonly Type _type;
 
         public RestClient(Uri baseUri, HttpClient httpClient, ISerializationManager serializationManager,
             ITaskConverterFactory taskConverterFactory)
         {
-            type = typeof(T);
-            context = new RestClientContext
+            _type = typeof(T);
+            _context = new RestClientContext
             {
                 BaseUri = baseUri,
                 HttpClient = httpClient,
@@ -29,40 +29,40 @@ namespace Activout.RestClient.Implementation
             };
 
             HandleAttributes();
-            context.DefaultSerializer = serializationManager.GetSerializer(context.DefaultContentTypes);
+            _context.DefaultSerializer = serializationManager.GetSerializer(_context.DefaultContentTypes);
         }
 
         private void HandleAttributes()
         {
-            var attributes = type.GetCustomAttributes();
+            var attributes = _type.GetCustomAttributes();
             foreach (var attribute in attributes)
                 if (attribute is ConsumesAttribute consumesAttribute)
-                    context.DefaultContentTypes = consumesAttribute.ContentTypes;
+                    _context.DefaultContentTypes = consumesAttribute.ContentTypes;
                 else if (attribute is InterfaceConsumesAttribute interfaceConsumesAttribute)
-                    context.DefaultContentTypes = interfaceConsumesAttribute.ContentTypes;
+                    _context.DefaultContentTypes = interfaceConsumesAttribute.ContentTypes;
                 else if (attribute is RouteAttribute routeAttribute)
-                    context.BaseTemplate = routeAttribute.Template;
+                    _context.BaseTemplate = routeAttribute.Template;
                 else if (attribute is InterfaceRouteAttribute interfaceRouteAttribute)
-                    context.BaseTemplate = interfaceRouteAttribute.Template;
+                    _context.BaseTemplate = interfaceRouteAttribute.Template;
                 else if (attribute is ErrorResponseAttribute errorResponseAttribute)
-                    context.ErrorResponseType = errorResponseAttribute.Type;
+                    _context.ErrorResponseType = errorResponseAttribute.Type;
         }
 
         public override IEnumerable<string> GetDynamicMemberNames()
         {
-            return type.GetMembers().Select(x => x.Name);
+            return _type.GetMembers().Select(x => x.Name);
         }
 
         public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
         {
-            var method = type.GetMethod(binder.Name);
+            var method = _type.GetMethod(binder.Name);
             if (method == null)
             {
                 result = null;
                 return false;
             }
 
-            var requestHandler = new RequestHandler(method, context);
+            var requestHandler = new RequestHandler(method, _context);
             // TODO: cache RequestHandler
 
             result = requestHandler.Send(args);

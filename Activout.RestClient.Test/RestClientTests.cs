@@ -15,19 +15,19 @@ namespace Activout.RestClientTest
     {
         public RestClientTests()
         {
-            restClientFactory = Services.CreateRestClientFactory();
-            mockHttp = new MockHttpMessageHandler();
+            _restClientFactory = Services.CreateRestClientFactory();
+            _mockHttp = new MockHttpMessageHandler();
         }
 
-        private const string BASE_URI = "http://localhost:9080/movieReviewService";
+        private const string BaseUri = "http://localhost:9080/movieReviewService";
 
-        private readonly IRestClientFactory restClientFactory;
-        private readonly MockHttpMessageHandler mockHttp;
+        private readonly IRestClientFactory _restClientFactory;
+        private readonly MockHttpMessageHandler _mockHttp;
 
         private IMovieReviewService CreateMovieReviewService()
         {
-            return restClientFactory.CreateBuilder(mockHttp.ToHttpClient())
-                .BaseUri(new Uri(BASE_URI))
+            return _restClientFactory.CreateBuilder(_mockHttp.ToHttpClient())
+                .BaseUri(new Uri(BaseUri))
                 .Build<IMovieReviewService>();
         }
 
@@ -36,8 +36,8 @@ namespace Activout.RestClientTest
         {
             // arrange
             var movieId = "*MOVIE_ID*";
-            mockHttp
-                .When(HttpMethod.Get, $"{BASE_URI}/movies/{movieId}/reviews")
+            _mockHttp
+                .When(HttpMethod.Get, $"{BaseUri}/movies/{movieId}/reviews")
                 .Respond(HttpStatusCode.NotFound, request =>
                 {
                     return new StringContent(JsonConvert.SerializeObject(new
@@ -74,8 +74,8 @@ namespace Activout.RestClientTest
             // arrange
             var movieId = "*MOVIE_ID*";
             var reviewId = "*REVIEW_ID*";
-            mockHttp
-                .When(HttpMethod.Get, $"{BASE_URI}/movies/{movieId}/reviews/{reviewId}")
+            _mockHttp
+                .When(HttpMethod.Get, $"{BaseUri}/movies/{movieId}/reviews/{reviewId}")
                 .Respond(HttpStatusCode.NotFound, request =>
                 {
                     return new StringContent(JsonConvert.SerializeObject(new
@@ -114,8 +114,8 @@ namespace Activout.RestClientTest
         public async Task TestGetEmptyIEnumerableAsync()
         {
             // arrange
-            mockHttp
-                .When($"{BASE_URI}/movies")
+            _mockHttp
+                .When($"{BaseUri}/movies")
                 .Respond("application/json", "[]");
 
             var reviewSvc = CreateMovieReviewService();
@@ -132,8 +132,8 @@ namespace Activout.RestClientTest
         {
             // arrange
             var movieId = "FOOBAR";
-            mockHttp
-                .When(HttpMethod.Post, $"{BASE_URI}/movies/{movieId}/reviews")
+            _mockHttp
+                .When(HttpMethod.Post, $"{BaseUri}/movies/{movieId}/reviews")
                 .WithHeaders("Content-Type", "application/json; charset=utf-8")
                 .Respond(request =>
                 {
@@ -160,8 +160,8 @@ namespace Activout.RestClientTest
         public async Task TestPostTextAsync()
         {
             // arrange
-            mockHttp
-                .When(HttpMethod.Post, $"{BASE_URI}/movies/import.csv")
+            _mockHttp
+                .When(HttpMethod.Post, $"{BaseUri}/movies/import.csv")
                 .WithContent("foobar")
                 .WithHeaders("Content-Type", "text/csv; charset=utf-8")
                 .Respond(HttpStatusCode.NoContent);
@@ -181,8 +181,8 @@ namespace Activout.RestClientTest
             // arrange
             var movieId = "*MOVIE_ID*";
             var reviewId = "*REVIEW_ID*";
-            mockHttp
-                .When(HttpMethod.Put, $"{BASE_URI}/movies/{movieId}/reviews/{reviewId}")
+            _mockHttp
+                .When(HttpMethod.Put, $"{BaseUri}/movies/{movieId}/reviews/{reviewId}")
                 .Respond(request => { return request.Content; });
 
             var reviewSvc = CreateMovieReviewService();
