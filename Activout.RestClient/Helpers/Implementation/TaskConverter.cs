@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -42,6 +43,7 @@ namespace Activout.RestClient.Helpers.Implementation
                             && x.A[0].GetGenericTypeDefinition() == typeof(Task<>))
                 .Select(x => x.M)
                 .SingleOrDefault();
+            Debug.Assert(continueWithMethod != null, nameof(continueWithMethod) + " != null");
             return continueWithMethod.MakeGenericMethod(actualReturnType);
         }
 

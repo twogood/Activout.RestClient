@@ -207,7 +207,8 @@ namespace Activout.RestClient.Implementation
             }
             catch (Exception e)
             {
-                throw new RestClientException(response.StatusCode, await response.Content.ReadAsStringAsync(), e);
+                var errorResponse = response.Content == null ? null : await response.Content.ReadAsStringAsync();
+                throw new RestClientException(response.StatusCode, errorResponse, e);
             }
 
             if (response.IsSuccessStatusCode)
