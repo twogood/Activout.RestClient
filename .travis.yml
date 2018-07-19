@@ -7,6 +7,6 @@ install:
 script:
   - dotnet build ./Activout.RestClient/
   - dotnet test ./Activout.RestClient.Test/
-  - $HOME/.dotnet/tools/dotnet-sonarscanner begin /k:"Activout.RestClient" /d:sonar.organization="twogood-github" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$SONAR_TOKEN"
+  - $HOME/.dotnet/tools/dotnet-sonarscanner begin /k:"Activout.RestClient" /d:sonar.organization="twogood-github" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$SONAR_TOKEN" /version:"$TRAVIS_BUILD_NUMBER-$TRAVIS_COMMIT"
   - dotnet build
   - $HOME/.dotnet/tools/dotnet-sonarscanner end /d:sonar.login="$SONAR_TOKEN"
