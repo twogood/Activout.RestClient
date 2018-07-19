@@ -5,11 +5,11 @@ using Microsoft.Net.Http.Headers;
 
 namespace Activout.RestClient.Serialization.Implementation
 {
-    class TextSerializer : ISerializer
+    internal class TextSerializer : ISerializer
     {
         public TextSerializer()
         {
-            SupportedMediaTypes = new MediaTypeCollection()
+            SupportedMediaTypes = new MediaTypeCollection
             {
                 new MediaTypeHeaderValue("text/*")
             };

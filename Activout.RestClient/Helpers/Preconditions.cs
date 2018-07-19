@@ -6,7 +6,7 @@ namespace Activout.RestClient.Helpers
     public static class Preconditions
     {
         /// <summary>
-        /// Ensures that an object reference passed as a parameter to the calling method is not null.
+        ///     Ensures that an object reference passed as a parameter to the calling method is not null.
         /// </summary>
         /// <param name="reference">an object reference</param>
         /// <param name="errorMessage">the exception message to use if the check fails</param>
@@ -14,10 +14,7 @@ namespace Activout.RestClient.Helpers
         /// <exception cref="NullReferenceException">if reference is null</exception>
         public static T CheckNotNull<T>(T reference, string errorMessage = null)
         {
-            if (reference == null)
-            {
-                throw new NullReferenceException(errorMessage);
-            }
+            if (reference == null) throw new NullReferenceException(errorMessage);
 
             return reference;
         }

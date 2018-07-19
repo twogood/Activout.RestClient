@@ -1,20 +1,21 @@
-﻿using Activout.RestClient.Helpers;
-using Activout.RestClient.Serialization;
-using System;
+﻿using System;
 using System.Net.Http;
+using Activout.RestClient.Helpers;
+using Activout.RestClient.Serialization;
 using static Activout.RestClient.Helpers.Preconditions;
 
 namespace Activout.RestClient.Implementation
 {
-    class RestClientBuilder : IRestClientBuilder
+    internal class RestClientBuilder : IRestClientBuilder
     {
-        private readonly HttpClient httpClient;
         private readonly IDuckTyping duckTyping;
+        private readonly HttpClient httpClient;
         private readonly ISerializationManager serializationManager;
         private readonly ITaskConverterFactory taskConverterFactory;
         private Uri baseUri;
 
-        public RestClientBuilder(HttpClient httpClient, IDuckTyping duckTyping, ISerializationManager serializationManager, ITaskConverterFactory taskConverterFactory)
+        public RestClientBuilder(HttpClient httpClient, IDuckTyping duckTyping,
+            ISerializationManager serializationManager, ITaskConverterFactory taskConverterFactory)
         {
             this.httpClient = CheckNotNull(httpClient);
             this.duckTyping = CheckNotNull(duckTyping);
@@ -28,6 +29,12 @@ namespace Activout.RestClient.Implementation
             return this;
         }
 
+        public T Build<T>() where T : class
+        {
+            var client = new RestClient<T>(baseUri, httpClient, serializationManager, taskConverterFactory);
+            return duckTyping.DuckType<T>(client);
+        }
+
         private static Uri AddTrailingSlash(Uri apiUri)
         {
             var uriBuilder = new UriBuilder(CheckNotNull(apiUri));
@@ -35,17 +42,9 @@ namespace Activout.RestClient.Implementation
             {
                 return apiUri;
             }
-            else
-            {
-                uriBuilder.Path = uriBuilder.Path + "/";
-                return uriBuilder.Uri;
-            }
-        }
 
-        public T Build<T>() where T : class
-        {
-            var client = new RestClient<T>(baseUri, httpClient, serializationManager, taskConverterFactory);
-            return duckTyping.DuckType<T>(client);
+            uriBuilder.Path = uriBuilder.Path + "/";
+            return uriBuilder.Uri;
         }
     }
 }

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Activout.RestClient.Helpers.Implementation
@@ -13,7 +11,7 @@ namespace Activout.RestClient.Helpers.Implementation
      * 
      * Implemented by executing Task<object>.ContinueWith<T>(x => (T)x.Result) using reflection.
      */
-    class TaskConverter : ITaskConverter
+    internal class TaskConverter : ITaskConverter
     {
         private static readonly Type objectTaskType = typeof(Task<object>);
         private readonly MethodInfo continueWith;
@@ -27,7 +25,7 @@ namespace Activout.RestClient.Helpers.Implementation
 
         public object ConvertReturnType(Task<object> task)
         {
-            return continueWith.Invoke(task, new object[] { lambda });
+            return continueWith.Invoke(task, new object[] {lambda});
         }
 
         private static MethodInfo GetContinueWithMethod(Type actualReturnType)
@@ -36,14 +34,15 @@ namespace Activout.RestClient.Helpers.Implementation
             var baseFuncType = typeof(Func<,>);
             var continueWithMethod = objectTaskType.GetMethods()
                 .Where(x => x.Name == nameof(Task.ContinueWith) && x.GetParameters().Length == 1)
-                .Select(x => new { M = x, P = x.GetParameters() })
-                .Where(x => x.P[0].ParameterType.IsGenericType && x.P[0].ParameterType.GetGenericTypeDefinition() == baseFuncType)
-                .Select(x => new { x.M, A = x.P[0].ParameterType.GetGenericArguments() })
-                 .Where(x => x.A[0].IsGenericType
-                         && x.A[0].GetGenericTypeDefinition() == typeof(Task<>))
+                .Select(x => new {M = x, P = x.GetParameters()})
+                .Where(x => x.P[0].ParameterType.IsGenericType &&
+                            x.P[0].ParameterType.GetGenericTypeDefinition() == baseFuncType)
+                .Select(x => new {x.M, A = x.P[0].ParameterType.GetGenericArguments()})
+                .Where(x => x.A[0].IsGenericType
+                            && x.A[0].GetGenericTypeDefinition() == typeof(Task<>))
                 .Select(x => x.M)
                 .SingleOrDefault();
-            return continueWithMethod.MakeGenericMethod(new Type[] { actualReturnType });
+            return continueWithMethod.MakeGenericMethod(actualReturnType);
         }
 
         private static Delegate CreateLambda(Type actualReturnType)
@@ -52,14 +51,16 @@ namespace Activout.RestClient.Helpers.Implementation
             var propertyExpression = Expression.Property(constantExpression, "Result");
             var conversion = Expression.Convert(propertyExpression, actualReturnType);
 
-            var lambdaMethod = GetLambdaMethod() ?? throw new NullReferenceException("Failed to get Expression.Lambda method");
+            var lambdaMethod = GetLambdaMethod() ??
+                               throw new NullReferenceException("Failed to get Expression.Lambda method");
             var lambda = InvokeLambdaMethod(lambdaMethod, conversion, constantExpression);
             return lambda.Compile();
         }
 
-        private static LambdaExpression InvokeLambdaMethod(MethodInfo lambdaMethod, UnaryExpression expression, ParameterExpression parameter)
+        private static LambdaExpression InvokeLambdaMethod(MethodInfo lambdaMethod, UnaryExpression expression,
+            ParameterExpression parameter)
         {
-            return (LambdaExpression)lambdaMethod.Invoke(null, new object[] { expression, new ParameterExpression[] { parameter } });
+            return (LambdaExpression) lambdaMethod.Invoke(null, new object[] {expression, new[] {parameter}});
         }
 
         private static MethodInfo GetLambdaMethod()
@@ -67,10 +68,10 @@ namespace Activout.RestClient.Helpers.Implementation
             return typeof(Expression)
                 .GetMethods()
                 .Single(x => x.Name == nameof(Expression.Lambda)
-                    && !x.IsGenericMethod
-                    && x.GetParameters().Length == 2
-                    && x.GetParameters()[0].ParameterType == typeof(Expression)
-                    && x.GetParameters()[1].ParameterType == typeof(ParameterExpression[]));
+                             && !x.IsGenericMethod
+                             && x.GetParameters().Length == 2
+                             && x.GetParameters()[0].ParameterType == typeof(Expression)
+                             && x.GetParameters()[1].ParameterType == typeof(ParameterExpression[]));
         }
     }
 }

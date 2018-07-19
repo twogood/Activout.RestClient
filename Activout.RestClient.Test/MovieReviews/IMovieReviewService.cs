@@ -1,7 +1,7 @@
-﻿using Activout.RestClient;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Activout.RestClient;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Activout.MovieReviews
 {
@@ -26,11 +26,11 @@ namespace Activout.MovieReviews
 
         [HttpPut]
         [Route("/{movieId}/reviews/{reviewId}")]
-        Review UpdateReview([RouteParam("movieId")] string movieId, [RouteParam("reviewId")] string reviewId, Review review);
+        Review UpdateReview([RouteParam("movieId")] string movieId, [RouteParam("reviewId")] string reviewId,
+            Review review);
 
         [HttpPost("/import.csv")]
         [Consumes("text/csv")]
         Task Import(string csv);
     }
-
 }

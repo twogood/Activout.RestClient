@@ -1,15 +1,12 @@
-﻿using Activout.RestClient.Helpers;
+﻿using System;
+using System.Net.Http;
+using Activout.RestClient.Helpers;
 using Activout.RestClient.Serialization;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Reflection;
-using System.Text;
 
 namespace Activout.RestClient.Implementation
 {
-    class RestClientContext
+    internal class RestClientContext
     {
         public Uri BaseUri { get; internal set; }
         public string BaseTemplate { get; internal set; }

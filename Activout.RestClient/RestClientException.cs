@@ -12,7 +12,8 @@ namespace Activout.RestClient
             ErrorResponse = errorResponse;
         }
 
-        public RestClientException(HttpStatusCode statusCode, string errorResponse, Exception innerException) : base(errorResponse, innerException)
+        public RestClientException(HttpStatusCode statusCode, string errorResponse, Exception innerException) : base(
+            errorResponse, innerException)
         {
             StatusCode = statusCode;
             ErrorResponse = errorResponse;
@@ -24,7 +25,7 @@ namespace Activout.RestClient
 
         public T GetErrorResponse<T>()
         {
-            return (T)ErrorResponse;
+            return (T) ErrorResponse;
         }
 
         public override string ToString()

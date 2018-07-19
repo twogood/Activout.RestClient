@@ -1,16 +1,17 @@
-﻿using Activout.RestClient.Helpers;
+﻿using System.Net.Http;
+using Activout.RestClient.Helpers;
 using Activout.RestClient.Serialization;
-using System.Net.Http;
 
 namespace Activout.RestClient.Implementation
 {
-    class RestClientFactory : IRestClientFactory
+    internal class RestClientFactory : IRestClientFactory
     {
         private readonly IDuckTyping duckTyping;
         private readonly ISerializationManager serializationManager;
         private readonly ITaskConverterFactory taskConverterFactory;
 
-        public RestClientFactory(IDuckTyping duckTyping, ISerializationManager serializationManager, ITaskConverterFactory taskConverterFactory)
+        public RestClientFactory(IDuckTyping duckTyping, ISerializationManager serializationManager,
+            ITaskConverterFactory taskConverterFactory)
         {
             this.duckTyping = duckTyping;
             this.serializationManager = serializationManager;

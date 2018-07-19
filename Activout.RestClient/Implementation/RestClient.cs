@@ -1,21 +1,22 @@
-﻿using Activout.RestClient.Helpers;
-using Activout.RestClient.Serialization;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using Activout.RestClient.Helpers;
+using Activout.RestClient.Serialization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Activout.RestClient.Implementation
 {
-    class RestClient<T> : DynamicObject where T : class
+    internal class RestClient<T> : DynamicObject where T : class
     {
-        private readonly Type type;
         private readonly RestClientContext context;
+        private readonly Type type;
 
-        public RestClient(Uri baseUri, HttpClient httpClient, ISerializationManager serializationManager, ITaskConverterFactory taskConverterFactory)
+        public RestClient(Uri baseUri, HttpClient httpClient, ISerializationManager serializationManager,
+            ITaskConverterFactory taskConverterFactory)
         {
             type = typeof(T);
             context = new RestClientContext
@@ -24,7 +25,7 @@ namespace Activout.RestClient.Implementation
                 HttpClient = httpClient,
                 TaskConverterFactory = taskConverterFactory,
                 SerializationManager = serializationManager,
-                BaseTemplate = "",
+                BaseTemplate = ""
             };
 
             HandleAttributes();
@@ -35,28 +36,16 @@ namespace Activout.RestClient.Implementation
         {
             var attributes = type.GetCustomAttributes();
             foreach (var attribute in attributes)
-            {
                 if (attribute is ConsumesAttribute consumesAttribute)
-                {
                     context.DefaultContentTypes = consumesAttribute.ContentTypes;
-                }
                 else if (attribute is InterfaceConsumesAttribute interfaceConsumesAttribute)
-                {
                     context.DefaultContentTypes = interfaceConsumesAttribute.ContentTypes;
-                }
                 else if (attribute is RouteAttribute routeAttribute)
-                {
                     context.BaseTemplate = routeAttribute.Template;
-                }
                 else if (attribute is InterfaceRouteAttribute interfaceRouteAttribute)
-                {
                     context.BaseTemplate = interfaceRouteAttribute.Template;
-                }
                 else if (attribute is ErrorResponseAttribute errorResponseAttribute)
-                {
                     context.ErrorResponseType = errorResponseAttribute.Type;
-                }
-            }
         }
 
         public override IEnumerable<string> GetDynamicMemberNames()

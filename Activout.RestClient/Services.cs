@@ -12,10 +12,10 @@ namespace Activout.RestClient
         public static IServiceCollection AddRestClient(this IServiceCollection self)
         {
             return self
-                .AddTransient<IDuckTyping, DuckTyping>()
-                .AddTransient<ITaskConverterFactory, TaskConverterFactory>()
-                .AddTransient<IRestClientFactory, RestClientFactory>()
-                .AddTransient<IRestClientBuilder, RestClientBuilder>()
+                    .AddTransient<IDuckTyping, DuckTyping>()
+                    .AddTransient<ITaskConverterFactory, TaskConverterFactory>()
+                    .AddTransient<IRestClientFactory, RestClientFactory>()
+                    .AddTransient<IRestClientBuilder, RestClientBuilder>()
                 ;
         }
 
