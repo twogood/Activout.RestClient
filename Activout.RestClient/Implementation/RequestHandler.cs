@@ -45,7 +45,7 @@ namespace Activout.RestClient.Implementation
                 {
                     case HttpMethodAttribute httpMethodAttribute:
                         templateBuilder.Append(httpMethodAttribute.Template);
-                        _httpMethod = GetHttpMethod(attribute);
+                        _httpMethod = GetHttpMethod(httpMethodAttribute);
                         break;
 
                     case ErrorResponseAttribute errorResponseAttribute:
@@ -66,7 +66,7 @@ namespace Activout.RestClient.Implementation
             _context = context;
         }
 
-        private static HttpMethod GetHttpMethod(object attribute)
+        private static HttpMethod GetHttpMethod(HttpMethodAttribute attribute)
         {
             switch (attribute)
             {
