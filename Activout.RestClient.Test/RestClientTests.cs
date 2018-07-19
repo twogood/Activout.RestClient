@@ -38,19 +38,15 @@ namespace Activout.RestClientTest
             var movieId = "*MOVIE_ID*";
             _mockHttp
                 .When(HttpMethod.Get, $"{BaseUri}/movies/{movieId}/reviews")
-                .Respond(HttpStatusCode.NotFound, request =>
-                {
-                    return new StringContent(JsonConvert.SerializeObject(new
+                .Respond(HttpStatusCode.NotFound, request => new StringContent(JsonConvert.SerializeObject(new
+                    {
+                        Errors = new object[]
                         {
-                            Errors = new object[]
-                            {
-                                new {Message = "Sorry, that page does not exist", Code = 34}
-                            }
-                        }),
-                        Encoding.UTF8,
-                        "application/json");
-                    ;
-                });
+                            new {Message = "Sorry, that page does not exist", Code = 34}
+                        }
+                    }),
+                    Encoding.UTF8,
+                    "application/json"));
 
             var reviewSvc = CreateMovieReviewService();
 
@@ -76,19 +72,15 @@ namespace Activout.RestClientTest
             var reviewId = "*REVIEW_ID*";
             _mockHttp
                 .When(HttpMethod.Get, $"{BaseUri}/movies/{movieId}/reviews/{reviewId}")
-                .Respond(HttpStatusCode.NotFound, request =>
-                {
-                    return new StringContent(JsonConvert.SerializeObject(new
+                .Respond(HttpStatusCode.NotFound, request => new StringContent(JsonConvert.SerializeObject(new
+                    {
+                        Errors = new object[]
                         {
-                            Errors = new object[]
-                            {
-                                new {Message = "Sorry, that page does not exist", Code = 34}
-                            }
-                        }),
-                        Encoding.UTF8,
-                        "application/json");
-                    ;
-                });
+                            new {Message = "Sorry, that page does not exist", Code = 34}
+                        }
+                    }),
+                    Encoding.UTF8,
+                    "application/json"));
 
             var reviewSvc = CreateMovieReviewService();
 
@@ -183,7 +175,7 @@ namespace Activout.RestClientTest
             var reviewId = "*REVIEW_ID*";
             _mockHttp
                 .When(HttpMethod.Put, $"{BaseUri}/movies/{movieId}/reviews/{reviewId}")
-                .Respond(request => { return request.Content; });
+                .Respond(request => request.Content);
 
             var reviewSvc = CreateMovieReviewService();
 
