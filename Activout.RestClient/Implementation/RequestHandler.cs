@@ -41,33 +41,44 @@ namespace Activout.RestClient.Implementation
 
             var templateBuilder = new StringBuilder(context.BaseTemplate ?? "");
             foreach (var attribute in method.GetCustomAttributes(true))
-                if (attribute is HttpMethodAttribute httpMethodAttribute)
+                switch (attribute)
                 {
-                    templateBuilder.Append(httpMethodAttribute.Template);
+                    case HttpMethodAttribute httpMethodAttribute:
+                        templateBuilder.Append(httpMethodAttribute.Template);
+                        _httpMethod = GetHttpMethod(attribute);
+                        break;
 
-                    // TODO: support additional HTTP methods
-                    if (attribute is HttpGetAttribute)
-                        _httpMethod = HttpMethod.Get;
-                    else if (attribute is HttpPostAttribute)
-                        _httpMethod = HttpMethod.Post;
-                    else if (attribute is HttpPutAttribute) _httpMethod = HttpMethod.Put;
-                }
-                else if (attribute is ErrorResponseAttribute errorResponseAttribute)
-                {
-                    _errorResponseType = errorResponseAttribute.Type;
-                }
-                else if (attribute is ConsumesAttribute consumesAttribute)
-                {
-                    _contentTypes = consumesAttribute.ContentTypes;
-                    _serializer = context.SerializationManager.GetSerializer(_contentTypes);
-                }
-                else if (attribute is RouteAttribute routeAttribute)
-                {
-                    templateBuilder.Append(routeAttribute.Template);
+                    case ErrorResponseAttribute errorResponseAttribute:
+                        _errorResponseType = errorResponseAttribute.Type;
+                        break;
+
+                    case ConsumesAttribute consumesAttribute:
+                        _contentTypes = consumesAttribute.ContentTypes;
+                        _serializer = context.SerializationManager.GetSerializer(_contentTypes);
+                        break;
+
+                    case RouteAttribute routeAttribute:
+                        templateBuilder.Append(routeAttribute.Template);
+                        break;
                 }
 
             _template = templateBuilder.ToString();
             _context = context;
+        }
+
+        private static HttpMethod GetHttpMethod(object attribute)
+        {
+            switch (attribute)
+            {
+                case HttpGetAttribute _:
+                    return HttpMethod.Get;
+                case HttpPostAttribute _:
+                    return HttpMethod.Post;
+                case HttpPutAttribute _:
+                    return HttpMethod.Put;
+                default:
+                    throw new NotImplementedException($"Http Attribute not yet supported: {attribute}");
+            }
         }
 
         private ITaskConverter CreateConverter(RestClientContext context)
