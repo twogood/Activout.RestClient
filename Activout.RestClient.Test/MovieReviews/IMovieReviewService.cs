@@ -16,19 +16,18 @@ namespace Activout.MovieReviews
 
         [HttpGet]
         [Route("/{movieId}/reviews")]
-        Task<IEnumerable<Review>> GetAllReviews([RouteParam] string movieId);
+        Task<IEnumerable<Review>> GetAllReviews(string movieId);
 
         [HttpGet("/{movieId}/reviews/{reviewId}")]
-        Review GetReview([RouteParam] string movieId, [RouteParam] string reviewId);
+        Review GetReview(string movieId, string reviewId);
 
         [HttpPost]
         [Route("/{movieId}/reviews")]
-        Task<Review> SubmitReview([RouteParam] string movieId, Review review);
+        Task<Review> SubmitReview([RouteParam("movieId")] string movieId, Review review);
 
         [HttpPut]
         [Route("/{movieId}/reviews/{reviewId}")]
-        Review UpdateReview([RouteParam] string movieId, [RouteParam] string reviewId,
-            Review review);
+        Review UpdateReview(string movieId, [RouteParam] string reviewId, Review review);
 
         [HttpPost("/import.csv")]
         [Consumes("text/csv")]

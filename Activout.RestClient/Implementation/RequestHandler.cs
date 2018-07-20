@@ -77,6 +77,7 @@ namespace Activout.RestClient.Implementation
             {
                 paramConverters[i] = paramConverterManager.GetConverter(_parameters[i]);
             }
+
             return paramConverters;
         }
 
@@ -196,24 +197,34 @@ namespace Activout.RestClient.Implementation
         {
             var routeParams = new Dictionary<string, object>();
             var queryParams = new List<string>();
+
             for (var i = 0; i < _parameters.Length; i++)
             {
                 var parameterAttributes = _parameters[i].GetCustomAttributes(false);
                 var name = _parameters[i].Name;
+                var escapedValue = Uri.EscapeDataString(_paramConverters[i].ToString(args[i]));
+                var handled = false;
 
                 foreach (var attribute in parameterAttributes)
                 {
                     if (attribute.GetType() == typeof(RouteParamAttribute))
                     {
                         var routeParamAttribute = (RouteParamAttribute) attribute;
-                        routeParams[routeParamAttribute.Name ?? name] = args[i];
+                        routeParams[routeParamAttribute.Name ?? name] = escapedValue;
+                        handled = true;
                     }
                     else if (attribute.GetType() == typeof(QueryParamAttribute))
                     {
                         var queryParamAttribute = (QueryParamAttribute) attribute;
                         name = queryParamAttribute.Name ?? name;
-                        queryParams.Add(name + "=" + Uri.EscapeDataString(_paramConverters[i].ToString(args[i])));
+                        queryParams.Add(Uri.EscapeDataString(name) + "=" + escapedValue);
+                        handled = true;
                     }
+                }
+
+                if (!handled)
+                {
+                    routeParams[name] = escapedValue;
                 }
             }
 
