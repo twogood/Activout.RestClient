@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using Activout.RestClient.Helpers;
+using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
 using Microsoft.AspNetCore.Mvc.Formatters;
 
@@ -16,5 +17,6 @@ namespace Activout.RestClient.Implementation
         public ITaskConverterFactory TaskConverterFactory { get; internal set; }
         public Type ErrorResponseType { get; internal set; }
         public MediaTypeCollection DefaultContentTypes { get; internal set; }
+        public IParamConverterManager ParamConverterManager { get; internal set; }
     }
 }

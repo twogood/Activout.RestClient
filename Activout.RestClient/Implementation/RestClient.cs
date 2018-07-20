@@ -15,21 +15,13 @@ namespace Activout.RestClient.Implementation
         private readonly RestClientContext _context;
         private readonly Type _type;
 
-        public RestClient(Uri baseUri, HttpClient httpClient, ISerializationManager serializationManager,
-            ITaskConverterFactory taskConverterFactory)
+        public RestClient(RestClientContext context)
         {
             _type = typeof(T);
-            _context = new RestClientContext
-            {
-                BaseUri = baseUri,
-                HttpClient = httpClient,
-                TaskConverterFactory = taskConverterFactory,
-                SerializationManager = serializationManager,
-                BaseTemplate = ""
-            };
-
+            _context = context;
+            _context.BaseTemplate = "";
             HandleAttributes();
-            _context.DefaultSerializer = serializationManager.GetSerializer(_context.DefaultContentTypes);
+            _context.DefaultSerializer = _context.SerializationManager.GetSerializer(_context.DefaultContentTypes);
         }
 
         private void HandleAttributes()

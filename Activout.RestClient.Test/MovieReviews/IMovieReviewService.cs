@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Activout.RestClient;
 using Microsoft.AspNetCore.Mvc;
@@ -15,22 +16,27 @@ namespace Activout.MovieReviews
 
         [HttpGet]
         [Route("/{movieId}/reviews")]
-        Task<IEnumerable<Review>> GetAllReviews([RouteParam("movieId")] string movieId);
+        Task<IEnumerable<Review>> GetAllReviews([RouteParam] string movieId);
 
         [HttpGet("/{movieId}/reviews/{reviewId}")]
-        Review GetReview([RouteParam("movieId")] string movieId, [RouteParam("reviewId")] string reviewId);
+        Review GetReview([RouteParam] string movieId, [RouteParam] string reviewId);
 
         [HttpPost]
         [Route("/{movieId}/reviews")]
-        Task<Review> SubmitReview([RouteParam("movieId")] string movieId, Review review);
+        Task<Review> SubmitReview([RouteParam] string movieId, Review review);
 
         [HttpPut]
         [Route("/{movieId}/reviews/{reviewId}")]
-        Review UpdateReview([RouteParam("movieId")] string movieId, [RouteParam("reviewId")] string reviewId,
+        Review UpdateReview([RouteParam] string movieId, [RouteParam] string reviewId,
             Review review);
 
         [HttpPost("/import.csv")]
         [Consumes("text/csv")]
         Task Import(string csv);
+
+        [HttpGet]
+        Task<IEnumerable<Movie>> QueryMoviesByDate(
+            [QueryParam] DateTime begin,
+            [QueryParam] DateTime end);
     }
 }

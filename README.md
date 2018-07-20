@@ -22,22 +22,27 @@ public interface IMovieReviewService
 
     [HttpGet]
     [Route("/{movieId}/reviews")]
-    Task<IEnumerable<Review>> GetAllReviews([RouteParam("movieId")] string movieId);
+    Task<IEnumerable<Review>> GetAllReviews([RouteParam] string movieId);
 
     [HttpGet("/{movieId}/reviews/{reviewId}")]
-    Review GetReview([RouteParam("movieId")] string movieId, [RouteParam("reviewId")] string reviewId);
+    Review GetReview([RouteParam] string movieId, [RouteParam] string reviewId);
 
     [HttpPost]
     [Route("/{movieId}/reviews")]
-    Task<Review> SubmitReview([RouteParam("movieId")] string movieId, Review review);
+    Task<Review> SubmitReview([RouteParam] string movieId, Review review);
 
     [HttpPut]
     [Route("/{movieId}/reviews/{reviewId}")]
-    Review UpdateReview([RouteParam("movieId")] string movieId, [RouteParam("reviewId")] string reviewId, Review review);
+    Review UpdateReview([RouteParam] string movieId, [RouteParam] string reviewId, Review review);
 
     [HttpPost("/import.csv")]
     [Consumes("text/csv")]
     Task Import(string csv);
+
+    [HttpGet]
+    Task<IEnumerable<Movie>> QueryMoviesByDate(
+        [QueryParam] DateTime begin,
+        [QueryParam] DateTime end);
 }
 ```
 
@@ -46,7 +51,8 @@ Now we can use this interface as a means to invoke the actual remote review serv
 ```C#
 var restClientFactory = Services.CreateRestClientFactory();
 var movieReviewService = restClientFactory
-            .CreateBuilder(httpClient)
+            .HttpClient(_httpClient)
+            .CreateBuilder()
             .BaseUri(new Uri("http://localhost:9080/movieReviewService"))
             .Build<IMovieReviewService>();
 
@@ -65,7 +71,7 @@ This allows for a much more natural coding style, and the underlying implementat
 
 ## TODO
 
-- Query parameters are not yet implemented
+- More real-life testing :)
 
 ## Collaborate
 This project is still under development - participation welcome!

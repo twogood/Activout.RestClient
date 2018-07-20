@@ -1,9 +1,12 @@
 ﻿using Activout.RestClient.Helpers;
 using Activout.RestClient.Helpers.Implementation;
 using Activout.RestClient.Implementation;
+using Activout.RestClient.ParamConverter;
+using Activout.RestClient.ParamConverter.Implementation;
 using Activout.RestClient.Serialization;
 using Activout.RestClient.Serialization.Implementation;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Activout.RestClient
 {
@@ -11,12 +14,10 @@ namespace Activout.RestClient
     {
         public static IServiceCollection AddRestClient(this IServiceCollection self)
         {
-            return self
-                    .AddTransient<IDuckTyping, DuckTyping>()
-                    .AddTransient<ITaskConverterFactory, TaskConverterFactory>()
-                    .AddTransient<IRestClientFactory, RestClientFactory>()
-                    .AddTransient<IRestClientBuilder, RestClientBuilder>()
-                ;
+            self.TryAddTransient<IDuckTyping, DuckTyping>();
+            self.TryAddTransient<ITaskConverterFactory, TaskConverterFactory>();
+            self.TryAddTransient<IRestClientFactory, RestClientFactory>();
+            return self;
         }
 
         public static IDuckTyping CreateDuckTyping()
@@ -32,12 +33,19 @@ namespace Activout.RestClient
         public static IRestClientFactory CreateRestClientFactory(
             IDuckTyping duckTyping = null,
             ISerializationManager serializationManager = null,
+            ParamConverterManager paramConverterManager = null,
             ITaskConverterFactory taskConverterFactory = null)
         {
             return new RestClientFactory(
                 duckTyping ?? CreateDuckTyping(),
                 serializationManager ?? CreateSerializationManager(),
+                paramConverterManager ?? CreateParamConverterManager(),
                 taskConverterFactory ?? CreateTaskConverterFactory());
+        }
+
+        public static IParamConverterManager CreateParamConverterManager()
+        {
+            return new ParamConverterManager();
         }
 
         private static ISerializationManager CreateSerializationManager()

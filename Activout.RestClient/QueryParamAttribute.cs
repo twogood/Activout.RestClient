@@ -4,14 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 namespace Activout.RestClient
 {
     [AttributeUsage(AttributeTargets.Parameter)]
-    public class RouteParamAttribute : FromRouteAttribute
+    public class QueryParamAttribute : FromQueryAttribute
     {
-        public RouteParamAttribute()
+        public QueryParamAttribute()
         {
-            // deliberately empty
+            // deliberately empty    
         }
-
-        public RouteParamAttribute(string name)
+        
+        public QueryParamAttribute(string name)
         {
             Name = name;
         }

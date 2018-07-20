@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Activout.RestClient.Helpers;
+using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -25,12 +27,14 @@ namespace Activout.RestClient.Implementation
         private readonly Type _returnType;
         private readonly ISerializer _serializer;
         private readonly string _template;
+        private readonly IParamConverter[] _paramConverters;
 
         public RequestHandler(MethodInfo method, RestClientContext context)
         {
             _returnType = method.ReturnType;
             _actualReturnType = GetActualReturnType();
             _parameters = method.GetParameters();
+            _paramConverters = GetParamConverters(context.ParamConverterManager);
             _converter = CreateConverter(context);
             _template = context.BaseTemplate ?? "";
             _serializer = context.DefaultSerializer;
@@ -64,6 +68,16 @@ namespace Activout.RestClient.Implementation
 
             _template = templateBuilder.ToString();
             _context = context;
+        }
+
+        private IParamConverter[] GetParamConverters(IParamConverterManager paramConverterManager)
+        {
+            var paramConverters = new IParamConverter[_parameters.Length];
+            for (var i = 0; i < _parameters.Length; i++)
+            {
+                paramConverters[i] = paramConverterManager.GetConverter(_parameters[i]);
+            }
+            return paramConverters;
         }
 
         private static HttpMethod GetHttpMethod(HttpMethodAttribute attribute)
@@ -152,8 +166,15 @@ namespace Activout.RestClient.Implementation
             if (_parameters.Length != args.Length)
                 throw new InvalidOperationException($"Expected {_parameters.Length} parameters but got {args.Length}");
 
-            var routeParams = GetRouteParams(args);
-            var requestUri = ExpandTemplate(routeParams);
+            var (routeParams, queryParams) = GetParams(args);
+            var requestUriString = ExpandTemplate(routeParams);
+            if (queryParams.Any())
+            {
+                requestUriString = requestUriString + "?" + string.Join("&", queryParams);
+            }
+
+            var requestUri = new Uri(requestUriString, UriKind.RelativeOrAbsolute);
+
             var request = new HttpRequestMessage(_httpMethod, requestUri);
 
             if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put)
@@ -171,21 +192,32 @@ namespace Activout.RestClient.Implementation
             return task.Result;
         }
 
-        private Dictionary<string, object> GetRouteParams(IReadOnlyList<object> args)
+        private (Dictionary<string, object>, List<string>) GetParams(IReadOnlyList<object> args)
         {
             var routeParams = new Dictionary<string, object>();
+            var queryParams = new List<string>();
             for (var i = 0; i < _parameters.Length; i++)
             {
                 var parameterAttributes = _parameters[i].GetCustomAttributes(false);
+                var name = _parameters[i].Name;
+
                 foreach (var attribute in parameterAttributes)
+                {
                     if (attribute.GetType() == typeof(RouteParamAttribute))
                     {
                         var routeParamAttribute = (RouteParamAttribute) attribute;
-                        routeParams[routeParamAttribute.Name] = args[i];
+                        routeParams[routeParamAttribute.Name ?? name] = args[i];
                     }
+                    else if (attribute.GetType() == typeof(QueryParamAttribute))
+                    {
+                        var queryParamAttribute = (QueryParamAttribute) attribute;
+                        name = queryParamAttribute.Name ?? name;
+                        queryParams.Add(name + "=" + Uri.EscapeDataString(_paramConverters[i].ToString(args[i])));
+                    }
+                }
             }
 
-            return routeParams;
+            return (routeParams, queryParams);
         }
 
         private async Task<object> SendAsync(HttpRequestMessage request)

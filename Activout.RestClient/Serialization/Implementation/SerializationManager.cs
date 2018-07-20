@@ -7,31 +7,26 @@ namespace Activout.RestClient.Serialization.Implementation
 {
     internal class SerializationManager : ISerializationManager
     {
-        private readonly List<IDeserializer> _deserializers;
-        private readonly List<ISerializer> _serializers;
+        public List<IDeserializer> Deserializers { get; }
+        public List<ISerializer> Serializers { get; }
 
-        public SerializationManager(List<ISerializer> serializers = null, List<IDeserializer> deserializers = null)
+        public SerializationManager()
         {
-            _serializers = serializers ?? new List<ISerializer>();
-            _deserializers = deserializers ?? new List<IDeserializer>();
-
-            _serializers.Add(new JsonSerializer());
-            _serializers.Add(new TextSerializer());
-
-            _deserializers.Add(new JsonDeserializer());
+            Serializers = new List<ISerializer> {new JsonSerializer(), new TextSerializer()};
+            Deserializers = new List<IDeserializer> {new JsonDeserializer()};
         }
 
         public IDeserializer GetDeserializer(string mediaType)
         {
             CheckNotNull(mediaType);
-            return _deserializers.First(s => s.SupportedMediaTypes.Contains(mediaType));
+            return Deserializers.First(s => s.SupportedMediaTypes.Contains(mediaType));
         }
 
         public ISerializer GetSerializer(MediaTypeCollection mediaTypeCollection)
         {
-            if (mediaTypeCollection == null) return _serializers.First();
+            if (mediaTypeCollection == null) return Serializers.First();
 
-            foreach (var serializer in _serializers)
+            foreach (var serializer in Serializers)
             {
                 foreach (var supportedMediaTypeString in serializer.SupportedMediaTypes)
                 {

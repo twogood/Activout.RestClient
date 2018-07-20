@@ -4,6 +4,6 @@ namespace Activout.RestClient
 {
     public interface IRestClientFactory
     {
-        IRestClientBuilder CreateBuilder(HttpClient httpClient = null);
+        IRestClientBuilder CreateBuilder();
     }
 }

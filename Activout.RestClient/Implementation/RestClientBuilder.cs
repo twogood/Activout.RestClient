@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using Activout.RestClient.Helpers;
+using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
 using static Activout.RestClient.Helpers.Preconditions;
 
@@ -9,29 +10,44 @@ namespace Activout.RestClient.Implementation
     internal class RestClientBuilder : IRestClientBuilder
     {
         private readonly IDuckTyping _duckTyping;
-        private readonly HttpClient _httpClient;
-        private readonly ISerializationManager _serializationManager;
-        private readonly ITaskConverterFactory _taskConverterFactory;
-        private Uri _baseUri;
+        private readonly RestClientContext _context;
 
-        public RestClientBuilder(HttpClient httpClient, IDuckTyping duckTyping,
-            ISerializationManager serializationManager, ITaskConverterFactory taskConverterFactory)
+        public RestClientBuilder(
+            IDuckTyping duckTyping,
+            ISerializationManager serializationManager,
+            IParamConverterManager paramConverterManager,
+            ITaskConverterFactory taskConverterFactory)
         {
-            _httpClient = CheckNotNull(httpClient);
             _duckTyping = CheckNotNull(duckTyping);
-            _taskConverterFactory = CheckNotNull(taskConverterFactory);
-            _serializationManager = serializationManager;
+
+            _context = new RestClientContext
+            {
+                TaskConverterFactory = CheckNotNull(taskConverterFactory),
+                SerializationManager = CheckNotNull(serializationManager),
+                ParamConverterManager = CheckNotNull(paramConverterManager)
+            };
         }
 
         public IRestClientBuilder BaseUri(Uri apiUri)
         {
-            _baseUri = AddTrailingSlash(apiUri);
+            _context.BaseUri = AddTrailingSlash(apiUri);
+            return this;
+        }
+
+        public IRestClientBuilder HttpClient(HttpClient httpClient)
+        {
+            _context.HttpClient = httpClient;
             return this;
         }
 
         public T Build<T>() where T : class
         {
-            var client = new RestClient<T>(_baseUri, _httpClient, _serializationManager, _taskConverterFactory);
+            if (_context.HttpClient == null)
+            {
+                _context.HttpClient = new HttpClient();
+            }
+
+            var client = new RestClient<T>(_context);
             return _duckTyping.DuckType<T>(client);
         }
 

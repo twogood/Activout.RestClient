@@ -1,15 +1,15 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Activout.MovieReviews;
-using Activout.RestClient;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
 
-namespace Activout.RestClientTest
+namespace Activout.RestClient.Test
 {
     public class RestClientTests
     {
@@ -26,7 +26,8 @@ namespace Activout.RestClientTest
 
         private IMovieReviewService CreateMovieReviewService()
         {
-            return _restClientFactory.CreateBuilder(_mockHttp.ToHttpClient())
+            return _restClientFactory.CreateBuilder()
+                .HttpClient(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri))
                 .Build<IMovieReviewService>();
         }
@@ -117,6 +118,28 @@ namespace Activout.RestClientTest
 
             // assert
             Assert.Empty(movies);
+        }
+
+        [Fact]
+        public async Task TestQueryParamAsync()
+        {
+            // arrange
+            _mockHttp
+                .When($"{BaseUri}/movies?begin=2017-01-01T00%3A00%3A00.0000000Z&end=2018-01-01T00%3A00%3A00.0000000Z")
+                .Respond("application/json", "[{\"Title\":\"Blade Runner 2049\"}]");
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            var movies = await reviewSvc.QueryMoviesByDate(
+                new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                new DateTime(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+
+            // assert
+            var list = movies.ToList();
+            Assert.Single(list);
+            var movie = list.First();
+            Assert.Equal("Blade Runner 2049", movie.Title);
         }
 
         [Fact]
