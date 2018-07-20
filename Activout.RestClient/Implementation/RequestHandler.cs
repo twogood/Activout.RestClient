@@ -237,17 +237,15 @@ namespace Activout.RestClient.Implementation
 
             var response = await _context.HttpClient.SendAsync(request);
 
-            /*
-             TODO: test cases
-            if (actualReturnType == typeof(HttpResponseMessage))
+            if (_actualReturnType == typeof(HttpResponseMessage))
             {
                 return response;
             }
-            else if (actualReturnType == typeof(HttpContent))
+
+            if (_actualReturnType == typeof(HttpContent))
             {
                 return response.Content;
             }
-            */
 
             object data = null;
             try

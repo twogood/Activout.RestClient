@@ -218,5 +218,40 @@ namespace Activout.RestClient.Test
             Assert.Equal(stars, result.Stars);
             Assert.Equal(text, result.Text);
         }
+        
+        [Fact]
+        public async Task TestGetHttpContent()
+        {
+            // arrange
+            _mockHttp
+                .When($"{BaseUri}/movies")
+                .Respond("application/json", "[]");
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            var httpContent = reviewSvc.GetHttpContent();
+
+            // assert
+            Assert.Equal("[]", await httpContent.ReadAsStringAsync());
+        }
+
+        [Fact]
+        public async Task TestGetHttpResponseMessage()
+        {
+            // arrange
+            _mockHttp
+                .When($"{BaseUri}/movies")
+                .Respond("application/json", "[]");
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            var httpResponseMessage = reviewSvc.GetHttpResponseMessage();
+
+            // assert
+            Assert.Equal("[]", await httpResponseMessage.Content.ReadAsStringAsync());
+        }
+
     }
 }

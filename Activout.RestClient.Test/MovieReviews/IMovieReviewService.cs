@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Activout.RestClient;
 using Microsoft.AspNetCore.Mvc;
@@ -37,5 +38,12 @@ namespace Activout.MovieReviews
         Task<IEnumerable<Movie>> QueryMoviesByDate(
             [QueryParam] DateTime begin,
             [QueryParam] DateTime end);
+
+        [HttpGet]
+        HttpContent GetHttpContent();
+
+        [HttpGet]
+        HttpResponseMessage GetHttpResponseMessage();
+
     }
 }
