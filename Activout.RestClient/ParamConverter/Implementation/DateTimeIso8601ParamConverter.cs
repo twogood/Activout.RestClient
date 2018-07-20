@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Activout.RestClient.ParamConverter.Implementation
 {
-    public class DateTimeISO8601ParamConverter : IParamConverter
+    public class DateTimeIso8601ParamConverter : IParamConverter
     {
         public bool CanConvert(ParameterInfo parameterInfo)
         {
