@@ -71,6 +71,12 @@ This allows for a much more natural coding style, and the underlying implementat
 
 ## TODO
 
+- Caching of RequestHandler instances
+- Support for cookie parameters
+- Support for header parameters
+- Support for default headers
+- Support for HttpResponseMessage as return type
+- Support for HttpContent as return type
 - More real-life testing :)
 
 ## Collaborate
