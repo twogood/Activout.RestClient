@@ -19,32 +19,27 @@ Here is an example - let’s say that you want to use a movie review service. Th
 [InterfaceConsumes("application/json")]
 public interface IMovieReviewService
 {
-    [HttpGet]
-    Task<IEnumerable<Movie>> GetAllMovies();
+    Task<List<Movie>> GetAllMovies();
 
-    [HttpGet]
-    [Route("/{movieId}/reviews")]
-    Task<IEnumerable<Review>> GetAllReviews([RouteParam] string movieId);
+    Task<List<Movie>> QueryMoviesByDate(
+        [QueryParam] DateTime begin,
+        [QueryParam] DateTime end);
+
+    [HttpGet("/{movieId}/reviews")]
+    Task<IEnumerable<Review>> GetAllReviews(string movieId);
 
     [HttpGet("/{movieId}/reviews/{reviewId}")]
-    Review GetReview([RouteParam] string movieId, [RouteParam] string reviewId);
+    Task<Review> GetReview(string movieId, string reviewId);
 
-    [HttpPost]
-    [Route("/{movieId}/reviews")]
-    Task<Review> SubmitReview([RouteParam] string movieId, Review review);
+    [HttpPost("/{movieId}/reviews")]
+    Task<Review> SubmitReview(string movieId, Review review);
 
-    [HttpPut]
-    [Route("/{movieId}/reviews/{reviewId}")]
-    Review UpdateReview([RouteParam] string movieId, [RouteParam] string reviewId, Review review);
+    [HttpPut("/{movieId}/reviews/{reviewId}")]
+    Task<Review> UpdateReview(string movieId, string reviewId, Review review);
 
     [HttpPost("/import.csv")]
     [Consumes("text/csv")]
     Task Import(string csv);
-
-    [HttpGet]
-    Task<IEnumerable<Movie>> QueryMoviesByDate(
-        [QueryParam] DateTime begin,
-        [QueryParam] DateTime end);
 }
 ```
 
@@ -53,8 +48,8 @@ Now we can use this interface as a means to invoke the actual remote review serv
 ```C#
 var restClientFactory = Services.CreateRestClientFactory();
 var movieReviewService = restClientFactory
-            .HttpClient(_httpClient)
             .CreateBuilder()
+            .HttpClient(_httpClient)
             .BaseUri(new Uri("http://localhost:9080/movieReviewService"))
             .Build<IMovieReviewService>();
 
