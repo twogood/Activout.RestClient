@@ -11,7 +11,6 @@ using Activout.RestClient.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Routing;
-using Newtonsoft.Json.Linq;
 
 namespace Activout.RestClient.Implementation
 {
@@ -168,7 +167,7 @@ namespace Activout.RestClient.Implementation
             if (_parameters.Length != args.Length)
                 throw new InvalidOperationException($"Expected {_parameters.Length} parameters but got {args.Length}");
 
-            var (routeParams, queryParams) = GetParams(args);
+            var (routeParams, queryParams, formParams) = GetParams(args);
             var requestUriString = ExpandTemplate(routeParams);
             if (queryParams.Any())
             {
@@ -181,8 +180,15 @@ namespace Activout.RestClient.Implementation
 
             if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put)
             {
-                var mediaType = _contentTypes[0];
-                request.Content = _serializer.Serialize(args[_bodyArgumentIndex], Encoding.UTF8, mediaType);
+                if (formParams.Any())
+                {
+                    request.Content = new FormUrlEncodedContent(formParams);
+                }
+                else
+                {
+                    var mediaType = _contentTypes[0];
+                    request.Content = _serializer.Serialize(args[_bodyArgumentIndex], Encoding.UTF8, mediaType);
+                }
             }
 
             var task = SendAsync(request);
@@ -194,16 +200,19 @@ namespace Activout.RestClient.Implementation
             return task.Result;
         }
 
-        private (Dictionary<string, object>, List<string>) GetParams(IReadOnlyList<object> args)
+        private (Dictionary<string, object>, List<string>, List<KeyValuePair<string, string>>) GetParams(
+            IReadOnlyList<object> args)
         {
             var routeParams = new Dictionary<string, object>();
             var queryParams = new List<string>();
+            var formParams = new List<KeyValuePair<string, string>>();
 
             for (var i = 0; i < _parameters.Length; i++)
             {
                 var parameterAttributes = _parameters[i].GetCustomAttributes(false);
                 var name = _parameters[i].Name;
-                var escapedValue = Uri.EscapeDataString(_paramConverters[i].ToString(args[i]));
+                var value = _paramConverters[i].ToString(args[i]);
+                var escapedValue = Uri.EscapeDataString(value);
                 var handled = false;
 
                 foreach (var attribute in parameterAttributes)
@@ -221,6 +230,13 @@ namespace Activout.RestClient.Implementation
                         queryParams.Add(Uri.EscapeDataString(name) + "=" + escapedValue);
                         handled = true;
                     }
+                    else if (attribute.GetType() == typeof(FormParamAttribute))
+                    {
+                        var formParamAttribute = (FormParamAttribute) attribute;
+                        name = formParamAttribute.Name ?? name;
+                        formParams.Add(new KeyValuePair<string, string>(name, value));
+                        handled = true;
+                    }
                 }
 
                 if (!handled)
@@ -229,7 +245,7 @@ namespace Activout.RestClient.Implementation
                 }
             }
 
-            return (routeParams, queryParams);
+            return (routeParams, queryParams, formParams);
         }
 
         private async Task<object> SendAsync(HttpRequestMessage request)
@@ -238,34 +254,34 @@ namespace Activout.RestClient.Implementation
 
             var response = await _context.HttpClient.SendAsync(request);
 
-            if (_actualReturnType == typeof(HttpResponseMessage))
-            {
-                return response;
-            }
+            var type = response.IsSuccessStatusCode ? _actualReturnType : _errorResponseType;
+            object data;
 
-            if (_actualReturnType == typeof(HttpContent))
-            {
-                return response.Content;
-            }
-
-            object data = null;
             try
             {
-                if (response.Content != null)
+                if (type == typeof(HttpResponseMessage))
                 {
-                    if (_actualReturnType == typeof(JObject))
-                    {
-                        return JObject.Parse(await response.Content.ReadAsStringAsync());
-                    }
-
-                    if (_actualReturnType == typeof(JArray))
-                    {
-                        return JArray.Parse(await response.Content.ReadAsStringAsync());
-                    }
-
+                    data = response;
+                }
+                else if (type == typeof(HttpContent))
+                {
+                    data = response.Content;
+                }
+                else if (type == typeof(void) || response.Content == null)
+                {
+                    data = null;
+                }
+                else
+                {
+                    var contentTypeMediaType = response.Content.Headers?.ContentType?.MediaType;
                     var deserializer =
-                        _context.SerializationManager.GetDeserializer(response.Content.Headers?.ContentType?.MediaType);
-                    var type = response.IsSuccessStatusCode ? _actualReturnType : _errorResponseType;
+                        _context.SerializationManager.GetDeserializer(contentTypeMediaType);
+                    if (deserializer == null)
+                    {
+                        throw new RestClientException(response.StatusCode,
+                            "No deserializer found for " + contentTypeMediaType);
+                    }
+
                     data = await deserializer.Deserialize(response.Content, type);
                 }
             }

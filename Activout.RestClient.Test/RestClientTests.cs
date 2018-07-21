@@ -272,7 +272,7 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public void TestGetJArray()
+        public async Task TestGetJArray()
         {
             // arrange
             _mockHttp
@@ -282,11 +282,28 @@ namespace Activout.RestClient.Test
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            dynamic jArray = reviewSvc.GetJArray();
+            dynamic jArray = await reviewSvc.GetJArray();
 
             // assert
             string foo = jArray[0].foo;
             Assert.Equal("bar", foo);
+        }
+
+        [Fact]
+        public async Task TestFormPost()
+        {
+            // arrange
+            _mockHttp
+                .When($"{BaseUri}/movies/form")
+                .WithFormData("value", "foobar")
+                .Respond("text/plain", "");
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            await reviewSvc.FormPost("foobar");
+
+            // assert
         }
     }
 }

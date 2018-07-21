@@ -5,9 +5,9 @@ using Microsoft.Net.Http.Headers;
 
 namespace Activout.RestClient.Serialization.Implementation
 {
-    internal class TextSerializer : ISerializer
+    internal class StringSerializer : ISerializer
     {
-        public TextSerializer()
+        public StringSerializer()
         {
             SupportedMediaTypes = new MediaTypeCollection
             {

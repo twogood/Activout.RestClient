@@ -48,6 +48,9 @@ namespace Activout.MovieReviews
         JObject GetJObject();
 
         [Route("/array")]
-        JArray GetJArray();
+        Task<JArray> GetJArray();
+
+        [HttpPost("/form")]
+        Task FormPost([FormParam] string value);
     }
 }
