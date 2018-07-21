@@ -10,7 +10,6 @@ namespace Activout.MovieReviews
 {
     [InterfaceRoute("movies")]
     [ErrorResponse(typeof(ErrorResponse))]
-    [InterfaceConsumes("application/json")]
     public interface IMovieReviewService
     {
         [HttpGet]

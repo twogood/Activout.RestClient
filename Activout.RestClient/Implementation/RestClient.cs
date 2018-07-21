@@ -8,9 +8,19 @@ using Activout.RestClient.Helpers;
 using Activout.RestClient.Serialization;
 using Dynamitey.DynamicObjects;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Net.Http.Headers;
 
 namespace Activout.RestClient.Implementation
 {
+    internal static class RestClientDefaults
+    {
+        internal static readonly MediaTypeCollection MediaTypeCollection = new MediaTypeCollection()
+        {
+            "application/json"
+        };
+    }
+
     internal class RestClient<T> : DynamicObject where T : class
     {
         private readonly RestClientContext _context;
@@ -25,6 +35,11 @@ namespace Activout.RestClient.Implementation
             _context = context;
             _context.BaseTemplate = "";
             HandleAttributes();
+            if (_context.DefaultContentTypes == null)
+            {
+                _context.DefaultContentTypes = RestClientDefaults.MediaTypeCollection;
+            }
+
             _context.DefaultSerializer = _context.SerializationManager.GetSerializer(_context.DefaultContentTypes);
         }
 
