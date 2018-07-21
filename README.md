@@ -1,7 +1,8 @@
 # Activout Rest Client
 [![Build Status](https://travis-ci.org/twogood/Activout.RestClient.svg?branch=master)](https://travis-ci.org/twogood/Activout.RestClient)
+[![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=Activout.RestClient&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=Activout.RestClient)
 
-Create a REST(ish) API client only by defining the C# interface you want
+Create a REST(ish) API client only by defining the C# interface you want.
 
 *Shamelessly inspired by [Rest Client for MicroProfile](https://github.com/eclipse/microprofile-rest-client).* 
 
