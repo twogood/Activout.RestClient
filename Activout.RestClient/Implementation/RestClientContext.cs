@@ -9,6 +9,18 @@ namespace Activout.RestClient.Implementation
 {
     internal class RestClientContext
     {
+        private static readonly MediaTypeCollection JsonMediaTypeCollection = new MediaTypeCollection()
+        {
+            "application/json"
+        };
+
+        public RestClientContext()
+        {
+            BaseTemplate = "";
+            DefaultContentTypes = JsonMediaTypeCollection;
+            ErrorResponseType = typeof(string);
+        }
+
         public Uri BaseUri { get; internal set; }
         public string BaseTemplate { get; internal set; }
         public ISerializer DefaultSerializer { get; internal set; }
