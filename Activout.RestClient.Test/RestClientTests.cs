@@ -218,7 +218,7 @@ namespace Activout.RestClient.Test
             Assert.Equal(stars, result.Stars);
             Assert.Equal(text, result.Text);
         }
-        
+
         [Fact]
         public async Task TestGetHttpContent()
         {
@@ -253,5 +253,40 @@ namespace Activout.RestClient.Test
             Assert.Equal("[]", await httpResponseMessage.Content.ReadAsStringAsync());
         }
 
+        [Fact]
+        public void TestGetJObject()
+        {
+            // arrange
+            _mockHttp
+                .When($"{BaseUri}/movies/object")
+                .Respond("application/json", "{\"foo\":\"bar\"}");
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            dynamic jObject = reviewSvc.GetJObject();
+
+            // assert
+            string foo = jObject.foo;
+            Assert.Equal("bar", foo);
+        }
+
+        [Fact]
+        public void TestGetJArray()
+        {
+            // arrange
+            _mockHttp
+                .When($"{BaseUri}/movies/array")
+                .Respond("application/json", "[{\"foo\":\"bar\"}]");
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            dynamic jArray = reviewSvc.GetJArray();
+
+            // assert
+            string foo = jArray[0].foo;
+            Assert.Equal("bar", foo);
+        }
     }
 }

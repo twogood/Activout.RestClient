@@ -11,6 +11,7 @@ using Activout.RestClient.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Newtonsoft.Json.Linq;
 
 namespace Activout.RestClient.Implementation
 {
@@ -252,6 +253,16 @@ namespace Activout.RestClient.Implementation
             {
                 if (response.Content != null)
                 {
+                    if (_actualReturnType == typeof(JObject))
+                    {
+                        return JObject.Parse(await response.Content.ReadAsStringAsync());
+                    }
+
+                    if (_actualReturnType == typeof(JArray))
+                    {
+                        return JArray.Parse(await response.Content.ReadAsStringAsync());
+                    }
+
                     var deserializer =
                         _context.SerializationManager.GetDeserializer(response.Content.Headers?.ContentType?.MediaType);
                     var type = response.IsSuccessStatusCode ? _actualReturnType : _errorResponseType;

@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Activout.RestClient;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace Activout.MovieReviews
 {
@@ -39,11 +40,14 @@ namespace Activout.MovieReviews
             [QueryParam] DateTime begin,
             [QueryParam] DateTime end);
 
-        [HttpGet]
         HttpContent GetHttpContent();
 
-        [HttpGet]
         HttpResponseMessage GetHttpResponseMessage();
 
+        [Route("/object")]
+        JObject GetJObject();
+
+        [Route("/array")]
+        JArray GetJArray();
     }
 }
