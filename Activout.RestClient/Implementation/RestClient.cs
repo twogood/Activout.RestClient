@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Reflection;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.Serialization;
+using Dynamitey.DynamicObjects;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Activout.RestClient.Implementation
@@ -14,6 +15,9 @@ namespace Activout.RestClient.Implementation
     {
         private readonly RestClientContext _context;
         private readonly Type _type;
+
+        private readonly Dictionary<MethodInfo, RequestHandler> _requestHandlers =
+            new Dictionary<MethodInfo, RequestHandler>();
 
         public RestClient(RestClientContext context)
         {
@@ -50,8 +54,11 @@ namespace Activout.RestClient.Implementation
                 return false;
             }
 
-            var requestHandler = new RequestHandler(method, _context);
-            // TODO: cache RequestHandler
+            if (!_requestHandlers.TryGetValue(method, out var requestHandler))
+            {
+                requestHandler = new RequestHandler(method, _context);
+                _requestHandlers[method] = requestHandler;
+            }
 
             result = requestHandler.Send(args);
             return true;
