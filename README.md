@@ -59,6 +59,11 @@ await movieReviewService.SubmitReview(movieId, review);
 
 This allows for a much more natural coding style, and the underlying implementation handles the communication between the client and service - it makes the HTTP connection, serializes the Review object to JSON/etc. so that the remote service can process it.
 
+## External projects using Activout.RestClient
+
+- [Activout.FuelPrice](https://github.com/twogood/Activout.FuelPrice) A console application that reads from Twitter of a specific chain of petrol stations to fetch my local fuel price.
+- Your project here?
+
 ## Usage notes
 
 - Exceptions will be wrapped in AggregatedException
