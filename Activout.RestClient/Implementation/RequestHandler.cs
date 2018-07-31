@@ -167,7 +167,7 @@ namespace Activout.RestClient.Implementation
             if (_parameters.Length != args.Length)
                 throw new InvalidOperationException($"Expected {_parameters.Length} parameters but got {args.Length}");
 
-            var (routeParams, queryParams, formParams) = GetParams(args);
+            var (routeParams, queryParams, formParams, headerParams) = GetParams(args);
             var requestUriString = ExpandTemplate(routeParams);
             if (queryParams.Any())
             {
@@ -177,6 +177,7 @@ namespace Activout.RestClient.Implementation
             var requestUri = new Uri(requestUriString, UriKind.RelativeOrAbsolute);
 
             var request = new HttpRequestMessage(_httpMethod, requestUri);
+            headerParams.ForEach(p => request.Headers.Add(p.Key, p.Value));
 
             if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put)
             {
@@ -200,12 +201,14 @@ namespace Activout.RestClient.Implementation
             return task.Result;
         }
 
-        private (Dictionary<string, object>, List<string>, List<KeyValuePair<string, string>>) GetParams(
-            IReadOnlyList<object> args)
+        private (Dictionary<string, object>, List<string>, List<KeyValuePair<string, string>>,
+            List<KeyValuePair<string, string>>) GetParams(
+                IReadOnlyList<object> args)
         {
             var routeParams = new Dictionary<string, object>();
             var queryParams = new List<string>();
             var formParams = new List<KeyValuePair<string, string>>();
+            var headerParams = new List<KeyValuePair<string, string>>();
 
             for (var i = 0; i < _parameters.Length; i++)
             {
@@ -217,24 +220,27 @@ namespace Activout.RestClient.Implementation
 
                 foreach (var attribute in parameterAttributes)
                 {
-                    if (attribute.GetType() == typeof(RouteParamAttribute))
+                    if (attribute is RouteParamAttribute routeParamAttribute)
                     {
-                        var routeParamAttribute = (RouteParamAttribute) attribute;
                         routeParams[routeParamAttribute.Name ?? name] = escapedValue;
                         handled = true;
                     }
-                    else if (attribute.GetType() == typeof(QueryParamAttribute))
+                    else if (attribute is QueryParamAttribute queryParamAttribute)
                     {
-                        var queryParamAttribute = (QueryParamAttribute) attribute;
                         name = queryParamAttribute.Name ?? name;
                         queryParams.Add(Uri.EscapeDataString(name) + "=" + escapedValue);
                         handled = true;
                     }
-                    else if (attribute.GetType() == typeof(FormParamAttribute))
+                    else if (attribute is FormParamAttribute formParamAttribute)
                     {
-                        var formParamAttribute = (FormParamAttribute) attribute;
                         name = formParamAttribute.Name ?? name;
                         formParams.Add(new KeyValuePair<string, string>(name, value));
+                        handled = true;
+                    }
+                    else if (attribute is HeaderParamAttribute headerParamAttribute)
+                    {
+                        name = headerParamAttribute.Name ?? name;
+                        headerParams.Add(new KeyValuePair<string, string>(name, value));
                         handled = true;
                     }
                 }
@@ -245,7 +251,7 @@ namespace Activout.RestClient.Implementation
                 }
             }
 
-            return (routeParams, queryParams, formParams);
+            return (routeParams, queryParams, formParams, headerParams);
         }
 
         private async Task<object> SendAsync(HttpRequestMessage request)

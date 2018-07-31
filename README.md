@@ -74,7 +74,6 @@ This allows for a much more natural coding style, and the underlying implementat
 ## TODO
 
 - Support for cookie parameters
-- Support for header parameters
 - Support for default headers
 - More real-life testing :)
 

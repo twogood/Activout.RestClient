@@ -305,5 +305,22 @@ namespace Activout.RestClient.Test
 
             // assert
         }
+
+        [Fact]
+        public async Task TestHeaderParam()
+        {
+            // arrange
+            _mockHttp
+                .When($"{BaseUri}/movies/headers")
+                .WithHeaders("X-Foo", "bar")
+                .Respond("text/plain", "");
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            await reviewSvc.SendFooHeader("bar");
+
+            // assert
+        }
     }
 }
