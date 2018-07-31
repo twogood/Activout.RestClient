@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
@@ -37,6 +39,19 @@ namespace Activout.RestClient.Implementation
         public IRestClientBuilder HttpClient(HttpClient httpClient)
         {
             _context.HttpClient = httpClient;
+            return this;
+        }
+
+        public IRestClientBuilder Header(string name, object value)
+        {
+            _context.DefaultHeaders.Add(new KeyValuePair<string, object>(name, value));
+            return this;
+        }
+
+        public IRestClientBuilder Header(AuthenticationHeaderValue authenticationHeaderValue)
+        {
+            _context.DefaultHeaders.Add(
+                new KeyValuePair<string, object>("Authorization", authenticationHeaderValue));
             return this;
         }
 

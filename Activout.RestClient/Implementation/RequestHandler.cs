@@ -152,14 +152,6 @@ namespace Activout.RestClient.Implementation
 
             // We modified the original request Uri. Assign the new Uri to the request message.
             if (requestUri != null) request.RequestUri = requestUri;
-
-            /*
-            // Add default headers
-            if (_defaultRequestHeaders != null)
-            {
-                request.Headers.AddHeaders(_defaultRequestHeaders);
-            }
-            */
         }
 
         public object Send(object[] args)
@@ -177,7 +169,8 @@ namespace Activout.RestClient.Implementation
             var requestUri = new Uri(requestUriString, UriKind.RelativeOrAbsolute);
 
             var request = new HttpRequestMessage(_httpMethod, requestUri);
-            headerParams.ForEach(p => request.Headers.Add(p.Key, p.Value));
+
+            SetHeaders(request, headerParams);
 
             if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put)
             {
@@ -199,6 +192,12 @@ namespace Activout.RestClient.Implementation
             if (_returnType.BaseType == typeof(Task) && _returnType.IsGenericType)
                 return _converter.ConvertReturnType(task);
             return task.Result;
+        }
+
+        private void SetHeaders(HttpRequestMessage request, List<KeyValuePair<string, string>> headerParams)
+        {
+            _context.DefaultHeaders.ForEach(p => request.Headers.Add(p.Key, p.Value.ToString()));
+            headerParams.ForEach(p => request.Headers.Add(p.Key, p.Value));
         }
 
         private (Dictionary<string, object>, List<string>, List<KeyValuePair<string, string>>,

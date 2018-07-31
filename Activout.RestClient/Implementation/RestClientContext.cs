@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
@@ -18,6 +20,7 @@ namespace Activout.RestClient.Implementation
         {
             BaseTemplate = "";
             DefaultContentTypes = JsonMediaTypeCollection;
+            DefaultHeaders = new List<KeyValuePair<string, object>>();
             ErrorResponseType = typeof(string);
         }
 
@@ -30,5 +33,6 @@ namespace Activout.RestClient.Implementation
         public Type ErrorResponseType { get; internal set; }
         public MediaTypeCollection DefaultContentTypes { get; internal set; }
         public IParamConverterManager ParamConverterManager { get; internal set; }
+        public List<KeyValuePair<string, object>> DefaultHeaders { get; }
     }
 }

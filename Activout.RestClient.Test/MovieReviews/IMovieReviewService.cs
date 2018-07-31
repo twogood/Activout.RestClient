@@ -53,7 +53,7 @@ namespace Activout.MovieReviews
         Task FormPost([FormParam] string value);
 
         [Route("/headers")]
-        Task SendFooHeader([HeaderParam("X-Foo")] string foo);
+        Task<HttpResponseMessage> SendFooHeader([HeaderParam("X-Foo")] string foo);
 
     }
 }

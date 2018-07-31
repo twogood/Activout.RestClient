@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Activout.MovieReviews;
@@ -24,11 +25,16 @@ namespace Activout.RestClient.Test
         private readonly IRestClientFactory _restClientFactory;
         private readonly MockHttpMessageHandler _mockHttp;
 
-        private IMovieReviewService CreateMovieReviewService()
+        private IRestClientBuilder CreateRestClientBuilder()
         {
             return _restClientFactory.CreateBuilder()
                 .HttpClient(_mockHttp.ToHttpClient())
-                .BaseUri(new Uri(BaseUri))
+                .BaseUri(new Uri(BaseUri));
+        }
+
+        private IMovieReviewService CreateMovieReviewService()
+        {
+            return CreateRestClientBuilder()
                 .Build<IMovieReviewService>();
         }
 
@@ -315,12 +321,34 @@ namespace Activout.RestClient.Test
                 .WithHeaders("X-Foo", "bar")
                 .Respond("text/plain", "");
 
-            var reviewSvc = CreateMovieReviewService();
+            var reviewSvc = CreateRestClientBuilder()
+                .Header(new AuthenticationHeaderValue("Basic", "SECRET"))
+                .Header("X-Tick", new TickValue())
+                .Build<IMovieReviewService>();
 
             // act
-            await reviewSvc.SendFooHeader("bar");
+            var responseMessage1 = await reviewSvc.SendFooHeader("bar");
+            var requestHeaders1 = responseMessage1.RequestMessage.Headers;
+
+            var responseMessage2 = await reviewSvc.SendFooHeader("bar");
+            var requestHeaders2 = responseMessage2.RequestMessage.Headers;
 
             // assert
+            Assert.NotNull(requestHeaders1.Authorization);
+            Assert.Equal("Basic SECRET", requestHeaders1.Authorization.ToString());
+            Assert.NotEmpty(requestHeaders1.GetValues("X-Tick"));
+
+            Assert.NotEqual(
+                requestHeaders1.GetValues("X-Tick").First(),
+                requestHeaders2.GetValues("X-Tick").First());
+        }
+    }
+
+    internal class TickValue
+    {
+        public override string ToString()
+        {
+            return DateTime.Now.Ticks.ToString();
         }
     }
 }
