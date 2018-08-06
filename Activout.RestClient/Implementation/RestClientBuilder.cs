@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
+using Microsoft.Extensions.Caching.Memory;
 using static Activout.RestClient.Helpers.Preconditions;
 
 namespace Activout.RestClient.Implementation
@@ -38,7 +39,18 @@ namespace Activout.RestClient.Implementation
 
         public IRestClientBuilder HttpClient(HttpClient httpClient)
         {
+            return With(httpClient);
+        }
+
+        public IRestClientBuilder With(HttpClient httpClient)
+        {
             _context.HttpClient = httpClient;
+            return this;
+        }
+
+        public IRestClientBuilder With(IResponseCache responseCache)
+        {
+            _context.ResponseCache = responseCache;
             return this;
         }
 

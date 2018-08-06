@@ -14,7 +14,7 @@ namespace Activout.RestClient.Helpers
         /// <exception cref="ArgumentNullException">if reference is null</exception>
         public static T CheckNotNull<T>(T reference, string errorMessage = null)
         {
-            if (reference == null) throw new ArgumentNullException(errorMessage);
+            if (reference == null) throw new ArgumentNullException(typeof(T).FullName, errorMessage);
 
             return reference;
         }

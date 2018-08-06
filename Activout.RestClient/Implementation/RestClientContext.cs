@@ -6,6 +6,7 @@ using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Activout.RestClient.Implementation
 {
@@ -34,5 +35,6 @@ namespace Activout.RestClient.Implementation
         public MediaTypeCollection DefaultContentTypes { get; internal set; }
         public IParamConverterManager ParamConverterManager { get; internal set; }
         public List<KeyValuePair<string, object>> DefaultHeaders { get; }
+        public IResponseCache ResponseCache { get; set; }
     }
 }

@@ -5,12 +5,14 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Activout.RestClient.Attributes;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Activout.RestClient.Implementation
 {
@@ -28,9 +30,11 @@ namespace Activout.RestClient.Implementation
         private readonly ISerializer _serializer;
         private readonly string _template;
         private readonly IParamConverter[] _paramConverters;
+        private CacheResponseAttribute _cacheResponse;
 
         public RequestHandler(MethodInfo method, RestClientContext context)
         {
+            _context = context;
             _returnType = method.ReturnType;
             _actualReturnType = GetActualReturnType();
             _parameters = method.GetParameters();
@@ -64,10 +68,15 @@ namespace Activout.RestClient.Implementation
                     case RouteAttribute routeAttribute:
                         templateBuilder.Append(routeAttribute.Template);
                         break;
+
+                    case CacheResponseAttribute cacheResponseAttribute:
+                        Preconditions.CheckNotNull(context.ResponseCache,
+                            "IRequestBuilder.With(responseCache) is required to support [CacheResponse]");
+                        _cacheResponse = cacheResponseAttribute;
+                        break;
                 }
 
             _template = templateBuilder.ToString();
-            _context = context;
         }
 
         private IParamConverter[] GetParamConverters(IParamConverterManager paramConverterManager)
@@ -257,6 +266,16 @@ namespace Activout.RestClient.Implementation
         {
             PrepareRequestMessage(request);
 
+            object cacheKey = null;
+            if (_cacheResponse != null)
+            {
+                cacheKey = _context.ResponseCache.CreateKey(request);
+                if (_context.ResponseCache.TryGetValue(cacheKey, out var result))
+                {
+                    return result;
+                }
+            }
+
             var response = await _context.HttpClient.SendAsync(request);
 
             var type = response.IsSuccessStatusCode ? _actualReturnType : _errorResponseType;
@@ -297,8 +316,17 @@ namespace Activout.RestClient.Implementation
             }
 
             if (response.IsSuccessStatusCode)
+            {
+                if (cacheKey != null)
+                {
+                    _context.ResponseCache.TrySetValue(cacheKey, data, response);
+                }
+
                 return data;
+            }
+
             throw new RestClientException(response.StatusCode, data);
         }
+
     }
 }

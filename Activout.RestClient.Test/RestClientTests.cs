@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -6,6 +7,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Activout.MovieReviews;
+using Activout.RestClient.Implementation;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
@@ -28,7 +31,7 @@ namespace Activout.RestClient.Test
         private IRestClientBuilder CreateRestClientBuilder()
         {
             return _restClientFactory.CreateBuilder()
-                .HttpClient(_mockHttp.ToHttpClient())
+                .With(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri));
         }
 
@@ -110,20 +113,64 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public async Task TestGetEmptyIEnumerableAsync()
+        public async Task TestGetCachedEmptyListAsync()
         {
             // arrange
             _mockHttp
                 .When($"{BaseUri}/movies")
                 .Respond("application/json", "[]");
 
-            var reviewSvc = CreateMovieReviewService();
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var responseCache = new DefaultResponseCache(memoryCache)
+            {
+                Options = new MemoryCacheEntryOptions {AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(15)}
+            };
+
+            var reviewSvc = CreateRestClientBuilder()
+                .With(responseCache)
+                .Build<IMovieReviewService>();
 
             // act
             var movies = await reviewSvc.GetAllMovies();
+            var moviesAgain = await reviewSvc.GetAllMovies();
 
             // assert
             Assert.Empty(movies);
+            Assert.StrictEqual(movies, moviesAgain);
+        }
+
+        [Fact]
+        public async Task TestExpiresHeaderAsync()
+        {
+            // arrange
+            var content = new StringContent("[]", Encoding.UTF8, "application/json");
+            content.Headers.Expires = DateTimeOffset.Now.AddDays(1);
+
+            _mockHttp
+                .When($"{BaseUri}/movies")
+                .Respond(content);
+
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var responseCache = new DefaultResponseCache(memoryCache)
+            {
+                Options = new MemoryCacheEntryOptions()
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMilliseconds(1)
+                }
+            };
+
+            var reviewSvc = CreateRestClientBuilder()
+                .With(responseCache)
+                .Build<IMovieReviewService>();
+
+            // act
+            var movies = await reviewSvc.GetAllMovies();
+            await Task.Delay(2);
+            var moviesAgain = await reviewSvc.GetAllMovies();
+
+            // assert
+            Assert.Empty(movies);
+            Assert.StrictEqual(movies, moviesAgain);
         }
 
         [Fact]

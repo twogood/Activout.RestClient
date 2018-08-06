@@ -5,10 +5,8 @@
   <ItemGroup>
     <PackageReference Include="ImpromptuInterface" Version="7.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Attributes" />
   </ItemGroup>
 </Project>

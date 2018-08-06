@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Activout.RestClient;
+using Activout.RestClient.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 
@@ -13,7 +14,8 @@ namespace Activout.MovieReviews
     public interface IMovieReviewService
     {
         [HttpGet]
-        Task<IEnumerable<Movie>> GetAllMovies();
+        [CacheResponse]
+        Task<List<Movie>> GetAllMovies();
 
         [HttpGet]
         [Route("/{movieId}/reviews")]
