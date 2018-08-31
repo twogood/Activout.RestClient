@@ -1,7 +1,7 @@
 language: csharp
 solution: ActivoutRestClient.sln
 mono: none
-dotnet: 2.1.302
+dotnet: 2.1.401
 install:
   - dotnet tool install --global dotnet-sonarscanner
 script:
