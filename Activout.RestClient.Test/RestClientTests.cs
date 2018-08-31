@@ -110,6 +110,28 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
+        public void TestErrorEmptyNoContentType()
+        {
+            // arrange
+            _mockHttp
+                .When(HttpMethod.Get, $"{BaseUri}/movies/fail")
+                .Respond(HttpStatusCode.BadRequest, request => new ByteArrayContent(new byte[0]));
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            var aggregateException = Assert.Throws<AggregateException>(() => reviewSvc.Fail());
+
+            // assert
+            var exception = (RestClientException) aggregateException.GetBaseException();
+            Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
+
+            Assert.NotNull(exception.ErrorResponse);
+            Assert.IsType<byte[]>(exception.ErrorResponse);
+            Assert.Empty(exception.GetErrorResponse<byte[]>());
+        }
+
+        [Fact]
         public async Task TestGetEmptyIEnumerableAsync()
         {
             // arrange
@@ -293,6 +315,40 @@ namespace Activout.RestClient.Test
             // assert
             string foo = jArray[0].foo;
             Assert.Equal("bar", foo);
+        }
+
+        [Fact]
+        public async Task TestGetByteArray()
+        {
+            // arrange
+            _mockHttp
+                .When($"{BaseUri}/movies/bytes")
+                .Respond(new ByteArrayContent(new byte[] {42}));
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            var bytes = await reviewSvc.GetByteArray();
+
+            // assert
+            Assert.Equal(new byte[] {42}, bytes);
+        }
+
+        [Fact]
+        public async Task TestGetByteArrayObject()
+        {
+            // arrange
+            _mockHttp
+                .When($"{BaseUri}/movies/byte-object")
+                .Respond(new ByteArrayContent(new byte[] {42}));
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            var byteArrayObject = await reviewSvc.GetByteArrayObject();
+
+            // assert
+            Assert.Equal(new byte[] {42}, byteArrayObject.Bytes);
         }
 
         [Fact]

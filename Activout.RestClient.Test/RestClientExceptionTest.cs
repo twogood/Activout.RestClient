@@ -9,6 +9,8 @@ namespace Activout.RestClient.Test
     // https://blogs.msdn.microsoft.com/agileer/2013/05/17/the-correct-way-to-code-a-custom-exception-class/
     public class RestClientExceptionTest
     {
+        private static readonly Uri RequestUri = new Uri("http://localhost");
+
         [Fact]
         public void RestClientException_default_ctor()
         {
@@ -16,7 +18,7 @@ namespace Activout.RestClient.Test
             const string expectedMessage = "Exception of type 'Activout.RestClient.RestClientException' was thrown.";
 
             // Act
-            var sut = new RestClientException(HttpStatusCode.InternalServerError, null);
+            var sut = new RestClientException(RequestUri, HttpStatusCode.InternalServerError, null);
 
             // Assert
             Assert.Null(sut.ErrorResponse);
@@ -32,7 +34,7 @@ namespace Activout.RestClient.Test
             const string expectedMessage = "message";
 
             // Act
-            var sut = new RestClientException(HttpStatusCode.InternalServerError, expectedMessage);
+            var sut = new RestClientException(RequestUri, HttpStatusCode.InternalServerError, expectedMessage);
 
             // Assert
             Assert.Equal(expectedMessage, sut.ErrorResponse);
@@ -49,7 +51,7 @@ namespace Activout.RestClient.Test
             var innerEx = new Exception("foo");
 
             // Act
-            var sut = new RestClientException(HttpStatusCode.InternalServerError, expectedMessage, innerEx);
+            var sut = new RestClientException(RequestUri, HttpStatusCode.InternalServerError, expectedMessage, innerEx);
 
             // Assert
             Assert.Equal(expectedMessage, sut.ErrorResponse);
@@ -64,7 +66,7 @@ namespace Activout.RestClient.Test
             // Arrange
             var innerEx = new Exception("foo");
             var originalException =
-                new RestClientException(HttpStatusCode.InternalServerError, "message", innerEx);
+                new RestClientException(RequestUri, HttpStatusCode.InternalServerError, "message", innerEx);
             var buffer = new byte[4096];
             var ms = new MemoryStream(buffer);
             var ms2 = new MemoryStream(buffer);

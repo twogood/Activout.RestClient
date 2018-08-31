@@ -26,15 +26,17 @@ namespace Activout.RestClient
     [Serializable]
     public class RestClientException : Exception
     {
-        public RestClientException(HttpStatusCode statusCode, object errorResponse) : base(errorResponse?.ToString())
+        public RestClientException(Uri requestUri, HttpStatusCode statusCode, object errorResponse) : base(errorResponse?.ToString())
         {
+            RequestUri = requestUri;
             StatusCode = statusCode;
             ErrorResponse = errorResponse;
         }
 
-        public RestClientException(HttpStatusCode statusCode, string errorResponse, Exception innerException) : base(
+        public RestClientException(Uri requestUri, HttpStatusCode statusCode, string errorResponse, Exception innerException) : base(
             errorResponse, innerException)
         {
+            RequestUri = requestUri;
             StatusCode = statusCode;
             ErrorResponse = errorResponse;
         }
@@ -50,6 +52,7 @@ namespace Activout.RestClient
             }
         }
 
+        public Uri RequestUri { get; }
         public HttpStatusCode StatusCode { get; }
 
         public object ErrorResponse { get; }
@@ -80,7 +83,7 @@ namespace Activout.RestClient
 
         public override string ToString()
         {
-            return $"{base.ToString()}; StatusCode={StatusCode}; ErrorMessage={ErrorResponse}";
+            return $"{base.ToString()}, {nameof(RequestUri)}: {RequestUri}, {nameof(StatusCode)}: {StatusCode}, {nameof(ErrorResponse)}: {ErrorResponse}";
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Activout.RestClient.Serialization.Implementation
         public SerializationManager()
         {
             Serializers = new List<ISerializer> {new JsonSerializer(), new StringSerializer()};
-            Deserializers = new List<IDeserializer> {new JsonDeserializer(), new StringDeserializer()};
+            Deserializers = new List<IDeserializer> {new JsonDeserializer(), new StringDeserializer(), new ByteArrayDeserializer()};
         }
 
         public IDeserializer GetDeserializer(string mediaType)

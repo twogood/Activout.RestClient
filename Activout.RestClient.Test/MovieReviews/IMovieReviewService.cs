@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Activout.RestClient;
@@ -21,6 +22,10 @@ namespace Activout.MovieReviews
 
         [HttpGet("/{movieId}/reviews/{reviewId}")]
         Review GetReview(string movieId, string reviewId);
+
+        [HttpGet("/fail")]
+        [ErrorResponse(typeof(byte[]))]
+        void Fail();
 
         [HttpPost]
         [Route("/{movieId}/reviews")]
@@ -55,5 +60,21 @@ namespace Activout.MovieReviews
         [Route("/headers")]
         Task<HttpResponseMessage> SendFooHeader([HeaderParam("X-Foo")] string foo);
 
+        [Route("/bytes")]
+        Task<byte[]> GetByteArray();
+
+        [Route("/byte-object")]
+        Task<ByteArrayObject> GetByteArrayObject();
+    }
+
+    [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
+    public class ByteArrayObject
+    {
+        public byte[] Bytes { get; }
+
+        public ByteArrayObject(byte[] bytes)
+        {
+            Bytes = bytes;
+        }
     }
 }

@@ -13,7 +13,8 @@ namespace Activout.RestClient.Serialization.Implementation
         {
             if (type != typeof(string))
             {
-                throw new NotImplementedException("Only string return value supported, but was " + type);
+                throw new NotImplementedException(
+                    $"Can only deserialize {content.Headers.ContentType} to string, not to {type}");
             }
 
             return await content.ReadAsStringAsync();

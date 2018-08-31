@@ -16,6 +16,9 @@ namespace Activout.RestClient.Implementation
 {
     internal class RequestHandler
     {
+        // https://www.w3.org/Protocols/rfc2616/rfc2616-sec7.html#sec7.2.1
+        private const string DefaultHttpContentType = "application/octet-stream";
+
         private readonly Type _actualReturnType;
         private readonly int _bodyArgumentIndex;
         private readonly MediaTypeCollection _contentTypes;
@@ -278,12 +281,13 @@ namespace Activout.RestClient.Implementation
                 }
                 else
                 {
-                    var contentTypeMediaType = response.Content.Headers?.ContentType?.MediaType;
+                    var contentTypeMediaType =
+                        response.Content.Headers?.ContentType?.MediaType ?? DefaultHttpContentType;
                     var deserializer =
                         _context.SerializationManager.GetDeserializer(contentTypeMediaType);
                     if (deserializer == null)
                     {
-                        throw new RestClientException(response.StatusCode,
+                        throw new RestClientException(request.RequestUri, response.StatusCode,
                             "No deserializer found for " + contentTypeMediaType);
                     }
 
@@ -292,13 +296,18 @@ namespace Activout.RestClient.Implementation
             }
             catch (Exception e)
             {
+                if (e is RestClientException)
+                {
+                    throw;
+                }
+
                 var errorResponse = response.Content == null ? null : await response.Content.ReadAsStringAsync();
-                throw new RestClientException(response.StatusCode, errorResponse, e);
+                throw new RestClientException(request.RequestUri, response.StatusCode, errorResponse, e);
             }
 
             if (response.IsSuccessStatusCode)
                 return data;
-            throw new RestClientException(response.StatusCode, data);
+            throw new RestClientException(request.RequestUri, response.StatusCode, data);
         }
     }
 }
