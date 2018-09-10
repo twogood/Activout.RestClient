@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -18,8 +19,8 @@ namespace Activout.RestClient.Implementation
         private readonly RestClientContext _context;
         private readonly Type _type;
 
-        private readonly Dictionary<MethodInfo, RequestHandler> _requestHandlers =
-            new Dictionary<MethodInfo, RequestHandler>();
+        private readonly IDictionary<MethodInfo, RequestHandler> _requestHandlers =
+            new ConcurrentDictionary<MethodInfo, RequestHandler>();
 
         public RestClient(RestClientContext context)
         {
