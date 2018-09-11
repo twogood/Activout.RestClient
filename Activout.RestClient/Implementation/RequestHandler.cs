@@ -88,6 +88,8 @@ namespace Activout.RestClient.Implementation
         {
             switch (attribute)
             {
+                case HttpDeleteAttribute _:
+                    return HttpMethod.Delete;
                 case HttpGetAttribute _:
                     return HttpMethod.Get;
                 case HttpPostAttribute _:

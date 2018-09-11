@@ -23,6 +23,9 @@ namespace Activout.MovieReviews
         [HttpGet("/{movieId}/reviews/{reviewId}")]
         Review GetReview(string movieId, string reviewId);
 
+        [HttpDelete("/{movieId}/reviews/{reviewId}")]
+        void DeleteReview(string movieId, string reviewId);
+
         [HttpGet("/fail")]
         [ErrorResponse(typeof(byte[]))]
         void Fail();

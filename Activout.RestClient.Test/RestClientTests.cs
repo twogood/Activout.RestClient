@@ -132,6 +132,25 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
+        public void TestDelete()
+        {
+            // arrange
+            const string movieId = "*MOVIE_ID*";
+            const string reviewId = "*REVIEW_ID*";
+            _mockHttp
+                .Expect(HttpMethod.Delete, $"{BaseUri}/movies/{movieId}/reviews/{reviewId}")
+                .Respond(HttpStatusCode.OK);
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            reviewSvc.DeleteReview(movieId,reviewId);
+
+            // assert
+            _mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
         public async Task TestGetEmptyIEnumerableAsync()
         {
             // arrange
