@@ -4,8 +4,10 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Activout.MovieReviews;
+using Moq;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
@@ -144,7 +146,7 @@ namespace Activout.RestClient.Test
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            reviewSvc.DeleteReview(movieId,reviewId);
+            reviewSvc.DeleteReview(movieId, reviewId);
 
             // assert
             _mockHttp.VerifyNoOutstandingExpectation();
@@ -388,6 +390,32 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
+        public async Task TestRequestLogger()
+        {
+            // arrange
+            _mockHttp
+                .When($"{BaseUri}/movies")
+                .Respond("application/json", "[]");
+
+            var requestLoggerMock = new Mock<IRequestLogger>();
+            requestLoggerMock.Setup(x => x.TimeOperation(It.IsAny<HttpRequestMessage>()))
+                .Returns(new Mock<IDisposable>().Object);
+
+            var reviewSvc = CreateRestClientBuilder()
+                .With(requestLoggerMock.Object)
+                .Build<IMovieReviewService>();
+
+            // act
+            await reviewSvc.GetAllMovies();
+            await reviewSvc.GetAllMovies();
+
+            // assert
+            requestLoggerMock.Verify(x => x.TimeOperation(It.IsAny<HttpRequestMessage>()), Times.Exactly(2));
+            requestLoggerMock.VerifyNoOtherCalls();
+            _mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
         public async Task TestHeaderParam()
         {
             // arrange
@@ -421,9 +449,11 @@ namespace Activout.RestClient.Test
 
     internal class TickValue
     {
+        private long _ticks = 42;
+
         public override string ToString()
         {
-            return DateTime.Now.Ticks.ToString();
+            return Interlocked.Increment(ref _ticks).ToString();
         }
     }
 }

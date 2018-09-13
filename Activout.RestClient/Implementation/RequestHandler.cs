@@ -262,7 +262,11 @@ namespace Activout.RestClient.Implementation
         {
             PrepareRequestMessage(request);
 
-            var response = await _context.HttpClient.SendAsync(request);
+            HttpResponseMessage response;
+            using (_context.RequestLogger.TimeOperation(request))
+            {
+                response = await _context.HttpClient.SendAsync(request);
+            }
 
             var type = response.IsSuccessStatusCode ? _actualReturnType : _errorResponseType;
             object data;

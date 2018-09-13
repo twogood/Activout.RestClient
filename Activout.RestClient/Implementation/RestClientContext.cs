@@ -11,7 +11,7 @@ namespace Activout.RestClient.Implementation
 {
     internal class RestClientContext
     {
-        private static readonly MediaTypeCollection JsonMediaTypeCollection = new MediaTypeCollection()
+        private static readonly MediaTypeCollection JsonMediaTypeCollection = new MediaTypeCollection
         {
             "application/json"
         };
@@ -34,5 +34,19 @@ namespace Activout.RestClient.Implementation
         public MediaTypeCollection DefaultContentTypes { get; internal set; }
         public IParamConverterManager ParamConverterManager { get; internal set; }
         public List<KeyValuePair<string, object>> DefaultHeaders { get; }
+        public IRequestLogger RequestLogger { get; set; } = new DummyRequestLogger();
+    }
+
+    internal class DummyRequestLogger : IRequestLogger, IDisposable
+    {
+        public IDisposable TimeOperation(HttpRequestMessage httpRequestMessage)
+        {
+            return this;
+        }
+
+        public void Dispose()
+        {
+            // Do nothing
+        }
     }
 }

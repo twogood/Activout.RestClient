@@ -10,6 +10,7 @@ namespace Activout.RestClient
         IRestClientBuilder HttpClient(HttpClient httpClient);
         IRestClientBuilder Header(string name, object value);
         IRestClientBuilder Header(AuthenticationHeaderValue authenticationHeaderValue);
+        IRestClientBuilder With(IRequestLogger requestLogger);
         T Build<T>() where T : class;
     }
 }

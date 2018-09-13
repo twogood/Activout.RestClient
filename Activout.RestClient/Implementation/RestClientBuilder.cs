@@ -55,6 +55,12 @@ namespace Activout.RestClient.Implementation
             return this;
         }
 
+        public IRestClientBuilder With(IRequestLogger requestLogger)
+        {
+            _context.RequestLogger = requestLogger;
+            return this;
+        }
+
         public T Build<T>() where T : class
         {
             if (_context.HttpClient == null)
