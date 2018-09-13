@@ -37,7 +37,7 @@ namespace Activout.RestClient.Implementation
         public IRequestLogger RequestLogger { get; set; } = new DummyRequestLogger();
     }
 
-    internal class DummyRequestLogger : IRequestLogger, IDisposable
+    internal sealed class DummyRequestLogger : IRequestLogger, IDisposable
     {
         public IDisposable TimeOperation(HttpRequestMessage httpRequestMessage)
         {
