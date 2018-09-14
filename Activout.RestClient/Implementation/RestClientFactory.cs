@@ -1,7 +1,5 @@
-﻿using System.Net.Http;
-using Activout.RestClient.Helpers;
+﻿using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
-using Activout.RestClient.Serialization;
 
 namespace Activout.RestClient.Implementation
 {

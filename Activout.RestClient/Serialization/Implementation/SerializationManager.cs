@@ -3,19 +3,33 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Newtonsoft.Json;
 using static Activout.RestClient.Helpers.Preconditions;
 
 namespace Activout.RestClient.Serialization.Implementation
 {
     public class SerializationManager : ISerializationManager
     {
+        public static readonly IReadOnlyCollection<JsonConverter> DefaultJsonConverters = new List<JsonConverter>
+            {new SimpleValueObjectConverter()}.ToImmutableList();
+
+        private static readonly JsonSerializerSettings DefaultJsonSerializerSettings = new JsonSerializerSettings
+        {
+            Converters = DefaultJsonConverters.ToList()
+        };
+
         public static readonly IReadOnlyCollection<ISerializer> DefaultSerializers =
-            new List<ISerializer> {new JsonSerializer(null), new StringSerializer()}
+            new List<ISerializer> {new JsonSerializer(DefaultJsonSerializerSettings), new StringSerializer()}
                 .ToImmutableList();
 
         public static readonly IReadOnlyCollection<IDeserializer> DefaultDeserializers =
-            new List<IDeserializer> {new JsonDeserializer(null), new StringDeserializer(), new ByteArrayDeserializer()}
+            new List<IDeserializer>
+                {
+                    new JsonDeserializer(DefaultJsonSerializerSettings), new StringDeserializer(),
+                    new ByteArrayDeserializer()
+                }
                 .ToImmutableList();
+
 
         private IReadOnlyCollection<ISerializer> Serializers { get; }
         private IReadOnlyCollection<IDeserializer> Deserializers { get; }
