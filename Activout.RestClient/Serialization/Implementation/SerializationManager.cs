@@ -1,19 +1,30 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using static Activout.RestClient.Helpers.Preconditions;
 
 namespace Activout.RestClient.Serialization.Implementation
 {
-    internal class SerializationManager : ISerializationManager
+    public class SerializationManager : ISerializationManager
     {
-        public List<IDeserializer> Deserializers { get; }
-        public List<ISerializer> Serializers { get; }
+        public static readonly IReadOnlyCollection<ISerializer> DefaultSerializers =
+            new List<ISerializer> {new JsonSerializer(null), new StringSerializer()}
+                .ToImmutableList();
 
-        public SerializationManager()
+        public static readonly IReadOnlyCollection<IDeserializer> DefaultDeserializers =
+            new List<IDeserializer> {new JsonDeserializer(null), new StringDeserializer(), new ByteArrayDeserializer()}
+                .ToImmutableList();
+
+        private IReadOnlyCollection<ISerializer> Serializers { get; }
+        private IReadOnlyCollection<IDeserializer> Deserializers { get; }
+
+        public SerializationManager(IReadOnlyCollection<ISerializer> serializers = null,
+            IReadOnlyCollection<IDeserializer> deserializers = null)
         {
-            Serializers = new List<ISerializer> {new JsonSerializer(), new StringSerializer()};
-            Deserializers = new List<IDeserializer> {new JsonDeserializer(), new StringDeserializer(), new ByteArrayDeserializer()};
+            Serializers = serializers ?? DefaultSerializers;
+            Deserializers = deserializers ?? DefaultDeserializers;
         }
 
         public IDeserializer GetDeserializer(string mediaType)
@@ -39,14 +50,10 @@ namespace Activout.RestClient.Serialization.Implementation
 
         public ISerializer GetSerializer(MediaTypeCollection mediaTypeCollection)
         {
-            if (mediaTypeCollection == null) return null;
+            if (mediaTypeCollection == null) throw new ArgumentNullException(nameof(mediaTypeCollection));
 
-            foreach (var serializer in Serializers)
-            {
-                if (IsMediaTypeSupported(mediaTypeCollection, serializer.SupportedMediaTypes)) return serializer;
-            }
-
-            return null;
+            return Serializers.FirstOrDefault(serializer =>
+                IsMediaTypeSupported(mediaTypeCollection, serializer.SupportedMediaTypes));
         }
 
         private static bool IsMediaTypeSupported(MediaTypeCollection mediaTypeCollection,

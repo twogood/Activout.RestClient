@@ -7,9 +7,16 @@ using Newtonsoft.Json.Linq;
 
 namespace Activout.RestClient.Serialization.Implementation
 {
-    internal class JsonDeserializer : IDeserializer
+    public class JsonDeserializer : IDeserializer
     {
+        private readonly JsonSerializerSettings _jsonSerializerSettings;
+
         public MediaTypeCollection SupportedMediaTypes => JsonHelper.SupportedMediaTypes;
+
+        public JsonDeserializer(JsonSerializerSettings jsonSerializerSettings)
+        {
+            _jsonSerializerSettings = jsonSerializerSettings;
+        }
 
         public async Task<object> Deserialize(HttpContent content, Type type)
         {
@@ -23,7 +30,7 @@ namespace Activout.RestClient.Serialization.Implementation
                 return JArray.Parse(await content.ReadAsStringAsync());
             }
 
-            return JsonConvert.DeserializeObject(await content.ReadAsStringAsync(), type);
+            return JsonConvert.DeserializeObject(await content.ReadAsStringAsync(), type, _jsonSerializerSettings);
         }
     }
 }

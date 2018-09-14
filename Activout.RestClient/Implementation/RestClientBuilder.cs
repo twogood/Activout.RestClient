@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
+using Activout.RestClient.Serialization.Implementation;
 using static Activout.RestClient.Helpers.Preconditions;
 
 namespace Activout.RestClient.Implementation
@@ -13,10 +15,11 @@ namespace Activout.RestClient.Implementation
     {
         private readonly IDuckTyping _duckTyping;
         private readonly RestClientContext _context;
+        private readonly List<ISerializer> _serializers = SerializationManager.DefaultSerializers.ToList();
+        private readonly List<IDeserializer> _deserializers = SerializationManager.DefaultDeserializers.ToList();
 
         public RestClientBuilder(
             IDuckTyping duckTyping,
-            ISerializationManager serializationManager,
             IParamConverterManager paramConverterManager,
             ITaskConverterFactory taskConverterFactory)
         {
@@ -25,7 +28,6 @@ namespace Activout.RestClient.Implementation
             _context = new RestClientContext
             {
                 TaskConverterFactory = CheckNotNull(taskConverterFactory),
-                SerializationManager = CheckNotNull(serializationManager),
                 ParamConverterManager = CheckNotNull(paramConverterManager)
             };
         }
@@ -61,11 +63,36 @@ namespace Activout.RestClient.Implementation
             return this;
         }
 
+        public IRestClientBuilder With(IDeserializer deserializer)
+        {
+            _deserializers.RemoveAll(d => d.SupportedMediaTypes.Intersect(deserializer.SupportedMediaTypes).Any());
+            _deserializers.Add(deserializer);
+            return this;
+        }
+
+        public IRestClientBuilder With(ISerializer serializer)
+        {
+            _serializers.RemoveAll(s => s.SupportedMediaTypes.Intersect(serializer.SupportedMediaTypes).Any());
+            _serializers.Add(serializer);
+            return this;
+        }
+
+        public IRestClientBuilder With(ISerializationManager serializationManager)
+        {
+            _context.SerializationManager = serializationManager;
+            return this;
+        }
+
         public T Build<T>() where T : class
         {
             if (_context.HttpClient == null)
             {
                 _context.HttpClient = new HttpClient();
+            }
+
+            if (_context.SerializationManager == null)
+            {
+                _context.SerializationManager = new SerializationManager(_serializers, _deserializers);
             }
 
             var client = new RestClient<T>(_context);

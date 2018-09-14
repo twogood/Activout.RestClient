@@ -3,14 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
-using System.Net.Http;
 using System.Reflection;
-using Activout.RestClient.Helpers;
-using Activout.RestClient.Serialization;
-using Dynamitey.DynamicObjects;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Net.Http.Headers;
 
 namespace Activout.RestClient.Implementation
 {

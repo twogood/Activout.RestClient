@@ -3,7 +3,7 @@ using Microsoft.Net.Http.Headers;
 
 namespace Activout.RestClient.Serialization.Implementation
 {
-    internal static class JsonHelper
+    public static class JsonHelper
     {
         static JsonHelper()
         {

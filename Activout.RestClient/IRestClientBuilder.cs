@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Activout.RestClient.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Activout.RestClient
 {
@@ -11,6 +15,9 @@ namespace Activout.RestClient
         IRestClientBuilder Header(string name, object value);
         IRestClientBuilder Header(AuthenticationHeaderValue authenticationHeaderValue);
         IRestClientBuilder With(IRequestLogger requestLogger);
+        IRestClientBuilder With(IDeserializer deserializer);
+        IRestClientBuilder With(ISerializer serializer);
+        IRestClientBuilder With(ISerializationManager serializationManager);
         T Build<T>() where T : class;
     }
 }
