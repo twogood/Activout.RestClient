@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
@@ -164,7 +165,7 @@ namespace Activout.RestClient.Implementation
             if (_parameters.Length != args.Length)
                 throw new InvalidOperationException($"Expected {_parameters.Length} parameters but got {args.Length}");
 
-            var (routeParams, queryParams, formParams, headerParams) = GetParams(args);
+            var (routeParams, queryParams, formParams, headerParams, cancellationToken) = GetParams(args);
             var requestUriString = ExpandTemplate(routeParams);
             if (queryParams.Any())
             {
@@ -190,7 +191,7 @@ namespace Activout.RestClient.Implementation
                 }
             }
 
-            var task = SendAsync(request);
+            var task = SendAsync(request, cancellationToken);
 
             if (IsVoidTask())
                 return task;
@@ -206,16 +207,23 @@ namespace Activout.RestClient.Implementation
         }
 
         private (Dictionary<string, object>, List<string>, List<KeyValuePair<string, string>>,
-            List<KeyValuePair<string, string>>) GetParams(
+            List<KeyValuePair<string, string>>, CancellationToken) GetParams(
                 IReadOnlyList<object> args)
         {
             var routeParams = new Dictionary<string, object>();
             var queryParams = new List<string>();
             var formParams = new List<KeyValuePair<string, string>>();
             var headerParams = new List<KeyValuePair<string, string>>();
+            var cancellationToken = CancellationToken.None;
 
             for (var i = 0; i < _parameters.Length; i++)
             {
+                if (args[i] is CancellationToken ct)
+                {
+                    cancellationToken = ct;
+                    continue;
+                }
+
                 var parameterAttributes = _parameters[i].GetCustomAttributes(false);
                 var name = _parameters[i].Name;
                 var value = _paramConverters[i].ToString(args[i]);
@@ -255,17 +263,17 @@ namespace Activout.RestClient.Implementation
                 }
             }
 
-            return (routeParams, queryParams, formParams, headerParams);
+            return (routeParams, queryParams, formParams, headerParams, cancellationToken);
         }
 
-        private async Task<object> SendAsync(HttpRequestMessage request)
+        private async Task<object> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             PrepareRequestMessage(request);
 
             HttpResponseMessage response;
             using (_context.RequestLogger.TimeOperation(request))
             {
-                response = await _context.HttpClient.SendAsync(request);
+                response = await _context.HttpClient.SendAsync(request, cancellationToken);
             }
 
             var type = response.IsSuccessStatusCode ? _actualReturnType : _errorResponseType;

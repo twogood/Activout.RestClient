@@ -111,6 +111,68 @@ namespace Activout.RestClient.Test
             Assert.Equal("Sorry, that page does not exist", error.Errors[0].Message);
         }
 
+
+        [Fact]
+        public async Task TestTimeoutAsync()
+        {
+            // arrange
+            _mockHttp
+                .When($"{BaseUri}/movies")
+                .Respond(async () =>
+                {
+                    await Task.Delay(1000);
+                    return null;
+                });
+
+            var httpClient = _mockHttp.ToHttpClient();
+            httpClient.Timeout = TimeSpan.FromMilliseconds(1);
+            var reviewSvc = _restClientFactory.CreateBuilder()
+                .HttpClient(httpClient)
+                .BaseUri(new Uri(BaseUri))
+                .Build<IMovieReviewService>();
+
+            // act
+            var aggregateException = await Assert.ThrowsAsync<AggregateException>(() => reviewSvc.GetAllMovies());
+
+            // assert
+            Assert.IsType<TaskCanceledException>(aggregateException.InnerException);
+        }
+
+        [Fact]
+        public async Task TestCancellationAsync()
+        {
+            // arrange
+            _mockHttp.When($"{BaseUri}/movies")
+                .Respond(_ => null);
+
+            var reviewSvc = CreateMovieReviewService();
+            var cancellationTokenSource = new CancellationTokenSource();
+
+            // act
+            cancellationTokenSource.Cancel();
+            var aggregateException = await Assert.ThrowsAsync<AggregateException>(() =>
+                reviewSvc.GetAllMoviesCancellable(cancellationTokenSource.Token));
+
+            // assert
+            Assert.IsType<TaskCanceledException>(aggregateException.InnerException);
+        }
+
+        [Fact]
+        public async Task TestNoCancellationAsync()
+        {
+            // arrange
+            _mockHttp.When($"{BaseUri}/movies")
+                .Respond("application/json", "[]");
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            var movies = await reviewSvc.GetAllMoviesCancellable(default(CancellationToken));
+
+            // assert
+            Assert.Empty(movies);
+        }
+
         [Fact]
         public void TestErrorEmptyNoContentType()
         {
