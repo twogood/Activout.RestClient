@@ -2,7 +2,7 @@ language: csharp
 solution: ActivoutRestClient.sln
 mono: none
 dotnet: 2.2.203
-dist: xenial
+dist: bionic
 install:
   - dotnet tool install --global dotnet-sonarscanner
 script:
