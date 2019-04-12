@@ -15,7 +15,7 @@ namespace Activout.RestClient
             self.TryAddTransient<IDuckTyping, DuckTyping>();
             self.TryAddTransient<IParamConverterManager, ParamConverterManager>();
             self.TryAddTransient<IRestClientFactory, RestClientFactory>();
-            self.TryAddTransient<ITaskConverterFactory, TaskConverterFactory>();
+            self.TryAddTransient<ITaskConverterFactory, TaskConverter2Factory>();
             return self;
         }
 
@@ -26,7 +26,7 @@ namespace Activout.RestClient
 
         public static ITaskConverterFactory CreateTaskConverterFactory()
         {
-            return new TaskConverterFactory();
+            return new TaskConverter2Factory();
         }
 
         public static IRestClientFactory CreateRestClientFactory(

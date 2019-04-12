@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Activout.MovieReviews;
+using Activout.RestClient.Helpers;
+using Activout.RestClient.Helpers.Implementation;
 using Moq;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
@@ -23,6 +25,8 @@ namespace Activout.RestClient.Test
         }
 
         private const string BaseUri = "http://localhost:9080/movieReviewService";
+        private const string MovieId = "*MOVIE_ID*";
+        private const string ReviewId = "*REVIEW_ID*";
 
         private readonly IRestClientFactory _restClientFactory;
         private readonly MockHttpMessageHandler _mockHttp;
@@ -41,29 +45,22 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public async Task TestErrorAsync()
+        public async Task TestErrorAsyncWithOldTaskConverter()
         {
             // arrange
-            var movieId = "*MOVIE_ID*";
-            _mockHttp
-                .When(HttpMethod.Get, $"{BaseUri}/movies/{movieId}/reviews")
-                .Respond(HttpStatusCode.NotFound, request => new StringContent(JsonConvert.SerializeObject(new
-                    {
-                        Errors = new object[]
-                        {
-                            new {Message = "Sorry, that page does not exist", Code = 34}
-                        }
-                    }),
-                    Encoding.UTF8,
-                    "application/json"));
+            ExpectGetAllReviewsAndReturnError();
 
-            var reviewSvc = CreateMovieReviewService();
+            var reviewSvc = CreateRestClientBuilder()
+                .With(new TaskConverterFactory())
+                .Build<IMovieReviewService>();
 
             // act
             var aggregateException =
-                await Assert.ThrowsAsync<AggregateException>(() => reviewSvc.GetAllReviews(movieId));
+                await Assert.ThrowsAsync<AggregateException>(() => reviewSvc.GetAllReviews(MovieId));
 
             // assert
+            _mockHttp.VerifyNoOutstandingExpectation();
+
             Assert.IsType<RestClientException>(aggregateException.InnerException);
             var exception = (RestClientException) aggregateException.InnerException;
 
@@ -74,13 +71,47 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
+        public async Task TestErrorAsync()
+        {
+            // arrange
+            ExpectGetAllReviewsAndReturnError();
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            var exception =
+                await Assert.ThrowsAsync<RestClientException>(() => reviewSvc.GetAllReviews(MovieId));
+
+            // assert
+            _mockHttp.VerifyNoOutstandingExpectation();
+
+            Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
+            var error = exception.GetErrorResponse<ErrorResponse>();
+            Assert.Equal(34, error.Errors[0].Code);
+            Assert.Equal("Sorry, that page does not exist", error.Errors[0].Message);
+        }
+
+        private void ExpectGetAllReviewsAndReturnError(string movieId = MovieId)
+        {
+            _mockHttp
+                .Expect(HttpMethod.Get, $"{BaseUri}/movies/{movieId}/reviews")
+                .Respond(HttpStatusCode.NotFound, request => new StringContent(JsonConvert.SerializeObject(new
+                    {
+                        Errors = new object[]
+                        {
+                            new {Message = "Sorry, that page does not exist", Code = 34}
+                        }
+                    }),
+                    Encoding.UTF8,
+                    "application/json"));
+        }
+
+        [Fact]
         public void TestErrorSync()
         {
             // arrange
-            var movieId = "*MOVIE_ID*";
-            var reviewId = "*REVIEW_ID*";
             _mockHttp
-                .When(HttpMethod.Get, $"{BaseUri}/movies/{movieId}/reviews/{reviewId}")
+                .When(HttpMethod.Get, $"{BaseUri}/movies/{MovieId}/reviews/{ReviewId}")
                 .Respond(HttpStatusCode.NotFound, request => new StringContent(JsonConvert.SerializeObject(new
                     {
                         Errors = new object[]
@@ -94,7 +125,7 @@ namespace Activout.RestClient.Test
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            var aggregateException = Assert.Throws<AggregateException>(() => reviewSvc.GetReview(movieId, reviewId));
+            var aggregateException = Assert.Throws<AggregateException>(() => reviewSvc.GetReview(MovieId, ReviewId));
 
             // assert
             var exception = (RestClientException) aggregateException.GetBaseException();
@@ -132,10 +163,9 @@ namespace Activout.RestClient.Test
                 .Build<IMovieReviewService>();
 
             // act
-            var aggregateException = await Assert.ThrowsAsync<AggregateException>(() => reviewSvc.GetAllMovies());
+            await Assert.ThrowsAsync<TaskCanceledException>(() => reviewSvc.GetAllMovies());
 
             // assert
-            Assert.IsType<TaskCanceledException>(aggregateException.InnerException);
         }
 
         [Fact]
@@ -150,11 +180,10 @@ namespace Activout.RestClient.Test
 
             // act
             cancellationTokenSource.Cancel();
-            var aggregateException = await Assert.ThrowsAsync<AggregateException>(() =>
+            await Assert.ThrowsAsync<OperationCanceledException>(() =>
                 reviewSvc.GetAllMoviesCancellable(cancellationTokenSource.Token));
 
             // assert
-            Assert.IsType<TaskCanceledException>(aggregateException.InnerException);
         }
 
         [Fact]
@@ -199,16 +228,14 @@ namespace Activout.RestClient.Test
         public void TestDelete()
         {
             // arrange
-            const string movieId = "*MOVIE_ID*";
-            const string reviewId = "*REVIEW_ID*";
             _mockHttp
-                .Expect(HttpMethod.Delete, $"{BaseUri}/movies/{movieId}/reviews/{reviewId}")
+                .Expect(HttpMethod.Delete, $"{BaseUri}/movies/{MovieId}/reviews/{ReviewId}")
                 .Respond(HttpStatusCode.OK);
 
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            reviewSvc.DeleteReview(movieId, reviewId);
+            reviewSvc.DeleteReview(MovieId, ReviewId);
 
             // assert
             _mockHttp.VerifyNoOutstandingExpectation();

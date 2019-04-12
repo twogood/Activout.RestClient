@@ -23,12 +23,14 @@ namespace Activout.RestClient.Implementation
             IParamConverterManager paramConverterManager,
             ITaskConverterFactory taskConverterFactory)
         {
-            _duckTyping = CheckNotNull(duckTyping);
+            _duckTyping = duckTyping ?? throw new ArgumentNullException(nameof(duckTyping));
 
             _context = new RestClientContext
             {
-                TaskConverterFactory = CheckNotNull(taskConverterFactory),
-                ParamConverterManager = CheckNotNull(paramConverterManager)
+                TaskConverterFactory = taskConverterFactory ??
+                                       throw new ArgumentNullException(nameof(taskConverterFactory)),
+                ParamConverterManager = paramConverterManager ??
+                                        throw new ArgumentNullException(nameof(paramConverterManager))
             };
         }
 
@@ -80,6 +82,12 @@ namespace Activout.RestClient.Implementation
         public IRestClientBuilder With(ISerializationManager serializationManager)
         {
             _context.SerializationManager = serializationManager;
+            return this;
+        }
+
+        public IRestClientBuilder With(ITaskConverterFactory taskConverterFactory)
+        {
+            _context.TaskConverterFactory = taskConverterFactory;
             return this;
         }
 

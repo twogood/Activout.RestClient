@@ -5,6 +5,7 @@ namespace Activout.RestClient.Helpers
     // Based on https://gist.github.com/johnlcox/5032524
     public static class Preconditions
     {
+        [Obsolete("Use ?? throw new ArgumentNullException(nameof(x))")]
         /// <summary>
         ///     Ensures that an object reference passed as a parameter to the calling method is not null.
         /// </summary>
