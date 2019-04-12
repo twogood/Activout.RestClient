@@ -76,5 +76,16 @@ This allows for a much more natural coding style, and the underlying implementat
 - Support for cookie parameters
 - More real-life testing :)
 
+## Similar projects
+
+I deliberately implemented my project without even searching for C# projects using the same concept, but afterwards I have found these:
+
+- [Nancy.Rest.Client](https://github.com/maxpiva/Nancy.Rest.Client)
+- [Rest.ServiceProxy](https://github.com/sirnewton01/Rest.ServiceProxy)
+
+
 ## Collaborate
 This project is still under development - participation welcome!
+
+## About Activout
+[Activout AB](http://activout.se) is a software company in Ronneby, Sweden.
