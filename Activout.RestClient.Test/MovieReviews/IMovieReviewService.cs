@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Activout.RestClient;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,9 @@ namespace Activout.MovieReviews
     {
         [HttpGet]
         Task<IEnumerable<Movie>> GetAllMovies();
+
+        [HttpGet]
+        Task<IEnumerable<Movie>> GetAllMoviesCancellable(CancellationToken cancellationToken);
 
         [HttpGet]
         [Route("/{movieId}/reviews")]
