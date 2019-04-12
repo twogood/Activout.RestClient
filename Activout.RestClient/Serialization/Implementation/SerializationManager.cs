@@ -18,9 +18,13 @@ namespace Activout.RestClient.Serialization.Implementation
             Converters = DefaultJsonConverters.ToList()
         };
 
-        public static readonly IReadOnlyCollection<ISerializer> DefaultSerializers =
-            new List<ISerializer> {new JsonSerializer(DefaultJsonSerializerSettings), new StringSerializer()}
-                .ToImmutableList();
+        public static readonly IReadOnlyCollection<ISerializer> DefaultSerializers = new List<ISerializer>
+            {
+                new FormUrlEncodedSerializer(),
+                new JsonSerializer(DefaultJsonSerializerSettings),
+                new StringSerializer()
+            }
+            .ToImmutableList();
 
         public static readonly IReadOnlyCollection<IDeserializer> DefaultDeserializers =
             new List<IDeserializer>

@@ -62,7 +62,9 @@ namespace Activout.RestClient.Implementation
 
                     case ConsumesAttribute consumesAttribute:
                         _contentTypes = consumesAttribute.ContentTypes;
-                        _serializer = context.SerializationManager.GetSerializer(_contentTypes);
+                        _serializer = context.SerializationManager.GetSerializer(_contentTypes) ??
+                                      throw new RestClientException(null, 0,
+                                          "No serializer for: " + string.Join(",", _contentTypes));
                         break;
 
                     case RouteAttribute routeAttribute:
