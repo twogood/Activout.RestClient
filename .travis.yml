@@ -5,6 +5,9 @@ dotnet: 2.2.203
 install:
   - dotnet tool install --global dotnet-sonarscanner
 script:
+  - apt-get clean
+  - apt-get update
+  - apt-get install dpkg
   - dotnet build ./Activout.RestClient/
   - dotnet test ./Activout.RestClient.Test/
   - $HOME/.dotnet/tools/dotnet-sonarscanner begin /k:"Activout.RestClient" /d:sonar.organization="activout" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$SONAR_TOKEN" /version:"$TRAVIS_BUILD_NUMBER-$TRAVIS_COMMIT"
