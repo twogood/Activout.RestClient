@@ -82,9 +82,12 @@ I deliberately implemented my project without even searching for C# projects usi
 - [Nancy.Rest.Client](https://github.com/maxpiva/Nancy.Rest.Client)
 - [Rest.ServiceProxy](https://github.com/sirnewton01/Rest.ServiceProxy)
 
-
 ## Collaborate
 This project is still under development - participation welcome!
+
+## Related projects
+
+- [Activout.DatabaseClient](https://github.com/twogood/Activout.DatabaseClient/) - Create a database client only by defining methods on an interface and annotate them with SQL statements. Uses Dapper for object mapping.
 
 ## About Activout
 [Activout AB](http://activout.se) is a software company in Ronneby, Sweden.
