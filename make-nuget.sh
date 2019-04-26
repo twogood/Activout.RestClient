@@ -9,7 +9,7 @@ dotnet pack \
 	-p:Title="Activout Rest Client" \
 	-p:Description="Create a REST(ish) API client only by defining the C# interface you want." \
 	-p:PackageVersion="$VERSION" \
-	-p:PackageLicenseUrl="https://raw.githubusercontent.com/twogood/Activout.RestClient/master/LICENSE" \
+	-p:PackageLicenseExpression="MIT" \
 	-p:PackageProjectUrl="https://github.com/twogood/Activout.RestClient" \
 	-p:RepositoryType="git" \
 	-p:RepositoryUrl="https://github.com/twogood/Activout.RestClient.git" \
