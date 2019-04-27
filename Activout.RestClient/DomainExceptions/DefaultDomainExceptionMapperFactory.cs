@@ -55,7 +55,7 @@ namespace Activout.RestClient.DomainExceptions
         }
 
 
-        private static IEnumerable<DomainErrorAttribute> CheckDomainErrorAttributes(Type errorResponseType,
+        private static void CheckDomainErrorAttributes(Type errorResponseType,
             Type domainErrorType)
         {
             var attributes = errorResponseType
@@ -72,8 +72,6 @@ namespace Activout.RestClient.DomainExceptions
                         $"Cannot assign domain value {a.DomainValue} to type {domainErrorType} for API value {a.ApiValue}");
                 }
             }
-
-            return attributes;
         }
     }
 }
