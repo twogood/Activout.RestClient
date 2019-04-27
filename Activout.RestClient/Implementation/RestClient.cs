@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
-using Activout.RestClient.DomainErrors;
+using Activout.RestClient.DomainExceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Activout.RestClient.Implementation
@@ -32,11 +32,7 @@ namespace Activout.RestClient.Implementation
                 switch (attribute)
                 {
                     case DomainExceptionAttribute domainExceptionAttribute:
-                        _context.DomainErrorType = domainExceptionAttribute.ErrorType;
                         _context.DomainExceptionType = domainExceptionAttribute.ExceptionType;
-                        break;
-                    case DomainHttpErrorAttribute domainHttpErrorAttribute:
-                        _context.DomainHttpErrorAttributes.Add(domainHttpErrorAttribute);
                         break;
                     case ConsumesAttribute consumesAttribute:
                         _context.DefaultContentTypes = consumesAttribute.ContentTypes;
@@ -48,11 +44,6 @@ namespace Activout.RestClient.Implementation
                         _context.ErrorResponseType = errorResponseAttribute.Type;
                         break;
                 }
-
-            if (!_context.UseDomainException && _context.DomainHttpErrorAttributes.Any())
-            {
-                throw new InvalidOperationException("[DomainHttpError] requires [DomainException] on interface");
-            }
         }
 
         public override IEnumerable<string> GetDynamicMemberNames()

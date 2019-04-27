@@ -1,12 +1,11 @@
 using System;
 
-namespace Activout.RestClient.DomainErrors
+namespace Activout.RestClient.DomainExceptions
 {
     [AttributeUsage(AttributeTargets.Interface)]
     public class DomainExceptionAttribute : Attribute
     {
         public Type ExceptionType { get; }
-        public Type ErrorType { get; }
 
         public DomainExceptionAttribute(Type exceptionType)
         {
@@ -15,12 +14,7 @@ namespace Activout.RestClient.DomainErrors
                 throw new ArgumentException("Type must be an exception", nameof(exceptionType));
             }
 
-            var errorProperty = exceptionType.GetProperty("Error") ??
-                                throw new ArgumentException("Exception must have a property called Error",
-                                    nameof(exceptionType));
-
             ExceptionType = exceptionType;
-            ErrorType = errorProperty.PropertyType;
         }
     }
 }

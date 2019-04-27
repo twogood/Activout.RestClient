@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace Activout.RestClient.DomainErrors
+namespace Activout.RestClient.DomainExceptions
 {
     [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Method, AllowMultiple = true)]
     public class DomainHttpErrorAttribute : Attribute

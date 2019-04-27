@@ -1,4 +1,4 @@
-using Activout.RestClient.DomainErrors;
+using Activout.RestClient.DomainExceptions;
 
 namespace Activout.RestClient.Test.DomainExceptionTests
 {

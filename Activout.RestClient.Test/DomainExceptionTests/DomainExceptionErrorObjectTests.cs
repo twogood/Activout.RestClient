@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Activout.RestClient.DomainErrors;
+using Activout.RestClient.DomainExceptions;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
 
 namespace Activout.RestClient.Test.DomainExceptionTests
 {
-
     internal class MyDomainErrorObject
     {
         public MyDomainErrorEnum ErrorEnum { get; }
@@ -39,26 +39,30 @@ namespace Activout.RestClient.Test.DomainExceptionTests
         Task Api();
     }
 
-    internal class MyDomainErrorObjectMapper : AbstractDomainErrorMapper
+    internal class MyDomainExceptionObjectMapper : AbstractDomainExceptionMapper
     {
-        protected override object Map(HttpResponseMessage httpResponseMessage, object data)
+        protected override Exception CreateException(HttpResponseMessage httpResponseMessage, object data)
         {
             if (!(data is MyApiErrorResponse errorResponse)) return null;
 
-            return errorResponse.Code == MyApiError.Bar
+            var domainError = errorResponse.Code == MyApiError.Bar
                 ? new MyDomainErrorObject(MyDomainErrorEnum.DomainBar)
                 : new MyDomainErrorObject(MyDomainErrorEnum.Unknown);
+
+            return new MyDomainErrorObjectException(domainError);
         }
     }
 
-    internal class MyDomainErrorMapperFactory : DefaultDomainErrorMapperFactory
+    internal class MyDomainExceptionMapperFactory : DefaultDomainExceptionMapperFactory
     {
-        public override IDomainErrorMapper CreateDomainErrorMapper(Type errorResponseType, Type domainErrorType,
-            IEnumerable<DomainHttpErrorAttribute> httpErrorAttributes)
+        public override IDomainExceptionMapper CreateDomainExceptionMapper(
+            MethodInfo method,
+            Type errorResponseType,
+            Type exceptionType)
         {
-            return domainErrorType == typeof(MyDomainErrorObject)
-                ? new MyDomainErrorObjectMapper()
-                : base.CreateDomainErrorMapper(errorResponseType, domainErrorType, httpErrorAttributes);
+            return exceptionType == typeof(MyDomainErrorObjectException)
+                ? new MyDomainExceptionObjectMapper()
+                : base.CreateDomainExceptionMapper(method, errorResponseType, exceptionType);
         }
     }
 
@@ -77,7 +81,7 @@ namespace Activout.RestClient.Test.DomainExceptionTests
                 .CreateBuilder()
                 .HttpClient(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri))
-                .With(new MyDomainErrorMapperFactory())
+                .With(new MyDomainExceptionMapperFactory())
                 .Build<IMyApiErrorObjectClient>();
         }
 

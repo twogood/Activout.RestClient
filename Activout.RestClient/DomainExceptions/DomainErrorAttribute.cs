@@ -1,6 +1,6 @@
 using System;
 
-namespace Activout.RestClient.DomainErrors
+namespace Activout.RestClient.DomainExceptions
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public class DomainErrorAttribute : Attribute

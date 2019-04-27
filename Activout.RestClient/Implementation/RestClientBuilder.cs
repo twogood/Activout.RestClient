@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Activout.RestClient.DomainErrors;
+using Activout.RestClient.DomainExceptions;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
@@ -92,9 +92,9 @@ namespace Activout.RestClient.Implementation
             return this;
         }
 
-        public IRestClientBuilder With(IDomainErrorMapperFactory domainErrorMapperFactory)
+        public IRestClientBuilder With(IDomainExceptionMapperFactory domainExceptionMapperFactory)
         {
-            _context.DomainErrorMapperFactory = domainErrorMapperFactory;
+            _context.DomainExceptionMapperFactory = domainExceptionMapperFactory;
             return this;
         }
 
@@ -110,9 +110,9 @@ namespace Activout.RestClient.Implementation
                 _context.SerializationManager = new SerializationManager(_serializers, _deserializers);
             }
 
-            if (_context.DomainErrorMapperFactory == null)
+            if (_context.DomainExceptionMapperFactory == null)
             {
-                _context.DomainErrorMapperFactory = new DefaultDomainErrorMapperFactory();
+                _context.DomainExceptionMapperFactory = new DefaultDomainExceptionMapperFactory();
             }
 
             var client = new RestClient<T>(_context);

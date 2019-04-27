@@ -4,26 +4,32 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 
-namespace Activout.RestClient.DomainErrors
+namespace Activout.RestClient.DomainExceptions
 {
-    public class DefaultDomainErrorMapper : AbstractDomainErrorMapper
+    public class DefaultDomainExceptionMapper : AbstractDomainExceptionMapper
     {
+        private readonly Type _domainExceptionType;
         private readonly Type _domainErrorType;
-        private readonly IList<DomainHttpErrorAttribute> _attributes;
+        private readonly IList<DomainHttpErrorAttribute> _httpErrorAttributes;
 
-        public DefaultDomainErrorMapper(Type domainErrorType,
-            IEnumerable<DomainHttpErrorAttribute> attributes)
+        public DefaultDomainExceptionMapper(
+            Type domainExceptionType,
+            Type domainErrorType,
+            IEnumerable<DomainHttpErrorAttribute> httpErrorAttributes)
         {
+            _domainExceptionType = domainExceptionType;
             _domainErrorType = domainErrorType;
-            _attributes = attributes.ToList();
+            _httpErrorAttributes = httpErrorAttributes.ToList();
         }
 
-        protected override object Map(HttpResponseMessage httpResponseMessage, object data)
+        protected override Exception CreateException(HttpResponseMessage httpResponseMessage, object data)
         {
-            return MapByDomainErrorAttribute(data)
-                   ?? MapHttpStatusCodeByAttribute(httpResponseMessage)
-                   ?? MapHttpStatusCodeByEnumName(httpResponseMessage)
-                   ?? MapGenericClientOrServerError(httpResponseMessage);
+            var domainError = MapByDomainErrorAttribute(data)
+                              ?? MapHttpStatusCodeByAttribute(httpResponseMessage)
+                              ?? MapHttpStatusCodeByEnumName(httpResponseMessage)
+                              ?? MapGenericClientOrServerError(httpResponseMessage);
+
+            return (Exception) Activator.CreateInstance(_domainExceptionType, domainError);
         }
 
         private static object MapByDomainErrorAttribute(object data)
@@ -34,8 +40,7 @@ namespace Activout.RestClient.DomainErrors
             }
 
             return (from property in data.GetType().GetProperties()
-                let attributes = property.GetCustomAttributes(true)
-                    .Where(a => a.GetType() == typeof(DomainErrorAttribute))
+                let attributes = property.GetCustomAttributes(typeof(DomainErrorAttribute), true)
                     .Cast<DomainErrorAttribute>()
                     .ToList()
                 where attributes.Any()
@@ -66,7 +71,7 @@ namespace Activout.RestClient.DomainErrors
 
         private object GetDomainErrorValue(HttpStatusCode httpStatusCode)
         {
-            return _attributes
+            return _httpErrorAttributes
                 .FirstOrDefault(x => x.HttpStatusCode == httpStatusCode)
                 ?.DomainErrorValue;
         }
