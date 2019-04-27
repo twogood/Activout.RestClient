@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Newtonsoft.Json;
-using static Activout.RestClient.Helpers.Preconditions;
 
 namespace Activout.RestClient.Serialization.Implementation
 {
@@ -47,7 +46,7 @@ namespace Activout.RestClient.Serialization.Implementation
 
         public IDeserializer GetDeserializer(string mediaType)
         {
-            CheckNotNull(mediaType);
+            if (mediaType == null) throw new ArgumentNullException(nameof(mediaType));
 
             var inputMediaType = new MediaType(mediaType);
 

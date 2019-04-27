@@ -2,7 +2,6 @@
 using System.Net;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-using Activout.RestClient.Helpers;
 
 namespace Activout.RestClient
 {
@@ -65,7 +64,7 @@ namespace Activout.RestClient
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            Preconditions.CheckNotNull(info);
+            if (info == null) throw new ArgumentNullException(nameof(info));
 
             info.AddValue(nameof(StatusCode), StatusCode);
             if (ErrorResponse.IsSerializable())

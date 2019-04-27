@@ -8,7 +8,6 @@ using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
 using Activout.RestClient.Serialization.Implementation;
-using static Activout.RestClient.Helpers.Preconditions;
 
 namespace Activout.RestClient.Implementation
 {
@@ -121,7 +120,7 @@ namespace Activout.RestClient.Implementation
 
         private static Uri AddTrailingSlash(Uri apiUri)
         {
-            var uriBuilder = new UriBuilder(CheckNotNull(apiUri));
+            var uriBuilder = new UriBuilder(apiUri ?? throw new ArgumentNullException(nameof(apiUri)));
             if (uriBuilder.Path.EndsWith("/"))
             {
                 return apiUri;
