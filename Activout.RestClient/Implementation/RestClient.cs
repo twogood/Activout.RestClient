@@ -32,7 +32,7 @@ namespace Activout.RestClient.Implementation
                 switch (attribute)
                 {
                     case DomainExceptionAttribute domainExceptionAttribute:
-                        _context.DomainExceptionType = domainExceptionAttribute.ExceptionType;
+                        _context.DomainExceptionType = domainExceptionAttribute.Type;
                         break;
                     case ConsumesAttribute consumesAttribute:
                         _context.DefaultContentTypes = consumesAttribute.ContentTypes;

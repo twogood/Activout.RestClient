@@ -5,16 +5,16 @@ namespace Activout.RestClient.DomainExceptions
     [AttributeUsage(AttributeTargets.Interface)]
     public class DomainExceptionAttribute : Attribute
     {
-        public Type ExceptionType { get; }
+        public Type Type { get; }
 
-        public DomainExceptionAttribute(Type exceptionType)
+        public DomainExceptionAttribute(Type type)
         {
-            if (!typeof(Exception).IsAssignableFrom(exceptionType))
+            if (!typeof(Exception).IsAssignableFrom(type))
             {
-                throw new ArgumentException("Type must be an exception", nameof(exceptionType));
+                throw new ArgumentException("Type must be an exception: " + type, nameof(type));
             }
 
-            ExceptionType = exceptionType;
+            Type = type;
         }
     }
 }

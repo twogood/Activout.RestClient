@@ -22,13 +22,13 @@ namespace Activout.RestClient.Test.DomainExceptionTests
 
     [ErrorResponse(typeof(MyApiErrorResponse))]
     [DomainException(typeof(MyDomainErrorEnumException))]
-    [DomainHttpError(HttpStatusCode.InternalServerError, MyDomainErrorEnum.ServerError)]
+    [MyDomainHttpError(HttpStatusCode.InternalServerError, MyDomainErrorEnum.ServerError)]
     public interface IMyApiClient
     {
-        [DomainHttpError(HttpStatusCode.Forbidden, MyDomainErrorEnum.AccessDenied)]
+        [MyDomainHttpError(HttpStatusCode.Forbidden, MyDomainErrorEnum.AccessDenied)]
         Task ForbiddenToAccessDenied();
 
-        [DomainHttpError(HttpStatusCode.BadRequest, MyDomainErrorEnum.ClientError)]
+        [MyDomainHttpError(HttpStatusCode.BadRequest, MyDomainErrorEnum.ClientError)]
         Task Api();
     }
 
