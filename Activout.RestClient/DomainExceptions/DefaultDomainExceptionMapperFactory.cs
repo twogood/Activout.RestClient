@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -58,8 +59,7 @@ namespace Activout.RestClient.DomainExceptions
         private static void CheckDomainErrorAttributes(Type errorResponseType,
             Type domainErrorType)
         {
-            var attributes = errorResponseType
-                .GetProperties()
+            var attributes = GetProperties(errorResponseType)
                 .SelectMany(p => p.GetCustomAttributes(typeof(DomainErrorAttribute), true))
                 .Cast<DomainErrorAttribute>()
                 .ToList();
@@ -72,6 +72,12 @@ namespace Activout.RestClient.DomainExceptions
                         $"Cannot assign domain value {a.DomainValue} to type {domainErrorType} for API value {a.ApiValue}");
                 }
             }
+        }
+
+        [SuppressMessage("SonarCloud", "S1523")]
+        private static IEnumerable<PropertyInfo> GetProperties(Type type)
+        {
+            return type.GetProperties();
         }
     }
 }

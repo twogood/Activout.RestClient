@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 
 namespace Activout.RestClient.DomainExceptions
 {
@@ -39,7 +41,7 @@ namespace Activout.RestClient.DomainExceptions
                 return null;
             }
 
-            return (from property in data.GetType().GetProperties()
+            return (from property in GetProperties(data.GetType())
                 let attributes = property.GetCustomAttributes(typeof(DomainErrorAttribute), true)
                     .Cast<DomainErrorAttribute>()
                     .ToList()
@@ -81,6 +83,12 @@ namespace Activout.RestClient.DomainExceptions
             var httpStatusCode = httpResponseMessage.StatusCode;
             return ((int) httpStatusCode > 500 ? GetDomainErrorValue((HttpStatusCode) 500) : null)
                    ?? ((int) httpStatusCode > 400 ? GetDomainErrorValue((HttpStatusCode) 400) : null);
+        }
+
+        [SuppressMessage("SonarCloud", "S1523")]
+        private static IEnumerable<PropertyInfo> GetProperties(Type type)
+        {
+            return type.GetProperties();
         }
     }
 }
