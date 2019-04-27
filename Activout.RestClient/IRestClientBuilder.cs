@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Activout.RestClient.DomainErrors;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.Serialization;
 
@@ -17,6 +18,7 @@ namespace Activout.RestClient
         IRestClientBuilder With(ISerializer serializer);
         IRestClientBuilder With(ISerializationManager serializationManager);
         IRestClientBuilder With(ITaskConverterFactory taskConverterFactory);
+        IRestClientBuilder With(IDomainErrorMapperFactory domainErrorMapperFactory);
         T Build<T>() where T : class;
     }
 }

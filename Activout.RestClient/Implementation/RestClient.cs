@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
+using Activout.RestClient.DomainErrors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Activout.RestClient.Implementation
@@ -28,12 +29,30 @@ namespace Activout.RestClient.Implementation
         {
             var attributes = _type.GetCustomAttributes();
             foreach (var attribute in attributes)
-                if (attribute is ConsumesAttribute consumesAttribute)
-                    _context.DefaultContentTypes = consumesAttribute.ContentTypes;
-                else if (attribute is RouteAttribute routeAttribute)
-                    _context.BaseTemplate = routeAttribute.Template;
-                else if (attribute is ErrorResponseAttribute errorResponseAttribute)
-                    _context.ErrorResponseType = errorResponseAttribute.Type;
+                switch (attribute)
+                {
+                    case DomainExceptionAttribute domainExceptionAttribute:
+                        _context.DomainErrorType = domainExceptionAttribute.ErrorType;
+                        _context.DomainExceptionType = domainExceptionAttribute.ExceptionType;
+                        break;
+                    case DomainHttpErrorAttribute domainHttpErrorAttribute:
+                        _context.DomainHttpErrorAttributes.Add(domainHttpErrorAttribute);
+                        break;
+                    case ConsumesAttribute consumesAttribute:
+                        _context.DefaultContentTypes = consumesAttribute.ContentTypes;
+                        break;
+                    case RouteAttribute routeAttribute:
+                        _context.BaseTemplate = routeAttribute.Template;
+                        break;
+                    case ErrorResponseAttribute errorResponseAttribute:
+                        _context.ErrorResponseType = errorResponseAttribute.Type;
+                        break;
+                }
+
+            if (!_context.UseDomainException && _context.DomainHttpErrorAttributes.Any())
+            {
+                throw new InvalidOperationException("[DomainHttpError] requires [DomainException] on interface");
+            }
         }
 
         public override IEnumerable<string> GetDynamicMemberNames()

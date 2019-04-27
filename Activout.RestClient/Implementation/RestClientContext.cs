@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using Activout.RestClient.DomainErrors;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
@@ -34,6 +35,13 @@ namespace Activout.RestClient.Implementation
         public IParamConverterManager ParamConverterManager { get; internal set; }
         public List<KeyValuePair<string, object>> DefaultHeaders { get; }
         public IRequestLogger RequestLogger { get; set; } = new DummyRequestLogger();
+        public Type DomainExceptionType { get; set; }
+        public Type DomainErrorType { get; set; }
+        public IDomainErrorMapperFactory DomainErrorMapperFactory { get; set; }
+        public bool UseDomainException => DomainExceptionType != null;
+
+        public ICollection<DomainHttpErrorAttribute> DomainHttpErrorAttributes { get; set; } =
+            new List<DomainHttpErrorAttribute>();
     }
 
     internal sealed class DummyRequestLogger : IRequestLogger, IDisposable

@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Activout.RestClient.DomainErrors;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
@@ -32,6 +33,7 @@ namespace Activout.RestClient.Implementation
         private readonly ISerializer _serializer;
         private readonly string _template;
         private readonly IParamConverter[] _paramConverters;
+        private readonly IDomainErrorMapper _domainErrorMapper;
 
         public RequestHandler(MethodInfo method, RestClientContext context)
         {
@@ -45,12 +47,18 @@ namespace Activout.RestClient.Implementation
             _contentTypes = context.DefaultContentTypes;
             _errorResponseType = context.ErrorResponseType;
 
+            var domainHttpErrorAttributes = new List<DomainHttpErrorAttribute>();
+
             _bodyArgumentIndex = _parameters.Length - 1;
 
             var templateBuilder = new StringBuilder(context.BaseTemplate ?? "");
             foreach (var attribute in method.GetCustomAttributes(true))
                 switch (attribute)
                 {
+                    case DomainHttpErrorAttribute domainHttpErrorAttribute:
+                        domainHttpErrorAttributes.Add(domainHttpErrorAttribute);
+                        break;
+
                     case HttpMethodAttribute httpMethodAttribute:
                         templateBuilder.Append(httpMethodAttribute.Template);
                         _httpMethod = GetHttpMethod(httpMethodAttribute);
@@ -74,7 +82,21 @@ namespace Activout.RestClient.Implementation
 
             _template = templateBuilder.ToString();
             _context = context;
+
+            if (_context.UseDomainException)
+            {
+                domainHttpErrorAttributes.AddRange(context.DomainHttpErrorAttributes);
+                _domainErrorMapper = context.DomainErrorMapperFactory.CreateDomainErrorMapper(
+                    _errorResponseType,
+                    _context.DomainErrorType,
+                    domainHttpErrorAttributes);
+            }
+            else if (domainHttpErrorAttributes.Any())
+            {
+                throw new InvalidOperationException("[DomainHttpError] requires [DomainException] on interface");
+            }
         }
+
 
         private IParamConverter[] GetParamConverters(IParamConverterManager paramConverterManager)
         {
@@ -322,8 +344,22 @@ namespace Activout.RestClient.Implementation
             }
 
             if (response.IsSuccessStatusCode)
+            {
                 return data;
+            }
+
+            if (_context.UseDomainException)
+            {
+                throw await CreateDomainException(response, data);
+            }
+
             throw new RestClientException(request.RequestUri, response.StatusCode, data);
+        }
+
+        private async Task<Exception> CreateDomainException(HttpResponseMessage response, object data)
+        {
+            var domainError = await _domainErrorMapper.MapAsync(response, data);
+            return (Exception) Activator.CreateInstance(_context.DomainExceptionType, domainError);
         }
     }
 }
