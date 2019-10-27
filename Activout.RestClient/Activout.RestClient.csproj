@@ -4,12 +4,11 @@
     <LangVersion>8</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ImpromptuInterface" Version="7.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="System.Linq" Version="4.3.0" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Attributes" />
+    <PackageReference Include="ImpromptuInterface" Version="7.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="System.Linq" Version="4.3.0" />
   </ItemGroup>
 </Project>
