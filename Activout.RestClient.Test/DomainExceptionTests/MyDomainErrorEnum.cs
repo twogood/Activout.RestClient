@@ -1,6 +1,6 @@
 namespace Activout.RestClient.Test.DomainExceptionTests
 {
-    internal enum MyDomainErrorEnum
+    public enum MyDomainErrorEnum
     {
         Unknown = 0,
         AccessDenied,

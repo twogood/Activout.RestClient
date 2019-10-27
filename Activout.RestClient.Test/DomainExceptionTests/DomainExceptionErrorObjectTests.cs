@@ -29,6 +29,12 @@ namespace Activout.RestClient.Test.DomainExceptionTests
         {
             Error = error;
         }
+
+        public MyDomainErrorObjectException(MyDomainErrorObject error, Exception innerException) : base(
+            innerException.Message, innerException)
+        {
+            Error = error;
+        }
     }
 
     [ErrorResponse(typeof(MyApiErrorResponse))]
@@ -42,9 +48,12 @@ namespace Activout.RestClient.Test.DomainExceptionTests
     {
         protected override Exception CreateException(HttpResponseMessage httpResponseMessage, object data)
         {
-            if (!(data is MyApiErrorResponse errorResponse)) return null;
+            if (data is Exception e)
+            {
+                return new MyDomainErrorObjectException(new MyDomainErrorObject(MyDomainErrorEnum.Unknown), e);
+            }
 
-            var domainError = errorResponse.Code == MyApiError.Bar
+            var domainError = data is MyApiErrorResponse errorResponse && errorResponse.Code == MyApiError.Bar
                 ? new MyDomainErrorObject(MyDomainErrorEnum.DomainBar)
                 : new MyDomainErrorObject(MyDomainErrorEnum.Unknown);
 
@@ -100,6 +109,21 @@ namespace Activout.RestClient.Test.DomainExceptionTests
             Assert.Equal(MyDomainErrorEnum.DomainBar, exception.Error.ErrorEnum);
         }
 
+        [Fact]
+        public async Task TestNoDeserializerFound()
+        {
+            // Arrange
+            _mockHttp
+                .Expect(BaseUri)
+                .Respond(_ => HtmlHttpResponseMessage(HttpStatusCode.BadRequest));
+
+            // Act
+            var exception = await Assert.ThrowsAsync<MyDomainErrorObjectException>(() =>
+                _myApiClient.Api());
+
+            // Assert
+            Assert.Equal(MyDomainErrorEnum.Unknown, exception.Error.ErrorEnum);
+        }
 
         private static HttpResponseMessage JsonHttpResponseMessage(HttpStatusCode httpStatusCode, MyApiError myApiError)
         {
@@ -109,6 +133,15 @@ namespace Activout.RestClient.Test.DomainExceptionTests
                 {
                     Code = myApiError
                 }), Encoding.UTF8, "application/json")
+            };
+        }
+
+        private static HttpResponseMessage HtmlHttpResponseMessage(HttpStatusCode httpStatusCode)
+        {
+            return new HttpResponseMessage(httpStatusCode)
+            {
+                Content = new StringContent($"<html><head><title>Error {httpStatusCode}</title></head></html>",
+                    Encoding.UTF8, "text/html")
             };
         }
     }

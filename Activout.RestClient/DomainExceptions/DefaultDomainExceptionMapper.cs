@@ -24,14 +24,22 @@ namespace Activout.RestClient.DomainExceptions
             _httpErrorAttributes = httpErrorAttributes.ToList();
         }
 
-        protected override Exception CreateException(HttpResponseMessage httpResponseMessage, object data)
+        protected override Exception CreateException(HttpResponseMessage httpResponseMessage, object data,
+            Exception innerException)
         {
             var domainError = MapByDomainErrorAttribute(data)
                               ?? MapHttpStatusCodeByAttribute(httpResponseMessage)
                               ?? MapHttpStatusCodeByEnumName(httpResponseMessage)
                               ?? MapGenericClientOrServerError(httpResponseMessage);
 
-            return (Exception) Activator.CreateInstance(_domainExceptionType, domainError);
+            try
+            {
+                return (Exception) Activator.CreateInstance(_domainExceptionType, domainError, innerException);
+            }
+            catch (MissingMethodException)
+            {
+                return (Exception) Activator.CreateInstance(_domainExceptionType, domainError);
+            }
         }
 
         private static object MapByDomainErrorAttribute(object data)

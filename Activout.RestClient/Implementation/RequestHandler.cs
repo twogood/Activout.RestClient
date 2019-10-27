@@ -291,44 +291,58 @@ namespace Activout.RestClient.Implementation
             var type = response.IsSuccessStatusCode ? _actualReturnType : _errorResponseType;
             object data;
 
-            try
+
+            if (type == typeof(HttpResponseMessage))
             {
-                if (type == typeof(HttpResponseMessage))
+                data = response;
+            }
+            else if (type == typeof(HttpContent))
+            {
+                data = response.Content;
+            }
+            else if (type == typeof(void) || response.Content == null)
+            {
+                data = null;
+            }
+            else
+            {
+                var contentTypeMediaType =
+                    response.Content.Headers?.ContentType?.MediaType ?? DefaultHttpContentType;
+                var deserializer =
+                    _context.SerializationManager.GetDeserializer(contentTypeMediaType);
+                if (deserializer == null)
                 {
-                    data = response;
-                }
-                else if (type == typeof(HttpContent))
-                {
-                    data = response.Content;
-                }
-                else if (type == typeof(void) || response.Content == null)
-                {
-                    data = null;
-                }
-                else
-                {
-                    var contentTypeMediaType =
-                        response.Content.Headers?.ContentType?.MediaType ?? DefaultHttpContentType;
-                    var deserializer =
-                        _context.SerializationManager.GetDeserializer(contentTypeMediaType);
-                    if (deserializer == null)
+                    var restClientException = new RestClientException(request.RequestUri, response.StatusCode,
+                        "No deserializer found for " + contentTypeMediaType);
+
+                    if (response.IsSuccessStatusCode || !_context.UseDomainException)
                     {
-                        throw new RestClientException(request.RequestUri, response.StatusCode,
-                            "No deserializer found for " + contentTypeMediaType);
+                        throw restClientException;
                     }
 
-                    data = await deserializer.Deserialize(response.Content, type);
-                }
-            }
-            catch (Exception e)
-            {
-                if (e is RestClientException)
-                {
-                    throw;
+                    throw await _domainExceptionMapper.CreateExceptionAsync(response, null, restClientException);
                 }
 
-                var errorResponse = response.Content == null ? null : await response.Content.ReadAsStringAsync();
-                throw new RestClientException(request.RequestUri, response.StatusCode, errorResponse, e);
+                try
+                {
+                    data = await deserializer.Deserialize(response.Content, type);
+                }
+                catch (Exception e)
+                {
+                    if (e is RestClientException)
+                    {
+                        throw;
+                    }
+
+                    var errorResponse = response.Content == null ? null : await response.Content.ReadAsStringAsync();
+
+                    if (response.IsSuccessStatusCode || !_context.UseDomainException)
+                    {
+                        throw new RestClientException(request.RequestUri, response.StatusCode, errorResponse, e);
+                    }
+
+                    throw await _domainExceptionMapper.CreateExceptionAsync(response, null, e);
+                }
             }
 
             if (response.IsSuccessStatusCode)

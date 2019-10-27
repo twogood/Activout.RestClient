@@ -6,6 +6,8 @@ namespace Activout.RestClient.DomainExceptions
 {
     public interface IDomainExceptionMapper
     {
-        Task<Exception> CreateExceptionAsync(HttpResponseMessage httpResponseMessage, object data);
+        Task<Exception> CreateExceptionAsync(HttpResponseMessage httpResponseMessage, object data,
+            Exception innerException = null);
+
     }
 }
