@@ -19,9 +19,11 @@ namespace Activout.RestClient.Helpers.Implementation
         public TaskConverter2(Type actualReturnType)
         {
             _type = typeof(TaskCompletionSource<>).MakeGenericType(actualReturnType);
-            _setResultMethod = _type.GetMethod("SetResult");
-            _setExceptionMethod = _type.GetMethod("SetException", new[] {typeof(Exception)});
-            _taskProperty = _type.GetProperty("Task");
+            _setResultMethod = _type.GetMethod("SetResult") ??
+                               throw new InvalidOperationException("Method SetResult not found");
+            _setExceptionMethod = _type.GetMethod("SetException", new[] {typeof(Exception)}) ??
+                                  throw new InvalidOperationException("Method SetException not found");
+            _taskProperty = _type.GetProperty("Task") ?? throw new InvalidOperationException("Property Task not found");
         }
 
         public object ConvertReturnType(Task<object> task)

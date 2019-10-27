@@ -24,8 +24,8 @@ namespace Activout.RestClient.DomainExceptions
             _httpErrorAttributes = httpErrorAttributes.ToList();
         }
 
-        protected override Exception CreateException(HttpResponseMessage httpResponseMessage, object data,
-            Exception innerException)
+        protected override Exception CreateException(HttpResponseMessage httpResponseMessage, object? data,
+            Exception? innerException)
         {
             var domainError = MapByDomainErrorAttribute(data)
                               ?? MapHttpStatusCodeByAttribute(httpResponseMessage)
@@ -34,15 +34,15 @@ namespace Activout.RestClient.DomainExceptions
 
             try
             {
-                return (Exception) Activator.CreateInstance(_domainExceptionType, domainError, innerException);
+                return (Exception) Activator.CreateInstance(_domainExceptionType, domainError, innerException)!;
             }
             catch (MissingMethodException)
             {
-                return (Exception) Activator.CreateInstance(_domainExceptionType, domainError);
+                return (Exception) Activator.CreateInstance(_domainExceptionType, domainError)!;
             }
         }
 
-        private static object MapByDomainErrorAttribute(object data)
+        private static object? MapByDomainErrorAttribute(object? data)
         {
             if (data == null)
             {
@@ -60,7 +60,7 @@ namespace Activout.RestClient.DomainExceptions
                 select a.DomainValue).FirstOrDefault();
         }
 
-        private object MapHttpStatusCodeByEnumName(HttpResponseMessage httpResponseMessage)
+        private object? MapHttpStatusCodeByEnumName(HttpResponseMessage httpResponseMessage)
         {
             try
             {
@@ -74,19 +74,19 @@ namespace Activout.RestClient.DomainExceptions
             }
         }
 
-        private object MapHttpStatusCodeByAttribute(HttpResponseMessage httpResponseMessage)
+        private object? MapHttpStatusCodeByAttribute(HttpResponseMessage httpResponseMessage)
         {
             return GetDomainErrorValue(httpResponseMessage.StatusCode);
         }
 
-        private object GetDomainErrorValue(HttpStatusCode httpStatusCode)
+        private object? GetDomainErrorValue(HttpStatusCode httpStatusCode)
         {
             return _httpErrorAttributes
                 .FirstOrDefault(x => x.HttpStatusCode == httpStatusCode)
                 ?.DomainErrorValue;
         }
 
-        private object MapGenericClientOrServerError(HttpResponseMessage httpResponseMessage)
+        private object? MapGenericClientOrServerError(HttpResponseMessage httpResponseMessage)
         {
             var httpStatusCode = httpResponseMessage.StatusCode;
             return ((int) httpStatusCode > 500 ? GetDomainErrorValue((HttpStatusCode) 500) : null)

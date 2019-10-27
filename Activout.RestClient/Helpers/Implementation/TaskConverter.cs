@@ -26,7 +26,7 @@ namespace Activout.RestClient.Helpers.Implementation
 
         public object ConvertReturnType(Task<object> task)
         {
-            return _continueWith.Invoke(task, new object[] {_lambda});
+            return _continueWith.Invoke(task, new object[] {_lambda})!;
         }
 
         private static MethodInfo GetContinueWithMethod(Type actualReturnType)
@@ -62,7 +62,7 @@ namespace Activout.RestClient.Helpers.Implementation
         private static LambdaExpression InvokeLambdaMethod(MethodBase lambdaMethod, UnaryExpression expression,
             ParameterExpression parameter)
         {
-            return (LambdaExpression) lambdaMethod.Invoke(null, new object[] {expression, new[] {parameter}});
+            return (LambdaExpression) lambdaMethod.Invoke(null, new object[] {expression, new[] {parameter}})!;
         }
 
         private static MethodInfo GetLambdaMethod()
