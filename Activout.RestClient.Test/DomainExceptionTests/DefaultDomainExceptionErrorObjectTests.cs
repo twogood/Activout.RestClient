@@ -24,12 +24,7 @@ namespace Activout.RestClient.Test.DomainExceptionTests
     {
         public MyDomainErrorEnum Error { get; }
 
-        public SomeDomainErrorObjectException(MyDomainErrorEnum error)
-        {
-            Error = error;
-        }
-
-        public SomeDomainErrorObjectException(MyDomainErrorEnum error, Exception innerException) : base(
+        public SomeDomainErrorObjectException(MyDomainErrorEnum error, Exception innerException = null) : base(
             error.ToString(), innerException)
         {
             Error = error;
