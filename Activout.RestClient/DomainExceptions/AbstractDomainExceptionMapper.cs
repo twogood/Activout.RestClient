@@ -7,13 +7,13 @@ namespace Activout.RestClient.DomainExceptions
     public abstract class AbstractDomainExceptionMapper : IDomainExceptionMapper
     {
         public virtual Task<Exception> CreateExceptionAsync(HttpResponseMessage httpResponseMessage, object data,
-            Exception innerException)
+            Exception innerException = null)
         {
             return Task.FromResult(CreateException(httpResponseMessage, data, innerException));
         }
 
         protected virtual Exception CreateException(HttpResponseMessage httpResponseMessage, object data,
-            Exception unused)
+            Exception innerException)
         {
             return CreateException(httpResponseMessage, data);
         }
