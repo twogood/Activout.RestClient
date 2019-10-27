@@ -23,6 +23,8 @@ namespace Activout.RestClient.Test
     public class Stuff
     {
         public MySimpleValueObject FooBar { get; set; }
+
+        public int? NullableInteger { get; set; }
     }
 
     public interface IValueObjectClient
@@ -54,7 +56,8 @@ namespace Activout.RestClient.Test
                 .Expect(HttpMethod.Post, BaseUri)
                 .WithContent(JsonConvert.SerializeObject(new
                 {
-                    FooBar = "foobar"
+                    FooBar = "foobar",
+                    NullableInteger = 42
                 }))
                 .Respond(HttpStatusCode.OK);
 
@@ -62,7 +65,8 @@ namespace Activout.RestClient.Test
 
             var wrapper = new Stuff
             {
-                FooBar = new MySimpleValueObject("foobar")
+                FooBar = new MySimpleValueObject("foobar"),
+                NullableInteger = 42
             };
 
             // Act
@@ -80,7 +84,8 @@ namespace Activout.RestClient.Test
                 .Expect(BaseUri)
                 .Respond(new StringContent(JsonConvert.SerializeObject(new
                     {
-                        FooBar = "foobar"
+                        FooBar = "foobar",
+                        NullableInteger = 42
                     }),
                     Encoding.UTF8,
                     "application/json"));

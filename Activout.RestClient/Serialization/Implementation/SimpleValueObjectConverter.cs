@@ -10,6 +10,7 @@ namespace Activout.RestClient.Serialization.Implementation
      * 1. No default constructor 
      * 2. A public property named Value
      * 3. A constructor taking the same type as the Value property
+     * 4. A type that is not Nullable<T>
      */
     public class SimpleValueObjectConverter : JsonConverter
     {
@@ -29,6 +30,7 @@ namespace Activout.RestClient.Serialization.Implementation
 
         public override bool CanConvert(Type objectType)
         {
+            if (Nullable.GetUnderlyingType(objectType) != null) return false;
             if (GetDefaultConstructor(objectType) != null) return false;
             var valueProperty = GetValueProperty(objectType);
             if (valueProperty == null) return false;
