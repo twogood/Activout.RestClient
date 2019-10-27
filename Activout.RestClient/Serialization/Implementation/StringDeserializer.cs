@@ -11,13 +11,10 @@ namespace Activout.RestClient.Serialization.Implementation
 
         public async Task<object> Deserialize(HttpContent content, Type type)
         {
-            if (type != typeof(string))
-            {
-                throw new NotImplementedException(
-                    $"Can only deserialize {content.Headers.ContentType} to string, not to {type}");
-            }
-
-            return await content.ReadAsStringAsync();
+            var stringData = await content.ReadAsStringAsync();
+            return type == typeof(string)
+                ? stringData
+                : Activator.CreateInstance(type, stringData);
         }
     }
 }
