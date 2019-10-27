@@ -8,7 +8,4 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Attributes" />
-  </ItemGroup>
 </Project>
