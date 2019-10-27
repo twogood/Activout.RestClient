@@ -487,7 +487,7 @@ namespace Activout.RestClient.Test
 
             var requestLoggerMock = new Mock<IRequestLogger>();
             requestLoggerMock.Setup(x => x.TimeOperation(It.IsAny<HttpRequestMessage>()))
-                .Returns(new Mock<IDisposable>().Object);
+                .Returns(() => new Mock<IDisposable>().Object);
 
             var reviewSvc = CreateRestClientBuilder()
                 .With(requestLoggerMock.Object)
