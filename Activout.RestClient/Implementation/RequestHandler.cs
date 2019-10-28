@@ -326,15 +326,7 @@ namespace Activout.RestClient.Implementation
             var deserializer = _context.SerializationManager.GetDeserializer(contentTypeMediaType);
             if (deserializer == null)
             {
-                var restClientException = new RestClientException(request.RequestUri, response.StatusCode,
-                    "No deserializer found for " + contentTypeMediaType);
-
-                if (response.IsSuccessStatusCode || !_context.UseDomainException)
-                {
-                    throw restClientException;
-                }
-
-                throw await _domainExceptionMapper.CreateExceptionAsync(response, null, restClientException);
+                throw await CreateNoDeserializerFoundException(request, response, contentTypeMediaType);
             }
 
             try
@@ -348,15 +340,36 @@ namespace Activout.RestClient.Implementation
                     throw;
                 }
 
-                var errorResponse = response.Content == null ? null : await response.Content.ReadAsStringAsync();
-
-                if (response.IsSuccessStatusCode || !_context.UseDomainException)
-                {
-                    throw new RestClientException(request.RequestUri, response.StatusCode, errorResponse, e);
-                }
-
-                throw await _domainExceptionMapper.CreateExceptionAsync(response, null, e);
+                throw await CreateDeserializationException(request, response, e);
             }
+        }
+
+        private async Task<Exception> CreateDeserializationException(HttpRequestMessage request,
+            HttpResponseMessage response, Exception e)
+        {
+            var errorResponse = response.Content == null ? null : await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode || !_context.UseDomainException)
+            {
+                return new RestClientException(request.RequestUri, response.StatusCode, errorResponse, e);
+            }
+
+            return await _domainExceptionMapper.CreateExceptionAsync(response, errorResponse, e);
+        }
+
+        private async Task<Exception> CreateNoDeserializerFoundException(HttpRequestMessage request,
+            HttpResponseMessage response,
+            string contentTypeMediaType)
+        {
+            var exception = (Exception) new RestClientException(request.RequestUri, response.StatusCode,
+                "No deserializer found for " + contentTypeMediaType);
+
+            if (response.IsSuccessStatusCode || !_context.UseDomainException)
+            {
+                return exception;
+            }
+
+            return await _domainExceptionMapper.CreateExceptionAsync(response, null, exception);
         }
     }
 }
