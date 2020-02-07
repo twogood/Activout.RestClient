@@ -7,7 +7,7 @@ namespace Activout.RestClient
     {
         public string Name { get; }
 
-        public NamedParamAttribute(string name)
+        protected NamedParamAttribute(string name)
         {
             Name = name;
         }

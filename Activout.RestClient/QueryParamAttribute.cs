@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Activout.RestClient
+﻿namespace Activout.RestClient
 {
     public class QueryParamAttribute : NamedParamAttribute
     {

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Activout.RestClient.Serialization
+﻿namespace Activout.RestClient.Serialization
 {
     public interface ISerializationManager
     {

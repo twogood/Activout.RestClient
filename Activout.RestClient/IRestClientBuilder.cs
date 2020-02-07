@@ -11,7 +11,7 @@ namespace Activout.RestClient
     {
         IRestClientBuilder Accept(string accept);
         IRestClientBuilder BaseUri(Uri apiUri);
-        IRestClientBuilder ContentType(MediaType applicationJson);
+        IRestClientBuilder ContentType(MediaType contentType);
         IRestClientBuilder HttpClient(HttpClient httpClient);
         IRestClientBuilder Header(string name, object value);
         IRestClientBuilder Header(AuthenticationHeaderValue authenticationHeaderValue);
