@@ -198,7 +198,7 @@ namespace Activout.RestClient.Test
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            var movies = await reviewSvc.GetAllMoviesCancellable(default(CancellationToken));
+            var movies = await reviewSvc.GetAllMoviesCancellable(default);
 
             // assert
             Assert.Empty(movies);

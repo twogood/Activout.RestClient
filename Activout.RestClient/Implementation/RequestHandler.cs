@@ -31,7 +31,7 @@ namespace Activout.RestClient.Implementation
         private readonly string _template;
         private readonly IParamConverter[] _paramConverters;
         private readonly IDomainExceptionMapper _domainExceptionMapper;
-        private readonly List<KeyValuePair<string, object>> _headers = new List<KeyValuePair<string, object>>();
+        private readonly List<KeyValuePair<string, object>> _requestHeaders = new List<KeyValuePair<string, object>>();
 
         public RequestHandler(MethodInfo method, RestClientContext context)
         {
@@ -44,7 +44,7 @@ namespace Activout.RestClient.Implementation
             _serializer = context.DefaultSerializer;
             _contentType = context.DefaultContentType;
             _errorResponseType = context.ErrorResponseType;
-            _headers.AddRange(context.DefaultHeaders);
+            _requestHeaders.AddRange(context.DefaultHeaders);
 
             _bodyArgumentIndex = _parameters.Length - 1;
 
@@ -61,7 +61,8 @@ namespace Activout.RestClient.Implementation
                         break;
 
                     case HeaderAttribute headerAttribute:
-                        AddOrReplaceHeader(headerAttribute.Name, headerAttribute.Value, headerAttribute.Replace);
+                        _requestHeaders.AddOrReplaceHeader(headerAttribute.Name, headerAttribute.Value,
+                            headerAttribute.Replace);
                         break;
 
                     case HttpMethodAttribute httpMethodAttribute:
@@ -87,17 +88,6 @@ namespace Activout.RestClient.Implementation
 
             _template = templateBuilder.ToString();
             _context = context;
-        }
-
-        private void AddOrReplaceHeader(string name, string value, bool replace)
-        {
-            if (replace)
-            {
-                _headers.RemoveAll(header =>
-                    header.Key.Equals(name, StringComparison.InvariantCultureIgnoreCase));
-            }
-
-            _headers.Add(new KeyValuePair<string, object>(name, value));
         }
 
         private IParamConverter[] GetParamConverters(IParamConverterManager paramConverterManager)
@@ -179,7 +169,14 @@ namespace Activout.RestClient.Implementation
             if (_parameters.Length != args.Length)
                 throw new InvalidOperationException($"Expected {_parameters.Length} parameters but got {args.Length}");
 
-            var (routeParams, queryParams, formParams, cancellationToken) = GetParams(args);
+            var headers = new List<KeyValuePair<string, object>>();
+            headers.AddRange(_requestHeaders);
+
+            var routeParams = new Dictionary<string, object>();
+            var queryParams = new List<string>();
+            var formParams = new List<KeyValuePair<string, string>>();
+            var cancellationToken = GetParams(args, routeParams, queryParams, formParams, headers);
+
             var requestUriString = ExpandTemplate(routeParams);
             if (queryParams.Any())
             {
@@ -190,7 +187,7 @@ namespace Activout.RestClient.Implementation
 
             var request = new HttpRequestMessage(_httpMethod, requestUri);
 
-            SetHeaders(request);
+            SetHeaders(request, headers);
 
             if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put)
             {
@@ -213,17 +210,15 @@ namespace Activout.RestClient.Implementation
             return task.Result;
         }
 
-        private void SetHeaders(HttpRequestMessage request)
+        private void SetHeaders(HttpRequestMessage request, List<KeyValuePair<string, object>> headers)
         {
-            _headers.ForEach(p => request.Headers.Add(p.Key, p.Value.ToString()));
+            headers.ForEach(p => request.Headers.Add(p.Key, p.Value.ToString()));
         }
 
-        private (Dictionary<string, object>, List<string>, List<KeyValuePair<string, string>>, CancellationToken)
-            GetParams(IReadOnlyList<object> args)
+        private CancellationToken GetParams(IReadOnlyList<object> args, IDictionary<string, object> routeParams,
+            ICollection<string> queryParams, ICollection<KeyValuePair<string, string>> formParams,
+            List<KeyValuePair<string, object>> headers)
         {
-            var routeParams = new Dictionary<string, object>();
-            var queryParams = new List<string>();
-            var formParams = new List<KeyValuePair<string, string>>();
             var cancellationToken = CancellationToken.None;
 
             for (var i = 0; i < _parameters.Length; i++)
@@ -262,7 +257,7 @@ namespace Activout.RestClient.Implementation
                     else if (attribute is HeaderParamAttribute headerParamAttribute)
                     {
                         name = headerParamAttribute.Name ?? name;
-                        AddOrReplaceHeader(name, value, headerParamAttribute.Replace);
+                        headers.AddOrReplaceHeader(name, value, headerParamAttribute.Replace);
                         handled = true;
                     }
                 }
@@ -273,7 +268,7 @@ namespace Activout.RestClient.Implementation
                 }
             }
 
-            return (routeParams, queryParams, formParams, cancellationToken);
+            return cancellationToken;
         }
 
         private async Task<object> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

@@ -40,23 +40,12 @@ namespace Activout.RestClient.Implementation
                         _context.ErrorResponseType = errorResponseAttribute.Type;
                         break;
                     case HeaderAttribute headerAttribute:
-                        AddOrReplaceHeader(headerAttribute.Name, headerAttribute.Value, headerAttribute.Replace);
+                        _context.DefaultHeaders.AddOrReplaceHeader(headerAttribute.Name, headerAttribute.Value, headerAttribute.Replace);
                         break;
                     case RouteAttribute routeAttribute:
                         _context.BaseTemplate = routeAttribute.Template;
                         break;
                 }
-        }
-
-        private void AddOrReplaceHeader(string name, string value, bool replace)
-        {
-            if (replace)
-            {
-                _context.DefaultHeaders.RemoveAll(header =>
-                    header.Key.Equals(name, StringComparison.InvariantCultureIgnoreCase));
-            }
-
-            _context.DefaultHeaders.Add(new KeyValuePair<string, object>(name, value));
         }
 
         public override IEnumerable<string> GetDynamicMemberNames()
