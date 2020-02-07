@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
@@ -18,13 +17,13 @@ namespace Activout.RestClient.Test
         [JsonProperty("another")] public string AnotherString { get; set; } = "bar";
     }
 
+    [ContentType("application/x-www-form-urlencoded")]
     public interface IFormPostClient
     {
-        [Consumes("application/x-www-form-urlencoded")]
+        [ContentType("application/x-www-form-urlencoded")]
         [HttpPost("/form")]
         Task PostObject(FormData formData);
 
-        [Consumes("application/x-www-form-urlencoded")]
         [HttpPost("/form")]
         Task PostEnumerable(IEnumerable<KeyValuePair<string, string>> formData);
     }
@@ -70,6 +69,23 @@ namespace Activout.RestClient.Test
 
             // Act
             await client.PostObject(new FormData());
+
+            // Assert
+            _mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task TestFormDataNull()
+        {
+            // Arrange
+            var client = CreateClient();
+
+            _mockHttp
+                .Expect(HttpMethod.Post, BaseUri + "form")
+                .Respond(HttpStatusCode.OK);
+
+            // Act
+            await client.PostObject(null);
 
             // Assert
             _mockHttp.VerifyNoOutstandingExpectation();

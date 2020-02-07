@@ -1,25 +1,18 @@
 ﻿using System.Net.Http;
 using System.Text;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Net.Http.Headers;
 
 namespace Activout.RestClient.Serialization.Implementation
 {
     internal class StringSerializer : ISerializer
     {
-        public StringSerializer()
+        public HttpContent Serialize(object data, Encoding encoding, MediaType mediaType)
         {
-            SupportedMediaTypes = new MediaTypeCollection
-            {
-                new MediaTypeHeaderValue("text/*")
-            };
+            return new StringContent(data.ToString(), encoding, mediaType.Value);
         }
 
-        public MediaTypeCollection SupportedMediaTypes { get; }
-
-        public HttpContent Serialize(object data, Encoding encoding, string mediaType)
+        public bool CanSerialize(MediaType mediaType)
         {
-            return new StringContent(data.ToString(), encoding, mediaType);
+            return mediaType.Value.StartsWith("text/");
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Activout.MovieReviews;
 using Activout.RestClient.Helpers.Implementation;
+using Activout.RestClient.Test.MovieReviews;
 using Moq;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
@@ -33,6 +34,8 @@ namespace Activout.RestClient.Test
         private IRestClientBuilder CreateRestClientBuilder()
         {
             return _restClientFactory.CreateBuilder()
+                .Accept("application/json")
+                .ContentType(new MediaType("application/json"))
                 .HttpClient(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri));
         }
@@ -246,6 +249,7 @@ namespace Activout.RestClient.Test
             // arrange
             _mockHttp
                 .When($"{BaseUri}/movies")
+                .WithHeaders("Accept", "application/json")
                 .Respond("application/json", "[]");
 
             var reviewSvc = CreateMovieReviewService();
@@ -458,6 +462,42 @@ namespace Activout.RestClient.Test
 
             // assert
             Assert.Equal(new byte[] {42}, byteArrayObject.Bytes);
+        }
+
+        [Fact]
+        public async Task TestGetString()
+        {
+            // arrange
+            _mockHttp
+                .When($"{BaseUri}/movies/string")
+                .WithHeaders("accept", "text/plain")
+                .Respond(new StringContent("foo"));
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            var result = await reviewSvc.GetString();
+
+            // assert
+            Assert.Equal("foo", result);
+        }
+
+        [Fact]
+        public async Task TestGetStringObject()
+        {
+            // arrange
+            _mockHttp
+                .When($"{BaseUri}/movies/string-object")
+                .WithHeaders("accept", "text/plain")
+                .Respond(new StringContent("bar"));
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            var stringObject = await reviewSvc.GetStringObject();
+
+            // assert
+            Assert.Equal("bar", stringObject.Value);
         }
 
         [Fact]

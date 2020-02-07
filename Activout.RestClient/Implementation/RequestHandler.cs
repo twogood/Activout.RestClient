@@ -10,9 +10,6 @@ using Activout.RestClient.DomainExceptions;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace Activout.RestClient.Implementation
 {
@@ -23,7 +20,7 @@ namespace Activout.RestClient.Implementation
 
         private readonly Type _actualReturnType;
         private readonly int _bodyArgumentIndex;
-        private readonly MediaTypeCollection _contentTypes;
+        private readonly MediaType _contentType;
         private readonly RestClientContext _context;
         private readonly ITaskConverter _converter;
         private readonly Type _errorResponseType;
@@ -34,6 +31,7 @@ namespace Activout.RestClient.Implementation
         private readonly string _template;
         private readonly IParamConverter[] _paramConverters;
         private readonly IDomainExceptionMapper _domainExceptionMapper;
+        private readonly List<KeyValuePair<string, object>> _headers = new List<KeyValuePair<string, object>>();
 
         public RequestHandler(MethodInfo method, RestClientContext context)
         {
@@ -44,8 +42,9 @@ namespace Activout.RestClient.Implementation
             _converter = CreateConverter(context);
             _template = context.BaseTemplate ?? "";
             _serializer = context.DefaultSerializer;
-            _contentTypes = context.DefaultContentTypes;
+            _contentType = context.DefaultContentType;
             _errorResponseType = context.ErrorResponseType;
+            _headers.AddRange(context.DefaultHeaders);
 
             _bodyArgumentIndex = _parameters.Length - 1;
 
@@ -53,26 +52,30 @@ namespace Activout.RestClient.Implementation
             foreach (var attribute in method.GetCustomAttributes(true))
                 switch (attribute)
                 {
-                    case HttpMethodAttribute httpMethodAttribute:
-                        templateBuilder.Append(httpMethodAttribute.Template);
-                        _httpMethod = GetHttpMethod(httpMethodAttribute);
+                    case ContentTypeAttribute contentTypeAttribute:
+                        _contentType = MediaType.ValueOf(contentTypeAttribute.ContentType);
                         break;
 
                     case ErrorResponseAttribute errorResponseAttribute:
                         _errorResponseType = errorResponseAttribute.Type;
                         break;
 
-                    case ConsumesAttribute consumesAttribute:
-                        _contentTypes = consumesAttribute.ContentTypes;
-                        _serializer = context.SerializationManager.GetSerializer(_contentTypes) ??
-                                      throw new InvalidOperationException(
-                                          "No serializer for: " + string.Join(",", _contentTypes));
+                    case HeaderAttribute headerAttribute:
+                        AddOrReplaceHeader(headerAttribute.Name, headerAttribute.Value, headerAttribute.Replace);
+                        break;
+
+                    case HttpMethodAttribute httpMethodAttribute:
+                        templateBuilder.Append(httpMethodAttribute.Template);
+                        _httpMethod = GetHttpMethod(httpMethodAttribute);
                         break;
 
                     case RouteAttribute routeAttribute:
                         templateBuilder.Append(routeAttribute.Template);
                         break;
                 }
+
+            _serializer = context.SerializationManager.GetSerializer(_contentType) ??
+                          throw new InvalidOperationException("No serializer for: " + _contentType);
 
             if (context.UseDomainException)
             {
@@ -84,6 +87,17 @@ namespace Activout.RestClient.Implementation
 
             _template = templateBuilder.ToString();
             _context = context;
+        }
+
+        private void AddOrReplaceHeader(string name, string value, bool replace)
+        {
+            if (replace)
+            {
+                _headers.RemoveAll(header =>
+                    header.Key.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+            }
+
+            _headers.Add(new KeyValuePair<string, object>(name, value));
         }
 
         private IParamConverter[] GetParamConverters(IParamConverterManager paramConverterManager)
@@ -99,19 +113,7 @@ namespace Activout.RestClient.Implementation
 
         private static HttpMethod GetHttpMethod(HttpMethodAttribute attribute)
         {
-            switch (attribute)
-            {
-                case HttpDeleteAttribute _:
-                    return HttpMethod.Delete;
-                case HttpGetAttribute _:
-                    return HttpMethod.Get;
-                case HttpPostAttribute _:
-                    return HttpMethod.Post;
-                case HttpPutAttribute _:
-                    return HttpMethod.Put;
-                default:
-                    throw new NotImplementedException($"Http Attribute not yet supported: {attribute}");
-            }
+            return attribute.HttpMethod;
         }
 
         private ITaskConverter CreateConverter(RestClientContext context)
@@ -177,7 +179,7 @@ namespace Activout.RestClient.Implementation
             if (_parameters.Length != args.Length)
                 throw new InvalidOperationException($"Expected {_parameters.Length} parameters but got {args.Length}");
 
-            var (routeParams, queryParams, formParams, headerParams, cancellationToken) = GetParams(args);
+            var (routeParams, queryParams, formParams, cancellationToken) = GetParams(args);
             var requestUriString = ExpandTemplate(routeParams);
             if (queryParams.Any())
             {
@@ -188,7 +190,7 @@ namespace Activout.RestClient.Implementation
 
             var request = new HttpRequestMessage(_httpMethod, requestUri);
 
-            SetHeaders(request, headerParams);
+            SetHeaders(request);
 
             if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put)
             {
@@ -198,8 +200,7 @@ namespace Activout.RestClient.Implementation
                 }
                 else
                 {
-                    var mediaType = _contentTypes[0];
-                    request.Content = _serializer.Serialize(args[_bodyArgumentIndex], Encoding.UTF8, mediaType);
+                    request.Content = _serializer.Serialize(args[_bodyArgumentIndex], Encoding.UTF8, _contentType);
                 }
             }
 
@@ -212,20 +213,17 @@ namespace Activout.RestClient.Implementation
             return task.Result;
         }
 
-        private void SetHeaders(HttpRequestMessage request, List<KeyValuePair<string, string>> headerParams)
+        private void SetHeaders(HttpRequestMessage request)
         {
-            _context.DefaultHeaders.ForEach(p => request.Headers.Add(p.Key, p.Value.ToString()));
-            headerParams.ForEach(p => request.Headers.Add(p.Key, p.Value));
+            _headers.ForEach(p => request.Headers.Add(p.Key, p.Value.ToString()));
         }
 
-        private (Dictionary<string, object>, List<string>, List<KeyValuePair<string, string>>,
-            List<KeyValuePair<string, string>>, CancellationToken) GetParams(
-                IReadOnlyList<object> args)
+        private (Dictionary<string, object>, List<string>, List<KeyValuePair<string, string>>, CancellationToken)
+            GetParams(IReadOnlyList<object> args)
         {
             var routeParams = new Dictionary<string, object>();
             var queryParams = new List<string>();
             var formParams = new List<KeyValuePair<string, string>>();
-            var headerParams = new List<KeyValuePair<string, string>>();
             var cancellationToken = CancellationToken.None;
 
             for (var i = 0; i < _parameters.Length; i++)
@@ -264,7 +262,7 @@ namespace Activout.RestClient.Implementation
                     else if (attribute is HeaderParamAttribute headerParamAttribute)
                     {
                         name = headerParamAttribute.Name ?? name;
-                        headerParams.Add(new KeyValuePair<string, string>(name, value));
+                        AddOrReplaceHeader(name, value, headerParamAttribute.Replace);
                         handled = true;
                     }
                 }
@@ -275,7 +273,7 @@ namespace Activout.RestClient.Implementation
                 }
             }
 
-            return (routeParams, queryParams, formParams, headerParams, cancellationToken);
+            return (routeParams, queryParams, formParams, cancellationToken);
         }
 
         private async Task<object> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -323,7 +321,7 @@ namespace Activout.RestClient.Implementation
             }
 
             var contentTypeMediaType = response.Content.Headers?.ContentType?.MediaType ?? DefaultHttpContentType;
-            var deserializer = _context.SerializationManager.GetDeserializer(contentTypeMediaType);
+            var deserializer = _context.SerializationManager.GetDeserializer(new MediaType(contentTypeMediaType));
             if (deserializer == null)
             {
                 throw await CreateNoDeserializerFoundException(request, response, contentTypeMediaType);

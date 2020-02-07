@@ -1,19 +1,11 @@
 ﻿using System;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Activout.RestClient
 {
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class QueryParamAttribute : FromQueryAttribute
+    public class QueryParamAttribute : NamedParamAttribute
     {
-        public QueryParamAttribute()
+        public QueryParamAttribute(string name = null) : base(name)
         {
-            // deliberately empty    
-        }
-        
-        public QueryParamAttribute(string name)
-        {
-            Name = name;
         }
     }
 }

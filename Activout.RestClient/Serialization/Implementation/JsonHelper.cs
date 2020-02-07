@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Net.Http.Headers;
+﻿using System.Collections.Generic;
 
 namespace Activout.RestClient.Serialization.Implementation
 {
@@ -7,12 +6,12 @@ namespace Activout.RestClient.Serialization.Implementation
     {
         static JsonHelper()
         {
-            SupportedMediaTypes = new MediaTypeCollection
+            SupportedMediaTypes = new[]
             {
-                new MediaTypeHeaderValue("application/json")
+                MediaType.ValueOf("application/json")
             };
         }
 
-        public static MediaTypeCollection SupportedMediaTypes { get; }
+        public static IReadOnlyCollection<MediaType> SupportedMediaTypes { get; }
     }
 }

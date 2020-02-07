@@ -4,13 +4,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Activout.RestClient;
-using Microsoft.AspNetCore.Mvc;
+using Activout.MovieReviews;
 using Newtonsoft.Json.Linq;
 
-namespace Activout.MovieReviews
+namespace Activout.RestClient.Test.MovieReviews
 {
-    [InterfaceRoute("movies")]
+    [Route("movies")]
     [ErrorResponse(typeof(ErrorResponse))]
     public interface IMovieReviewService
     {
@@ -43,7 +42,7 @@ namespace Activout.MovieReviews
         Review UpdateReview(string movieId, [RouteParam] string reviewId, Review review);
 
         [HttpPost("/import.csv")]
-        [Consumes("text/csv")]
+        [ContentType("text/csv")]
         Task Import(string csv);
 
         [HttpGet]
@@ -72,6 +71,24 @@ namespace Activout.MovieReviews
 
         [Route("/byte-object")]
         Task<ByteArrayObject> GetByteArrayObject();
+
+        [Route("/string")]
+        [Accept("text/plain")]
+        Task<string> GetString();
+
+        [Route("/string-object")]
+        [Accept("text/plain")]
+        Task<StringObject> GetStringObject();
+    }
+
+    public class StringObject
+    {
+        public string Value { get; }
+
+        public StringObject(string value)
+        {
+            Value = value;
+        }
     }
 
     [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]

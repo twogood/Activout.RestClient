@@ -5,7 +5,6 @@ using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using Activout.RestClient.DomainExceptions;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Activout.RestClient.Implementation
 {
@@ -22,7 +21,7 @@ namespace Activout.RestClient.Implementation
             _type = typeof(T);
             _context = context;
             HandleAttributes();
-            _context.DefaultSerializer = _context.SerializationManager.GetSerializer(_context.DefaultContentTypes);
+            _context.DefaultSerializer = _context.SerializationManager.GetSerializer(_context.DefaultContentType);
         }
 
         private void HandleAttributes()
@@ -31,19 +30,33 @@ namespace Activout.RestClient.Implementation
             foreach (var attribute in attributes)
                 switch (attribute)
                 {
+                    case ContentTypeAttribute contentTypeAttribute:
+                        _context.DefaultContentType = MediaType.ValueOf(contentTypeAttribute.ContentType);
+                        break;
                     case DomainExceptionAttribute domainExceptionAttribute:
                         _context.DomainExceptionType = domainExceptionAttribute.Type;
-                        break;
-                    case ConsumesAttribute consumesAttribute:
-                        _context.DefaultContentTypes = consumesAttribute.ContentTypes;
-                        break;
-                    case RouteAttribute routeAttribute:
-                        _context.BaseTemplate = routeAttribute.Template;
                         break;
                     case ErrorResponseAttribute errorResponseAttribute:
                         _context.ErrorResponseType = errorResponseAttribute.Type;
                         break;
+                    case HeaderAttribute headerAttribute:
+                        AddOrReplaceHeader(headerAttribute.Name, headerAttribute.Value, headerAttribute.Replace);
+                        break;
+                    case RouteAttribute routeAttribute:
+                        _context.BaseTemplate = routeAttribute.Template;
+                        break;
                 }
+        }
+
+        private void AddOrReplaceHeader(string name, string value, bool replace)
+        {
+            if (replace)
+            {
+                _context.DefaultHeaders.RemoveAll(header =>
+                    header.Key.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+            }
+
+            _context.DefaultHeaders.Add(new KeyValuePair<string, object>(name, value));
         }
 
         public override IEnumerable<string> GetDynamicMemberNames()

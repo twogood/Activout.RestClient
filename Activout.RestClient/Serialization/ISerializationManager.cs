@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.Formatters;
+﻿using System.Collections.Generic;
 
 namespace Activout.RestClient.Serialization
 {
     public interface ISerializationManager
     {
-        ISerializer GetSerializer(MediaTypeCollection mediaTypeCollection);
-        IDeserializer GetDeserializer(string mediaType);
+        ISerializer GetSerializer(MediaType mediaType);
+        IDeserializer GetDeserializer(MediaType mediaType);
     }
 }

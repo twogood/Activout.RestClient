@@ -34,9 +34,20 @@ namespace Activout.RestClient.Implementation
             };
         }
 
+        public IRestClientBuilder Accept(string accept)
+        {
+            return Header("Accept", accept);
+        }
+
         public IRestClientBuilder BaseUri(Uri apiUri)
         {
             _context.BaseUri = AddTrailingSlash(apiUri);
+            return this;
+        }
+
+        public IRestClientBuilder ContentType(MediaType contentType)
+        {
+            _context.DefaultContentType = contentType;
             return this;
         }
 
@@ -67,14 +78,12 @@ namespace Activout.RestClient.Implementation
 
         public IRestClientBuilder With(IDeserializer deserializer)
         {
-            _deserializers.RemoveAll(d => d.SupportedMediaTypes.Intersect(deserializer.SupportedMediaTypes).Any());
             _deserializers.Add(deserializer);
             return this;
         }
 
         public IRestClientBuilder With(ISerializer serializer)
         {
-            _serializers.RemoveAll(s => s.SupportedMediaTypes.Intersect(serializer.SupportedMediaTypes).Any());
             _serializers.Add(serializer);
             return this;
         }

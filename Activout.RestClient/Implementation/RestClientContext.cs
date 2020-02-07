@@ -1,25 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net.Http;
 using Activout.RestClient.DomainExceptions;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
-using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace Activout.RestClient.Implementation
 {
     internal class RestClientContext
     {
-        private static readonly MediaTypeCollection JsonMediaTypeCollection = new MediaTypeCollection
+        private static readonly Collection<MediaType> JsonMediaTypeCollection = new Collection<MediaType>
         {
-            "application/json"
+            MediaType.ValueOf("application/json")
         };
 
         public RestClientContext()
         {
             BaseTemplate = "";
-            DefaultContentTypes = JsonMediaTypeCollection;
+            DefaultContentType = JsonMediaTypeCollection.FirstOrDefault();
             DefaultHeaders = new List<KeyValuePair<string, object>>();
             ErrorResponseType = typeof(string);
         }
@@ -31,7 +32,7 @@ namespace Activout.RestClient.Implementation
         public HttpClient HttpClient { get; internal set; }
         public ITaskConverterFactory TaskConverterFactory { get; internal set; }
         public Type ErrorResponseType { get; internal set; }
-        public MediaTypeCollection DefaultContentTypes { get; internal set; }
+        public MediaType DefaultContentType { get; internal set; }
         public IParamConverterManager ParamConverterManager { get; internal set; }
         public List<KeyValuePair<string, object>> DefaultHeaders { get; }
         public IRequestLogger RequestLogger { get; set; } = new DummyRequestLogger();

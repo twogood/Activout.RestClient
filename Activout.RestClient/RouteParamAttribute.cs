@@ -1,19 +1,11 @@
 ﻿using System;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Activout.RestClient
 {
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class RouteParamAttribute : FromRouteAttribute
+    public class RouteParamAttribute : NamedParamAttribute
     {
-        public RouteParamAttribute()
+        public RouteParamAttribute(string name = null) : base(name)
         {
-            // deliberately empty
-        }
-
-        public RouteParamAttribute(string name)
-        {
-            Name = name;
         }
     }
 }

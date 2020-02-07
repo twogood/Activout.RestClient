@@ -1,19 +1,12 @@
 ﻿using System;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Activout.RestClient
 {
     [AttributeUsage(AttributeTargets.Parameter)]
-    public class FormParamAttribute : FromFormAttribute
+    public class FormParamAttribute : NamedParamAttribute
     {
-        public FormParamAttribute()
+        public FormParamAttribute(string name = null) : base(name)
         {
-            // deliberately empty    
-        }
-        
-        public FormParamAttribute(string name)
-        {
-            Name = name;
         }
     }
 }

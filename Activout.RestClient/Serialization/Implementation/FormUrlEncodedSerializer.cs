@@ -3,20 +3,18 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 
 namespace Activout.RestClient.Serialization.Implementation
 {
     public class FormUrlEncodedSerializer : ISerializer
     {
-        public MediaTypeCollection SupportedMediaTypes => new MediaTypeCollection
+        public IReadOnlyCollection<MediaType> SupportedMediaTypes => new[]
         {
-            new MediaTypeHeaderValue("application/x-www-form-urlencoded")
+            MediaType.ValueOf("application/x-www-form-urlencoded")
         };
 
-        public HttpContent Serialize(object data, Encoding encoding, string mediaType)
+        public HttpContent Serialize(object data, Encoding encoding, MediaType mediaType)
         {
             if (data == null)
             {
@@ -37,6 +35,11 @@ namespace Activout.RestClient.Serialization.Implementation
                     .Where(x => x.Value != null)
                     .Select(x => new KeyValuePair<string, string>(GetKey(x.Property), SerializeValue(x.Value)))
             );
+        }
+
+        public bool CanSerialize(MediaType mediaType)
+        {
+            return SupportedMediaTypes.Contains(mediaType);
         }
 
         private static string SerializeValue(object value)

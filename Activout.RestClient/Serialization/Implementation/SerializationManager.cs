@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Newtonsoft.Json;
 
 namespace Activout.RestClient.Serialization.Implementation
@@ -44,52 +43,16 @@ namespace Activout.RestClient.Serialization.Implementation
             Deserializers = deserializers ?? DefaultDeserializers;
         }
 
-        public IDeserializer GetDeserializer(string mediaType)
+        public IDeserializer GetDeserializer(MediaType mediaType)
         {
             if (mediaType == null) throw new ArgumentNullException(nameof(mediaType));
-
-            var inputMediaType = new MediaType(mediaType);
-
-            foreach (var deserializer in Deserializers)
-            {
-                foreach (var supportedMediaTypeString in deserializer.SupportedMediaTypes)
-                {
-                    var supportedMediaType = new MediaType(supportedMediaTypeString);
-                    if (inputMediaType.IsSubsetOf(supportedMediaType))
-                    {
-                        return deserializer;
-                    }
-                }
-            }
-
-            return null;
+            return Deserializers.FirstOrDefault(serializer => serializer.CanDeserialize(mediaType));
         }
 
-        public ISerializer GetSerializer(MediaTypeCollection mediaTypeCollection)
+        public ISerializer GetSerializer(MediaType mediaType)
         {
-            if (mediaTypeCollection == null) throw new ArgumentNullException(nameof(mediaTypeCollection));
-
-            return Serializers.FirstOrDefault(serializer =>
-                IsMediaTypeSupported(mediaTypeCollection, serializer.SupportedMediaTypes));
-        }
-
-        private static bool IsMediaTypeSupported(MediaTypeCollection mediaTypeCollection,
-            MediaTypeCollection supportedMediaTypes)
-        {
-            foreach (var supportedMediaTypeString in supportedMediaTypes)
-            {
-                var supportedMediaType = new MediaType(supportedMediaTypeString);
-                foreach (var mediaType in mediaTypeCollection)
-                {
-                    var inputMediaType = new MediaType(mediaType);
-                    if (inputMediaType.IsSubsetOf(supportedMediaType))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+            if (mediaType == null) throw new ArgumentNullException(nameof(mediaType));
+            return Serializers.FirstOrDefault(serializer => serializer.CanSerialize(mediaType));
         }
     }
 }

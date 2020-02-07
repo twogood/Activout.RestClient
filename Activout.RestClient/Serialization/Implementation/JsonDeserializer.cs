@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -11,7 +12,7 @@ namespace Activout.RestClient.Serialization.Implementation
     {
         private readonly JsonSerializerSettings _jsonSerializerSettings;
 
-        public MediaTypeCollection SupportedMediaTypes => JsonHelper.SupportedMediaTypes;
+        public IReadOnlyCollection<MediaType> SupportedMediaTypes => JsonHelper.SupportedMediaTypes;
 
         public JsonDeserializer(JsonSerializerSettings jsonSerializerSettings)
         {
@@ -31,6 +32,11 @@ namespace Activout.RestClient.Serialization.Implementation
             }
 
             return JsonConvert.DeserializeObject(await content.ReadAsStringAsync(), type, _jsonSerializerSettings);
+        }
+
+        public bool CanDeserialize(MediaType mediaType)
+        {
+            return SupportedMediaTypes.Contains(mediaType);
         }
     }
 }
