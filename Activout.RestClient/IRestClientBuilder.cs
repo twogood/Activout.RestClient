@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using Activout.RestClient.DomainExceptions;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.Serialization;
@@ -9,12 +8,10 @@ namespace Activout.RestClient
 {
     public interface IRestClientBuilder
     {
-        IRestClientBuilder Accept(string accept);
         IRestClientBuilder BaseUri(Uri apiUri);
         IRestClientBuilder ContentType(MediaType contentType);
-        IRestClientBuilder HttpClient(HttpClient httpClient);
+        IRestClientBuilder With(HttpClient httpClient);
         IRestClientBuilder Header(string name, object value);
-        IRestClientBuilder Header(AuthenticationHeaderValue authenticationHeaderValue);
         IRestClientBuilder With(IRequestLogger requestLogger);
         IRestClientBuilder With(IDeserializer deserializer);
         IRestClientBuilder With(ISerializer serializer);

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using Activout.RestClient.DomainExceptions;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
@@ -34,11 +33,7 @@ namespace Activout.RestClient.Implementation
             };
         }
 
-        public IRestClientBuilder Accept(string accept)
-        {
-            return Header("Accept", accept);
-        }
-
+        
         public IRestClientBuilder BaseUri(Uri apiUri)
         {
             _context.BaseUri = AddTrailingSlash(apiUri);
@@ -51,7 +46,7 @@ namespace Activout.RestClient.Implementation
             return this;
         }
 
-        public IRestClientBuilder HttpClient(HttpClient httpClient)
+        public IRestClientBuilder With(HttpClient httpClient)
         {
             _context.HttpClient = httpClient;
             return this;
@@ -60,13 +55,6 @@ namespace Activout.RestClient.Implementation
         public IRestClientBuilder Header(string name, object value)
         {
             _context.DefaultHeaders.Add(new KeyValuePair<string, object>(name, value));
-            return this;
-        }
-
-        public IRestClientBuilder Header(AuthenticationHeaderValue authenticationHeaderValue)
-        {
-            _context.DefaultHeaders.Add(
-                new KeyValuePair<string, object>("Authorization", authenticationHeaderValue));
             return this;
         }
 

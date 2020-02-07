@@ -6,7 +6,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Activout.MovieReviews;
 using Activout.RestClient.Helpers.Implementation;
 using Activout.RestClient.Test.MovieReviews;
 using Moq;
@@ -35,9 +34,9 @@ namespace Activout.RestClient.Test
         {
             return _restClientFactory.CreateBuilder()
                 .Accept("application/json")
-                .ContentType(new MediaType("application/json"))
-                .HttpClient(_mockHttp.ToHttpClient())
-                .BaseUri(new Uri(BaseUri));
+                .ContentType("application/json")
+                .With(_mockHttp.ToHttpClient())
+                .BaseUri(BaseUri);
         }
 
         private IMovieReviewService CreateMovieReviewService()
@@ -160,7 +159,7 @@ namespace Activout.RestClient.Test
             var httpClient = _mockHttp.ToHttpClient();
             httpClient.Timeout = TimeSpan.FromMilliseconds(1);
             var reviewSvc = _restClientFactory.CreateBuilder()
-                .HttpClient(httpClient)
+                .With(httpClient)
                 .BaseUri(new Uri(BaseUri))
                 .Build<IMovieReviewService>();
 

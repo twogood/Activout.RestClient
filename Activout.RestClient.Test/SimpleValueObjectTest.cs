@@ -30,7 +30,7 @@ namespace Activout.RestClient.Test
     {
         Stuff GetStuff();
 
-        [HttpPost]
+        [Post]
         Task SetStuff(Stuff wrapper);
     }
 
@@ -102,7 +102,7 @@ namespace Activout.RestClient.Test
         private IValueObjectClient CreateClient()
         {
             return _restClientFactory.CreateBuilder()
-                .HttpClient(_mockHttp.ToHttpClient())
+                .With(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri))
                 .Build<IValueObjectClient>();
         }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Activout.MovieReviews
+namespace Activout.RestClient.Test.MovieReviews
 {
     public class ErrorResponse
     {

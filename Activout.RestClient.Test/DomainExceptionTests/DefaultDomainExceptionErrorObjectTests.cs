@@ -1,7 +1,6 @@
 using System;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Activout.RestClient.DomainExceptions;
@@ -44,7 +43,7 @@ namespace Activout.RestClient.Test.DomainExceptionTests
 
             _defaultMapperApiClient = Services.CreateRestClientFactory()
                 .CreateBuilder()
-                .HttpClient(_mockHttp.ToHttpClient())
+                .With(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri))
                 .Build<ISomeApiErrorObjectClient>();
         }

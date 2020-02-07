@@ -21,10 +21,10 @@ namespace Activout.RestClient.Test
     public interface IFormPostClient
     {
         [ContentType("application/x-www-form-urlencoded")]
-        [HttpPost("/form")]
+        [Post("/form")]
         Task PostObject(FormData formData);
 
-        [HttpPost("/form")]
+        [Post("/form")]
         Task PostEnumerable(IEnumerable<KeyValuePair<string, string>> formData);
     }
 
@@ -44,7 +44,7 @@ namespace Activout.RestClient.Test
         private IRestClientBuilder CreateRestClientBuilder()
         {
             return _restClientFactory.CreateBuilder()
-                .HttpClient(_mockHttp.ToHttpClient())
+                .With(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri));
         }
 

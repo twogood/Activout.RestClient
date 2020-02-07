@@ -14,9 +14,10 @@ The Activout Rest Client provides a type-safe approach to invoke RESTful service
 Here is an example - let’s say that you want to use a movie review service. The remote service might provide APIs to view users' reviews and allow you to post and modify your own reviews. You might start with an interface to represent the remote service like this:
 
 ```C#
-[InterfaceRoute("movies")]
+[Route("movies")]
 [ErrorResponse(typeof(ErrorResponse))]
-[InterfaceConsumes("application/json")]
+[Accept("application/json")]
+[ContentType("application/json")]
 public interface IMovieReviewService
 {
     Task<List<Movie>> GetAllMovies();
@@ -25,20 +26,20 @@ public interface IMovieReviewService
         [QueryParam] DateTime begin,
         [QueryParam] DateTime end);
 
-    [HttpGet("/{movieId}/reviews")]
+    [Get("/{movieId}/reviews")]
     Task<IEnumerable<Review>> GetAllReviews(string movieId);
 
-    [HttpGet("/{movieId}/reviews/{reviewId}")]
+    [Get("/{movieId}/reviews/{reviewId}")]
     Task<Review> GetReview(string movieId, string reviewId);
 
-    [HttpPost("/{movieId}/reviews")]
+    [Post("/{movieId}/reviews")]
     Task<Review> SubmitReview(string movieId, Review review);
 
-    [HttpPut("/{movieId}/reviews/{reviewId}")]
+    [Put("/{movieId}/reviews/{reviewId}")]
     Task<Review> UpdateReview(string movieId, string reviewId, Review review);
 
-    [HttpPost("/import.csv")]
-    [Consumes("text/csv")]
+    [Post("/import.csv")]
+    [ContentType("text/csv")]
     Task Import(string csv);
 }
 ```
@@ -66,14 +67,47 @@ This allows for a much more natural coding style, and the underlying implementat
 
 ## Usage notes
 
+- Built for ASP.NET Core 3.1
 - Both synchronous and asynchronous calls are supported. Asynchronous is recommended.
 - Additional serializers and deserializers can be added at will.
 - Support for custom error objects via \[ErrorResponse\] attribute. These will be included in a RestClientException that is thrown if the API call fails.
 
+### Usage with dependency injection through IServiceCollection
+
+```C#
+public static IServiceCollection AddRestClient(this IServiceCollection self)
+{
+  self.TryAddTransient<IDuckTyping, DuckTyping>();
+  self.TryAddTransient<IParamConverterManager, ParamConverterManager>();
+  self.TryAddTransient<IRestClientFactory, RestClientFactory>();
+  self.TryAddTransient<ITaskConverterFactory, TaskConverter2Factory>();
+  return self;
+}
+```
+
+
+## Breaking changes in version 3
+
+- Changed IRestClientBuilder.HttpClient() to a new overload of IRestClientBuilder.With()
+- Removed dependency on Microsoft.AspNetCore.Mvc.Core
+  - Removed AddRestClient extension method on IServiceCollection, see Usage notes above
+  - This means we now use our own attributes instead of those in Microsoft.AspNetCore.Mvc namespace:
+    - \[HttpGet] → \[Get]
+    - \[HttpPost] → \[Post]
+    - \[InterfaceRoute] → \[Route]
+    - \[InterfaceConsumes] and \[Consumes] → \[Accept] for setting Accept HTTP header or \[ContentType] for POST/PUT data
+    - Other attributes keep the same name but live in the Activout.RestClient namespace
+  - This also meant replacing MediaTypeCollection and MediaType from Microsoft.AspNetCore.Mvc.Formatters namespace:
+    - We have our own MediaType class now, which is just a value object
+    - IDeserializer has a new method CanDeserialize and the SupportedMediaTypes property is removed
+    - ISerializer has a new method CanSerialize and the SupportedMediaTypes property is removed
+    - ISerializationManager method signatures changed accordingly
+
+
 ## TODO
 
-- Support for cookie parameters
-- More real-life testing :)
+- Support for cookie parameters, if someone need them
+- Maybe extract JSON serialization/deserialization to its own project so that Newtonsoft.Json dependency becomes optional
 
 ## Similar projects
 

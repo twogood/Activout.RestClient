@@ -22,8 +22,8 @@ namespace Activout.RestClient.Test
             Assert.Equal("foo/bar", mediaType.Value);
             Assert.Equal("foo/bar", mediaType.ToString());
         }
-        
-        
+
+
         [Fact]
         public void TestEqualsAndHashCode()
         {

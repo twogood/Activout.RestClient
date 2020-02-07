@@ -82,7 +82,7 @@ namespace Activout.RestClient.Test.DomainExceptionTests
 
             _myApiClient = Services.CreateRestClientFactory()
                 .CreateBuilder()
-                .HttpClient(_mockHttp.ToHttpClient())
+                .With(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri))
                 .With(new MyDomainExceptionMapperFactory())
                 .Build<IMyApiErrorObjectClient>();

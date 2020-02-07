@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Activout.MovieReviews
+namespace Activout.RestClient.Test.MovieReviews
 {
     [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
     public class Movie

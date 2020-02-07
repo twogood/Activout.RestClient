@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Activout.MovieReviews;
 using Newtonsoft.Json.Linq;
 
 namespace Activout.RestClient.Test.MovieReviews
@@ -13,39 +12,39 @@ namespace Activout.RestClient.Test.MovieReviews
     [ErrorResponse(typeof(ErrorResponse))]
     public interface IMovieReviewService
     {
-        [HttpGet]
+        [Get]
         Task<IEnumerable<Movie>> GetAllMovies();
 
-        [HttpGet]
+        [Get]
         Task<IEnumerable<Movie>> GetAllMoviesCancellable(CancellationToken cancellationToken);
 
-        [HttpGet]
+        [Get]
         [Route("/{movieId}/reviews")]
         Task<IEnumerable<Review>> GetAllReviews(string movieId);
 
-        [HttpGet("/{movieId}/reviews/{reviewId}")]
+        [Get("/{movieId}/reviews/{reviewId}")]
         Review GetReview(string movieId, string reviewId);
 
-        [HttpDelete("/{movieId}/reviews/{reviewId}")]
+        [Delete("/{movieId}/reviews/{reviewId}")]
         void DeleteReview(string movieId, string reviewId);
 
-        [HttpGet("/fail")]
+        [Get("/fail")]
         [ErrorResponse(typeof(byte[]))]
         void Fail();
 
-        [HttpPost]
+        [Post]
         [Route("/{movieId}/reviews")]
         Task<Review> SubmitReview([RouteParam("movieId")] string movieId, Review review);
 
-        [HttpPut]
+        [Put]
         [Route("/{movieId}/reviews/{reviewId}")]
         Review UpdateReview(string movieId, [RouteParam] string reviewId, Review review);
 
-        [HttpPost("/import.csv")]
+        [Post("/import.csv")]
         [ContentType("text/csv")]
         Task Import(string csv);
 
-        [HttpGet]
+        [Get]
         Task<IEnumerable<Movie>> QueryMoviesByDate(
             [QueryParam] DateTime begin,
             [QueryParam] DateTime end);
@@ -60,7 +59,7 @@ namespace Activout.RestClient.Test.MovieReviews
         [Route("/array")]
         Task<JArray> GetJArray();
 
-        [HttpPost("/form")]
+        [Post("/form")]
         Task FormPost([FormParam] string value);
 
         [Route("/headers")]
@@ -81,6 +80,7 @@ namespace Activout.RestClient.Test.MovieReviews
         Task<StringObject> GetStringObject();
     }
 
+    [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
     public class StringObject
     {
         public string Value { get; }

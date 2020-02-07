@@ -3,7 +3,7 @@ using System.Net.Http;
 
 namespace Activout.RestClient
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Method)]
     public abstract class HttpMethodAttribute : TemplateAttribute
     {
         public HttpMethod HttpMethod { get; }
@@ -14,32 +14,32 @@ namespace Activout.RestClient
         }
     }
 
-    public class HttpDeleteAttribute : HttpMethodAttribute
+    public class DeleteAttribute : HttpMethodAttribute
     {
-        public HttpDeleteAttribute(string template = null) : base(HttpMethod.Delete, template)
+        public DeleteAttribute(string template = null) : base(HttpMethod.Delete, template)
         {
         }
     }
 
-    public class HttpGetAttribute : HttpMethodAttribute
+    public class GetAttribute : HttpMethodAttribute
     {
-        public HttpGetAttribute(string template = null) : base(HttpMethod.Get, template)
-        {
-        }
-    }
-
-
-    public class HttpPostAttribute : HttpMethodAttribute
-    {
-        public HttpPostAttribute(string template = null) : base(HttpMethod.Post, template)
+        public GetAttribute(string template = null) : base(HttpMethod.Get, template)
         {
         }
     }
 
 
-    public class HttpPutAttribute : HttpMethodAttribute
+    public class PostAttribute : HttpMethodAttribute
     {
-        public HttpPutAttribute(string template = null) : base(HttpMethod.Put, template)
+        public PostAttribute(string template = null) : base(HttpMethod.Post, template)
+        {
+        }
+    }
+
+
+    public class PutAttribute : HttpMethodAttribute
+    {
+        public PutAttribute(string template = null) : base(HttpMethod.Put, template)
         {
         }
     }
