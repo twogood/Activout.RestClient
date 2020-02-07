@@ -46,15 +46,15 @@ namespace Activout.RestClient.Implementation
             return this;
         }
 
-        public IRestClientBuilder With(HttpClient httpClient)
-        {
-            _context.HttpClient = httpClient;
-            return this;
-        }
-
         public IRestClientBuilder Header(string name, object value)
         {
             _context.DefaultHeaders.Add(new KeyValuePair<string, object>(name, value));
+            return this;
+        }
+
+        public IRestClientBuilder With(HttpClient httpClient)
+        {
+            _context.HttpClient = httpClient;
             return this;
         }
 

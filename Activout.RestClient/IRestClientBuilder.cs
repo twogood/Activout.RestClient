@@ -10,8 +10,8 @@ namespace Activout.RestClient
     {
         IRestClientBuilder BaseUri(Uri apiUri);
         IRestClientBuilder ContentType(MediaType contentType);
-        IRestClientBuilder With(HttpClient httpClient);
         IRestClientBuilder Header(string name, object value);
+        IRestClientBuilder With(HttpClient httpClient);
         IRestClientBuilder With(IRequestLogger requestLogger);
         IRestClientBuilder With(IDeserializer deserializer);
         IRestClientBuilder With(ISerializer serializer);
