@@ -11,13 +11,16 @@ using Xunit;
 
 namespace Activout.RestClient.Test.DomainExceptionTests
 {
-    [ErrorResponse(typeof(MyApiErrorResponse))]
+    [ErrorResponse(typeof(MyApiEnumErrorResponse))]
     [DomainException(typeof(SomeDomainErrorObjectException))]
     [DomainHttpError(HttpStatusCode.BadRequest, MyDomainErrorEnum.ClientError)]
     [DomainHttpError(HttpStatusCode.InternalServerError, MyDomainErrorEnum.ServerError)]
     public interface ISomeApiErrorObjectClient
     {
         Task Api();
+        
+        [ErrorResponse(typeof(MyApiIntErrorResponse))]
+        Task ApiIntError();
     }
 
     internal class SomeDomainErrorObjectException : Exception
@@ -50,7 +53,7 @@ namespace Activout.RestClient.Test.DomainExceptionTests
         }
 
         [Fact]
-        public async Task TestMapApiErrorObject()
+        public async Task TestMapApiEnumErrorObject()
         {
             // Arrange
             _mockHttp
@@ -60,6 +63,22 @@ namespace Activout.RestClient.Test.DomainExceptionTests
             // Act
             var exception = await Assert.ThrowsAsync<SomeDomainErrorObjectException>(() =>
                 _defaultMapperApiClient.Api());
+
+            // Assert
+            Assert.Equal(MyDomainErrorEnum.DomainFoo, exception.Error);
+        }
+
+        [Fact]
+        public async Task TestMapApiIntErrorObject()
+        {
+            // Arrange
+            _mockHttp
+                .Expect(BaseUri)
+                .Respond(_ => JsonHttpResponseMessage(HttpStatusCode.BadRequest, (int)MyApiError.Foo));
+
+            // Act
+            var exception = await Assert.ThrowsAsync<SomeDomainErrorObjectException>(() =>
+                _defaultMapperApiClient.ApiIntError());
 
             // Assert
             Assert.Equal(MyDomainErrorEnum.DomainFoo, exception.Error);
@@ -102,12 +121,12 @@ namespace Activout.RestClient.Test.DomainExceptionTests
             Assert.Equal(error, exception.Error);
             Assert.IsType<RestClientException>(exception.InnerException);
         }
-        
-        private static HttpResponseMessage JsonHttpResponseMessage(HttpStatusCode httpStatusCode, MyApiError myApiError)
+
+        private static HttpResponseMessage JsonHttpResponseMessage(HttpStatusCode httpStatusCode, object myApiError)
         {
             return new HttpResponseMessage(httpStatusCode)
             {
-                Content = new StringContent(JsonConvert.SerializeObject(new MyApiErrorResponse
+                Content = new StringContent(JsonConvert.SerializeObject(new
                 {
                     Code = myApiError
                 }), Encoding.UTF8, "application/json")

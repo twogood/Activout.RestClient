@@ -32,7 +32,7 @@ namespace Activout.RestClient.Test.DomainExceptionTests
         }
     }
 
-    [ErrorResponse(typeof(MyApiErrorResponse))]
+    [ErrorResponse(typeof(MyApiEnumErrorResponse))]
     [DomainException(typeof(MyDomainErrorObjectException))]
     public interface IMyApiErrorObjectClient
     {
@@ -48,7 +48,7 @@ namespace Activout.RestClient.Test.DomainExceptionTests
                 return new MyDomainErrorObjectException(new MyDomainErrorObject(MyDomainErrorEnum.Unknown), e);
             }
 
-            var domainError = data is MyApiErrorResponse errorResponse && errorResponse.Code == MyApiError.Bar
+            var domainError = data is MyApiEnumErrorResponse errorResponse && errorResponse.Code == MyApiError.Bar
                 ? new MyDomainErrorObject(MyDomainErrorEnum.DomainBar)
                 : new MyDomainErrorObject(MyDomainErrorEnum.Unknown);
 
@@ -124,7 +124,7 @@ namespace Activout.RestClient.Test.DomainExceptionTests
         {
             return new HttpResponseMessage(httpStatusCode)
             {
-                Content = new StringContent(JsonConvert.SerializeObject(new MyApiErrorResponse
+                Content = new StringContent(JsonConvert.SerializeObject(new MyApiEnumErrorResponse
                 {
                     Code = myApiError
                 }), Encoding.UTF8, "application/json")

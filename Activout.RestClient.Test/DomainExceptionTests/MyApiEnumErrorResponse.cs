@@ -1,8 +1,8 @@
 namespace Activout.RestClient.Test.DomainExceptionTests
 {
-    public class MyApiErrorResponse
+    public class MyApiEnumErrorResponse
     {
-        [MyDomainError(MyApiError.Foo, MyDomainErrorEnum.DomainFoo)]
+        [MyApiErrorEnum(MyApiError.Foo, MyDomainErrorEnum.DomainFoo)]
         public MyApiError Code { get; set; }
     }
 }
