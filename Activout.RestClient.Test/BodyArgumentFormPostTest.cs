@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using Xunit;
 
 namespace Activout.RestClient.Test
 {
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class FormData
     {
         public string SomeString { get; set; } = "foo";
