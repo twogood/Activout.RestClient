@@ -295,6 +295,11 @@ namespace Activout.RestClient.Implementation
                 return response.StatusCode;
             }
 
+            if (_actualReturnType == typeof(HttpResponseMessage))
+            {
+                return response;
+            }
+
             var data = await GetResponseData(request, response);
 
             if (response.IsSuccessStatusCode)
@@ -317,11 +322,6 @@ namespace Activout.RestClient.Implementation
             if (type == typeof(void) || response.Content == null)
             {
                 return null;
-            }
-
-            if (type == typeof(HttpResponseMessage))
-            {
-                return response;
             }
 
             // HttpContent or a subclass like MultipartFormDataContent
