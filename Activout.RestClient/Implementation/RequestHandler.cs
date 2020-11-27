@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
@@ -287,6 +288,11 @@ namespace Activout.RestClient.Implementation
             using (_context.RequestLogger.TimeOperation(request))
             {
                 response = await _context.HttpClient.SendAsync(request, cancellationToken);
+            }
+
+            if (_actualReturnType == typeof(HttpStatusCode))
+            {
+                return response.StatusCode;
             }
 
             var data = await GetResponseData(request, response);
