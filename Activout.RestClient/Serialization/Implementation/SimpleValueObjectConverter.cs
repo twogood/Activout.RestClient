@@ -25,7 +25,7 @@ namespace Activout.RestClient.Serialization.Implementation
         {
             var valueProperty = GetValueProperty(objectType);
             var value = serializer.Deserialize(reader, valueProperty.PropertyType);
-            return Activator.CreateInstance(objectType, value);
+            return value == null ? null : Activator.CreateInstance(objectType, value);
         }
 
         public override bool CanConvert(Type objectType)

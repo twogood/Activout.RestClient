@@ -99,6 +99,31 @@ namespace Activout.RestClient.Test
             Assert.Equal("foobar", result.FooBar.Value);
         }
 
+        [Fact]
+        public void TestSimpleValueObjectDeserializationWithNulls()
+        {
+            // Arrange
+            _mockHttp
+                .Expect(BaseUri)
+                .Respond(new StringContent(JsonConvert.SerializeObject(new
+                    {
+                        FooBar = (string) null,
+                        NullableInteger = (int?) null
+                    }),
+                    Encoding.UTF8,
+                    "application/json"));
+
+            var client = CreateClient();
+
+            // Act
+            var result = client.GetStuff();
+
+            // Assert
+            _mockHttp.VerifyNoOutstandingExpectation();
+            Assert.Null(result.FooBar);
+            Assert.Null(result.NullableInteger);
+        }
+
         private IValueObjectClient CreateClient()
         {
             return _restClientFactory.CreateBuilder()
