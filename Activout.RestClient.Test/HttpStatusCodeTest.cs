@@ -26,7 +26,7 @@ namespace Activout.RestClient.Test
         [InlineData(HttpStatusCode.Forbidden)]
         [InlineData(HttpStatusCode.InternalServerError)]
         [InlineData(HttpStatusCode.NoContent)]
-        public async Task TestSendMultipart(HttpStatusCode expectedStatusCode)
+        public async Task TestStatusCodeResponse(HttpStatusCode expectedStatusCode)
         {
             // Arrange
             var client = CreateClient();
