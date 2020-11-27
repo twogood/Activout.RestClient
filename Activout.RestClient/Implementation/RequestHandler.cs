@@ -166,9 +166,6 @@ namespace Activout.RestClient.Implementation
 
         public object Send(object[] args)
         {
-            if (_parameters.Length != args.Length)
-                throw new InvalidOperationException($"Expected {_parameters.Length} parameters but got {args.Length}");
-
             var headers = new List<KeyValuePair<string, object>>();
             headers.AddRange(_requestHeaders);
 
