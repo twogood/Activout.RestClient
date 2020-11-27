@@ -75,8 +75,7 @@ namespace Activout.RestClient.Implementation
                         break;
                 }
 
-            _serializer = context.SerializationManager.GetSerializer(_contentType) ??
-                          throw new InvalidOperationException("No serializer for: " + _contentType);
+            _serializer = context.SerializationManager.GetSerializer(_contentType);
 
             if (context.UseDomainException)
             {
@@ -195,8 +194,17 @@ namespace Activout.RestClient.Implementation
                 {
                     request.Content = new FormUrlEncodedContent(formParams);
                 }
+                else if (args[_bodyArgumentIndex] is HttpContent httpContent)
+                {
+                    request.Content = httpContent;
+                }
                 else
                 {
+                    if (_serializer == null)
+                    {
+                        throw new InvalidOperationException("No serializer for: " + _contentType);
+                    }
+
                     request.Content = _serializer.Serialize(args[_bodyArgumentIndex], Encoding.UTF8, _contentType);
                 }
             }
@@ -310,7 +318,8 @@ namespace Activout.RestClient.Implementation
                 return response;
             }
 
-            if (type == typeof(HttpContent))
+            // HttpContent or a subclass like MultipartFormDataContent
+            if (type.IsInstanceOfType(response.Content))
             {
                 return response.Content;
             }
