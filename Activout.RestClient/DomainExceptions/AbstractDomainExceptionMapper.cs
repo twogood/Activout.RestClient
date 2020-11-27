@@ -15,11 +15,6 @@ namespace Activout.RestClient.DomainExceptions
         protected virtual Exception CreateException(HttpResponseMessage httpResponseMessage, object data,
             Exception innerException)
         {
-            return CreateException(httpResponseMessage, data);
-        }
-
-        protected virtual Exception CreateException(HttpResponseMessage httpResponseMessage, object data)
-        {
             throw new NotImplementedException();
         }
     }

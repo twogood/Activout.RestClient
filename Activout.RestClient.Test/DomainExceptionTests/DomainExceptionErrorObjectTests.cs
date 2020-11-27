@@ -41,18 +41,14 @@ namespace Activout.RestClient.Test.DomainExceptionTests
 
     internal class MyDomainExceptionObjectMapper : AbstractDomainExceptionMapper
     {
-        protected override Exception CreateException(HttpResponseMessage httpResponseMessage, object data)
+        protected override Exception CreateException(HttpResponseMessage httpResponseMessage, object data,
+            Exception innerException)
         {
-            if (data is Exception e)
-            {
-                return new MyDomainErrorObjectException(new MyDomainErrorObject(MyDomainErrorEnum.Unknown), e);
-            }
-
             var domainError = data is MyApiErrorResponse errorResponse && errorResponse.Code == MyApiError.Bar
                 ? new MyDomainErrorObject(MyDomainErrorEnum.DomainBar)
                 : new MyDomainErrorObject(MyDomainErrorEnum.Unknown);
 
-            return new MyDomainErrorObjectException(domainError);
+            return new MyDomainErrorObjectException(domainError, innerException);
         }
     }
 
@@ -118,6 +114,7 @@ namespace Activout.RestClient.Test.DomainExceptionTests
 
             // Assert
             Assert.Equal(MyDomainErrorEnum.Unknown, exception.Error.ErrorEnum);
+            Assert.IsType<MissingMethodException>(exception.InnerException);
         }
 
         private static HttpResponseMessage JsonHttpResponseMessage(HttpStatusCode httpStatusCode, MyApiError myApiError)
