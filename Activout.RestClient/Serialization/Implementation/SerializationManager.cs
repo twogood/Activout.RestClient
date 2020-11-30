@@ -27,7 +27,8 @@ namespace Activout.RestClient.Serialization.Implementation
         public static readonly IReadOnlyCollection<IDeserializer> DefaultDeserializers =
             new List<IDeserializer>
                 {
-                    new JsonDeserializer(DefaultJsonSerializerSettings), new StringDeserializer(),
+                    new JsonDeserializer(DefaultJsonSerializerSettings),
+                    new StringDeserializer(),
                     new ByteArrayDeserializer()
                 }
                 .ToImmutableList();
@@ -39,8 +40,8 @@ namespace Activout.RestClient.Serialization.Implementation
         public SerializationManager(IReadOnlyCollection<ISerializer> serializers = null,
             IReadOnlyCollection<IDeserializer> deserializers = null)
         {
-            Serializers = serializers ?? DefaultSerializers;
-            Deserializers = deserializers ?? DefaultDeserializers;
+            Serializers = (serializers ?? DefaultSerializers).OrderBy(s => s.Order).ToArray();
+            Deserializers = (deserializers ?? DefaultDeserializers).OrderBy(s => s.Order).ToArray();
         }
 
         public IDeserializer GetDeserializer(MediaType mediaType)

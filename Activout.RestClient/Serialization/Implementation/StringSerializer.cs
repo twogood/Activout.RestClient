@@ -5,6 +5,8 @@ namespace Activout.RestClient.Serialization.Implementation
 {
     internal class StringSerializer : ISerializer
     {
+        public int Order { get; set; }
+
         public HttpContent Serialize(object data, Encoding encoding, MediaType mediaType)
         {
             return new StringContent(data.ToString(), encoding, mediaType.Value);

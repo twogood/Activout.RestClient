@@ -17,6 +17,8 @@ namespace Activout.RestClient.Serialization.Implementation
             _jsonSerializerSettings = jsonSerializerSettings;
         }
 
+        public int Order { get; set; }
+
         public HttpContent Serialize(object data, Encoding encoding, MediaType mediaType)
         {
             return new StringContent(

@@ -13,6 +13,8 @@ namespace Activout.RestClient.Serialization.Implementation
             MediaType.ValueOf("application/octet-stream")
         };
 
+        public int Order { get; set; }
+
         public async Task<object> Deserialize(HttpContent content, Type type)
         {
             var bytes = await content.ReadAsByteArrayAsync();

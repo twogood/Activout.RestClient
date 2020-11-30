@@ -6,6 +6,8 @@ namespace Activout.RestClient.Serialization.Implementation
 {
     internal class StringDeserializer : IDeserializer
     {
+        public int Order { get; set; }
+
         public async Task<object> Deserialize(HttpContent content, Type type)
         {
             var stringData = await content.ReadAsStringAsync();

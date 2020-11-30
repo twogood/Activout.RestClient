@@ -19,6 +19,8 @@ namespace Activout.RestClient.Serialization.Implementation
             _jsonSerializerSettings = jsonSerializerSettings;
         }
 
+        public int Order { get; set; }
+
         public async Task<object> Deserialize(HttpContent content, Type type)
         {
             if (type == typeof(JObject))

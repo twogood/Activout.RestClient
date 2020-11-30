@@ -14,6 +14,8 @@ namespace Activout.RestClient.Serialization.Implementation
             MediaType.ValueOf("application/x-www-form-urlencoded")
         };
 
+        public int Order { get; set; }
+
         public HttpContent Serialize(object data, Encoding encoding, MediaType mediaType)
         {
             if (data == null)
