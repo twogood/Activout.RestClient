@@ -3,7 +3,7 @@ using Activout.RestClient.ParamConverter;
 
 namespace Activout.RestClient.Implementation
 {
-    internal class RestClientFactory : IRestClientFactory
+    public class RestClientFactory : IRestClientFactory
     {
         private readonly IDuckTyping _duckTyping;
         private readonly IParamConverterManager _paramConverterManager;
