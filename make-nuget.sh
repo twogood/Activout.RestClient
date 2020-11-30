@@ -21,3 +21,6 @@ dotnet pack \
 
 echo "README:"
 echo "https://raw.githubusercontent.com/twogood/Activout.RestClient/main/README.md"
+echo "Upload:"
+echo "https://www.nuget.org/packages/manage/upload"
+
