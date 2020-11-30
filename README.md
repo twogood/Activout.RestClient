@@ -92,16 +92,20 @@ public static IServiceCollection AddRestClient(this IServiceCollection self)
 - Removed dependency on Microsoft.AspNetCore.Mvc.Core
   - Removed AddRestClient extension method on IServiceCollection, see Usage notes above
   - This means we now use our own attributes instead of those in Microsoft.AspNetCore.Mvc namespace:
-    - \[HttpGet] → \[Get]
-    - \[HttpPost] → \[Post]
-    - \[InterfaceRoute] → \[Route]
-    - \[InterfaceConsumes] and \[Consumes] → \[Accept] for setting Accept HTTP header or \[ContentType] for POST/PUT data
+    - `[HttpGet]` → `[Get]`
+    - `[HttpPost]` → `[Post]`
+    - `[HttpPut]` → `[Put]`
+    - `[HttpDelete]` → `[Delete]`
+    - `[InterfaceRoute]` → `[Path]`
+    - `[Route]` → `[Path]`
+    - `[RouteParam]` → `[PathParam]`
+    - `[InterfaceConsumes]` and `[Consumes]` → `[Accept]` for setting Accept HTTP header or `[ContentType]` for POST/PUT data
     - Other attributes keep the same name but live in the Activout.RestClient namespace
-  - This also meant replacing MediaTypeCollection and MediaType from Microsoft.AspNetCore.Mvc.Formatters namespace:
-    - We have our own MediaType class now, which is just a value object
-    - IDeserializer has a new method CanDeserialize and the SupportedMediaTypes property is removed
-    - ISerializer has a new method CanSerialize and the SupportedMediaTypes property is removed
-    - ISerializationManager method signatures changed accordingly
+  - This also meant replacing `MediaTypeCollection` and `MediaType` from Microsoft.AspNetCore.Mvc.Formatters namespace:
+    - We have our own `MediaType` class now, which is just a value object
+    - `IDeserializer` has a new method `CanDeserialize` and the `SupportedMediaTypes` property is removed. It also has a property
+    - `ISerializer` has a new method `CanSerialize` and the `SupportedMediaTypes` property is removed
+    - `ISerializationManager` method signatures changed accordingly
 
 
 ## TODO
