@@ -71,8 +71,8 @@ namespace Activout.RestClient.Implementation
                         _httpMethod = GetHttpMethod(httpMethodAttribute);
                         break;
 
-                    case RouteAttribute routeAttribute:
-                        templateBuilder.Append(routeAttribute.Template);
+                    case PathAttribute pathAttribute:
+                        templateBuilder.Append(pathAttribute.Template);
                         break;
                 }
 
@@ -221,7 +221,7 @@ namespace Activout.RestClient.Implementation
             headers.ForEach(p => request.Headers.Add(p.Key, p.Value.ToString()));
         }
 
-        private CancellationToken GetParams(IReadOnlyList<object> args, IDictionary<string, object> routeParams,
+        private CancellationToken GetParams(IReadOnlyList<object> args, IDictionary<string, object> pathParams,
             ICollection<string> queryParams, ICollection<KeyValuePair<string, string>> formParams,
             List<KeyValuePair<string, object>> headers)
         {
@@ -243,9 +243,9 @@ namespace Activout.RestClient.Implementation
 
                 foreach (var attribute in parameterAttributes)
                 {
-                    if (attribute is RouteParamAttribute routeParamAttribute)
+                    if (attribute is PathParamAttribute pathParamAttribute)
                     {
-                        routeParams[routeParamAttribute.Name ?? name] = escapedValue;
+                        pathParams[pathParamAttribute.Name ?? name] = escapedValue;
                         handled = true;
                     }
                     else if (attribute is QueryParamAttribute queryParamAttribute)
@@ -270,7 +270,7 @@ namespace Activout.RestClient.Implementation
 
                 if (!handled)
                 {
-                    routeParams[name] = escapedValue;
+                    pathParams[name] = escapedValue;
                 }
             }
 

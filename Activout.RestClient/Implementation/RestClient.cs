@@ -42,8 +42,8 @@ namespace Activout.RestClient.Implementation
                     case HeaderAttribute headerAttribute:
                         _context.DefaultHeaders.AddOrReplaceHeader(headerAttribute.Name, headerAttribute.Value, headerAttribute.Replace);
                         break;
-                    case RouteAttribute routeAttribute:
-                        _context.BaseTemplate = routeAttribute.Template;
+                    case PathAttribute pathAttribute:
+                        _context.BaseTemplate = pathAttribute.Template;
                         break;
                 }
         }

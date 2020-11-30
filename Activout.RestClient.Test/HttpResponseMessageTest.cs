@@ -43,7 +43,7 @@ namespace Activout.RestClient.Test
             Assert.Equal(expectedStatusCode, httpResponseMessage.StatusCode);
         }
 
-        [Route("response-message")]
+        [Path("response-message")]
         // ReSharper disable once MemberCanBePrivate.Global
         public interface IHttpResponseMessageClient
         {

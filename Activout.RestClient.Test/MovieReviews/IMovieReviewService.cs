@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Activout.RestClient.Test.MovieReviews
 {
-    [Route("movies")]
+    [Path("movies")]
     [ErrorResponse(typeof(ErrorResponse))]
     public interface IMovieReviewService
     {
@@ -19,7 +19,7 @@ namespace Activout.RestClient.Test.MovieReviews
         Task<IEnumerable<Movie>> GetAllMoviesCancellable(CancellationToken cancellationToken);
 
         [Get]
-        [Route("/{movieId}/reviews")]
+        [Path("/{movieId}/reviews")]
         Task<IEnumerable<Review>> GetAllReviews(string movieId);
 
         [Get("/{movieId}/reviews/{reviewId}")]
@@ -33,12 +33,12 @@ namespace Activout.RestClient.Test.MovieReviews
         void Fail();
 
         [Post]
-        [Route("/{movieId}/reviews")]
-        Task<Review> SubmitReview([RouteParam("movieId")] string movieId, Review review);
+        [Path("/{movieId}/reviews")]
+        Task<Review> SubmitReview([PathParam("movieId")] string movieId, Review review);
 
         [Put]
-        [Route("/{movieId}/reviews/{reviewId}")]
-        Review UpdateReview(string movieId, [RouteParam] string reviewId, Review review);
+        [Path("/{movieId}/reviews/{reviewId}")]
+        Review UpdateReview(string movieId, [PathParam] string reviewId, Review review);
 
         [Post("/import.csv")]
         [ContentType("text/csv")]
@@ -53,29 +53,29 @@ namespace Activout.RestClient.Test.MovieReviews
 
         HttpResponseMessage GetHttpResponseMessage();
 
-        [Route("/object")]
+        [Path("/object")]
         JObject GetJObject();
 
-        [Route("/array")]
+        [Path("/array")]
         Task<JArray> GetJArray();
 
         [Post("/form")]
         Task FormPost([FormParam] string value);
 
-        [Route("/headers")]
+        [Path("/headers")]
         Task<HttpResponseMessage> SendFooHeader([HeaderParam("X-Foo")] string foo);
 
-        [Route("/bytes")]
+        [Path("/bytes")]
         Task<byte[]> GetByteArray();
 
-        [Route("/byte-object")]
+        [Path("/byte-object")]
         Task<ByteArrayObject> GetByteArrayObject();
 
-        [Route("/string")]
+        [Path("/string")]
         [Accept("text/plain")]
         Task<string> GetString();
 
-        [Route("/string-object")]
+        [Path("/string-object")]
         [Accept("text/plain")]
         Task<StringObject> GetStringObject();
     }

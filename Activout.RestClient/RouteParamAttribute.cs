@@ -1,6 +1,9 @@
-﻿namespace Activout.RestClient
+﻿using System;
+
+namespace Activout.RestClient
 {
-    public class RouteParamAttribute : NamedParamAttribute
+    [Obsolete("Please use [PathParam] instead!")]
+    public class RouteParamAttribute : PathParamAttribute
     {
         public RouteParamAttribute(string name = null) : base(name)
         {

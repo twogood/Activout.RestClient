@@ -43,7 +43,7 @@ namespace Activout.RestClient.Test
             Assert.Equal(expectedStatusCode, statusCode);
         }
 
-        [Route("status-code")]
+        [Path("status-code")]
         // ReSharper disable once MemberCanBePrivate.Global
         public interface IHttpStatusCodeClient
         {

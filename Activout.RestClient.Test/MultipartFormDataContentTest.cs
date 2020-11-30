@@ -76,7 +76,7 @@ namespace Activout.RestClient.Test
         }
 
 
-        [Route("multipart")]
+        [Path("multipart")]
         // ReSharper disable once MemberCanBePrivate.Global
         public interface IMultipartFormDataContentClient
         {
