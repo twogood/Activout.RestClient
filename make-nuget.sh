@@ -17,3 +17,7 @@ dotnet pack \
 	--include-symbols \
 	--include-source \
 	Activout.RestClient/Activout.RestClient.csproj
+
+
+echo "README:"
+echo "https://raw.githubusercontent.com/twogood/Activout.RestClient/main/README.md"
