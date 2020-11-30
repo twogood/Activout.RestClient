@@ -14,7 +14,7 @@ The Activout Rest Client provides a type-safe approach to invoke RESTful service
 Here is an example - let’s say that you want to use a movie review service. The remote service might provide APIs to view users' reviews and allow you to post and modify your own reviews. You might start with an interface to represent the remote service like this:
 
 ```C#
-[Route("movies")]
+[Path("movies")]
 [ErrorResponse(typeof(ErrorResponse))]
 [Accept("application/json")]
 [ContentType("application/json")]
