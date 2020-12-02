@@ -50,7 +50,7 @@ Now we can use this interface as a means to invoke the actual remote review serv
 var restClientFactory = Services.CreateRestClientFactory();
 var movieReviewService = restClientFactory
             .CreateBuilder()
-            .HttpClient(_httpClient)
+            .With(_httpClient)
             .BaseUri(new Uri("http://localhost:9080/movieReviewService"))
             .Build<IMovieReviewService>();
 
