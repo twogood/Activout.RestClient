@@ -20,7 +20,8 @@ namespace Activout.RestClient.Serialization.Implementation
             {
                 new FormUrlEncodedSerializer(),
                 new JsonSerializer(DefaultJsonSerializerSettings),
-                new StringSerializer()
+                new StringSerializer(),
+                new ByteArraySerializer()
             }
             .ToImmutableList();
 

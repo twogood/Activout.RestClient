@@ -1,8 +1,8 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Activout.RestClient.Serialization.Implementation;
 using RichardSzalay.MockHttp;
 using Xunit;
 
@@ -26,6 +26,65 @@ namespace Activout.RestClient.Test
         {
             // Arrange
             var client = CreateClient();
+            var collector = new HttpRequestMessageCollector();
+
+            _mockHttp
+                .Expect(HttpMethod.Post, BaseUri + "multipart")
+                .With(message =>
+                {
+                    collector.Message = message;
+                    return message.Content.Headers.ContentType.MediaType == "multipart/form-data";
+                })
+                .Respond(HttpStatusCode.OK);
+
+            // Act
+            await client.SendParts(new FormModel
+            {
+                MyInt = 42, MyString = "foobar"
+            }, new[]
+            {
+                new Part<string>
+                {
+                    Content = "foo",
+                    FileName = "foo.txt"
+                },
+                new Part<string>
+                {
+                    Content = "bar",
+                    FileName = "bar.txt"
+                }
+            });
+
+            // Assert
+            _mockHttp.VerifyNoOutstandingExpectation();
+
+            var multipartFormDataContent = collector.Message.Content as MultipartFormDataContent;
+            Assert.NotNull(multipartFormDataContent);
+
+            var content = multipartFormDataContent.ToArray();
+            Assert.Equal(3, content.Length);
+
+            var formContent = content[0];
+            Assert.Equal("MyString=foobar&MyInt=42", await formContent.ReadAsStringAsync());
+            Assert.Null(formContent.Headers.ContentDisposition.Name);
+            Assert.Null(formContent.Headers.ContentDisposition.FileName);
+
+            var attachment1 = content[1];
+            Assert.Equal("foo", await attachment1.ReadAsStringAsync());
+            Assert.Equal("attachment", attachment1.Headers.ContentDisposition.Name);
+            Assert.Equal("foo.txt", attachment1.Headers.ContentDisposition.FileName);
+
+            var attachment2 = content[2];
+            Assert.Equal("bar", await attachment2.ReadAsStringAsync());
+            Assert.Equal("attachment", attachment2.Headers.ContentDisposition.Name);
+            Assert.Equal("bar.txt", attachment2.Headers.ContentDisposition.FileName);
+        }
+
+        [Fact]
+        public async Task TestSendMultipartFormDataContent()
+        {
+            // Arrange
+            var client = CreateClient();
 
             _mockHttp
                 .Expect(HttpMethod.Post, BaseUri + "multipart")
@@ -41,7 +100,7 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public async Task TestReceiveMultipart()
+        public async Task TestReceiveMultipartFormDataContent()
         {
             // Arrange
             var client = CreateClient();
@@ -88,6 +147,19 @@ namespace Activout.RestClient.Test
 
             [Accept("multipart/form-data")]
             public Task<HttpContent> ReceiveHttpContent();
+
+            [Post]
+            Task SendParts(
+                [PartParam("", contentType: "application/x-www-form-urlencoded")]
+                FormModel form,
+                [PartParam("attachment", contentType: "application/octet-stream")]
+                Part<string>[] parts);
+        }
+
+        public class FormModel
+        {
+            public string MyString { get; set; }
+            public int? MyInt { get; set; }
         }
 
         private IRestClientBuilder CreateRestClientBuilder()

@@ -172,7 +172,8 @@ namespace Activout.RestClient.Implementation
             var routeParams = new Dictionary<string, object>();
             var queryParams = new List<string>();
             var formParams = new List<KeyValuePair<string, string>>();
-            var cancellationToken = GetParams(args, routeParams, queryParams, formParams, headers);
+            var partParams = new List<Part<HttpContent>>();
+            var cancellationToken = GetParams(args, routeParams, queryParams, formParams, headers, partParams);
 
             var requestUriString = ExpandTemplate(routeParams);
             if (queryParams.Any())
@@ -188,22 +189,17 @@ namespace Activout.RestClient.Implementation
 
             if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put)
             {
-                if (formParams.Any())
+                if (partParams.Count != 0)
+                {
+                    request.Content = CreateMultipartFormDataContent(partParams);
+                }
+                else if (formParams.Any())
                 {
                     request.Content = new FormUrlEncodedContent(formParams);
                 }
-                else if (args[_bodyArgumentIndex] is HttpContent httpContent)
-                {
-                    request.Content = httpContent;
-                }
                 else
                 {
-                    if (_serializer == null)
-                    {
-                        throw new InvalidOperationException("No serializer for: " + _contentType);
-                    }
-
-                    request.Content = _serializer.Serialize(args[_bodyArgumentIndex], Encoding.UTF8, _contentType);
+                    request.Content = GetHttpContent(_serializer, args[_bodyArgumentIndex], _contentType);
                 }
             }
 
@@ -216,66 +212,156 @@ namespace Activout.RestClient.Implementation
             return task.Result;
         }
 
+        private static MultipartFormDataContent CreateMultipartFormDataContent(
+            IEnumerable<Part<HttpContent>> partParams)
+        {
+            var content = new MultipartFormDataContent();
+            foreach (var part in partParams)
+            {
+                if (!string.IsNullOrEmpty(part.FileName))
+                {
+                    content.Add(part.Content, part.Name, part.FileName);
+                }
+                else if (!string.IsNullOrEmpty(part.Name))
+                {
+                    content.Add(part.Content, part.Name);
+                }
+                else
+                {
+                    content.Add(part.Content);
+                }
+            }
+
+            return content;
+        }
+
         private void SetHeaders(HttpRequestMessage request, List<KeyValuePair<string, object>> headers)
         {
             headers.ForEach(p => request.Headers.Add(p.Key, p.Value.ToString()));
         }
 
-        private CancellationToken GetParams(IReadOnlyList<object> args, IDictionary<string, object> pathParams,
-            ICollection<string> queryParams, ICollection<KeyValuePair<string, string>> formParams,
-            List<KeyValuePair<string, object>> headers)
+        private CancellationToken GetParams(
+            IReadOnlyList<object> args,
+            IDictionary<string, object> pathParams,
+            ICollection<string> queryParams,
+            ICollection<KeyValuePair<string, string>> formParams,
+            List<KeyValuePair<string, object>> headers,
+            List<Part<HttpContent>> parts)
         {
             var cancellationToken = CancellationToken.None;
 
+
             for (var i = 0; i < _parameters.Length; i++)
             {
-                if (args[i] is CancellationToken ct)
+                var rawValue = args[i];
+                if (rawValue is CancellationToken ct)
                 {
                     cancellationToken = ct;
                     continue;
                 }
 
                 var parameterAttributes = _parameters[i].GetCustomAttributes(false);
-                var name = _parameters[i].Name;
-                var value = _paramConverters[i].ToString(args[i]);
-                var escapedValue = Uri.EscapeDataString(value);
+                var parameterName = _parameters[i].Name;
+                var stringValue = _paramConverters[i].ToString(rawValue);
                 var handled = false;
 
                 foreach (var attribute in parameterAttributes)
                 {
-                    if (attribute is PathParamAttribute pathParamAttribute)
+                    if (attribute is PartParamAttribute partAttribute)
                     {
-                        pathParams[pathParamAttribute.Name ?? name] = escapedValue;
+                        if (_parameters[i].ParameterType.IsArray)
+                        {
+                            var items = (object[]) rawValue;
+                            parts.AddRange(items.Select(item =>
+                                GetPartNameAndHttpContent(partAttribute, parameterName, item)));
+                        }
+                        else
+                        {
+                            parts.Add(GetPartNameAndHttpContent(partAttribute, parameterName, rawValue));
+                        }
+
+                        handled = true;
+                    }
+                    else if (attribute is PathParamAttribute pathParamAttribute)
+                    {
+                        pathParams[pathParamAttribute.Name ?? parameterName] = Uri.EscapeDataString(stringValue);
                         handled = true;
                     }
                     else if (attribute is QueryParamAttribute queryParamAttribute)
                     {
-                        name = queryParamAttribute.Name ?? name;
-                        queryParams.Add(Uri.EscapeDataString(name) + "=" + escapedValue);
+                        queryParams.Add(Uri.EscapeDataString(queryParamAttribute.Name ?? parameterName) + "=" +
+                                        Uri.EscapeDataString(stringValue));
                         handled = true;
                     }
                     else if (attribute is FormParamAttribute formParamAttribute)
                     {
-                        name = formParamAttribute.Name ?? name;
-                        formParams.Add(new KeyValuePair<string, string>(name, value));
+                        formParams.Add(new KeyValuePair<string, string>(formParamAttribute.Name ?? parameterName,
+                            stringValue));
                         handled = true;
                     }
                     else if (attribute is HeaderParamAttribute headerParamAttribute)
                     {
-                        name = headerParamAttribute.Name ?? name;
-                        headers.AddOrReplaceHeader(name, value, headerParamAttribute.Replace);
+                        headers.AddOrReplaceHeader(headerParamAttribute.Name ?? parameterName, stringValue,
+                            headerParamAttribute.Replace);
                         handled = true;
                     }
                 }
 
                 if (!handled)
                 {
-                    pathParams[name] = escapedValue;
+                    pathParams[parameterName] = Uri.EscapeDataString(stringValue);
                 }
             }
 
             return cancellationToken;
         }
+
+        private Part<HttpContent> GetPartNameAndHttpContent(PartParamAttribute partAttribute, string parameterName,
+            object rawValue)
+        {
+            string fileName = null;
+            string partName = null;
+
+            if (rawValue is Part part)
+            {
+                rawValue = part.InternalContent;
+                partName = part.Name;
+                fileName = part.FileName;
+            }
+
+            return new Part<HttpContent>
+            {
+                Content = GetPartHttpContent(partAttribute, rawValue),
+                Name = partName ?? partAttribute.Name ?? parameterName,
+                FileName = fileName ?? partAttribute.FileName
+            };
+        }
+
+        private HttpContent GetPartHttpContent(PartParamAttribute partAttribute, object value)
+        {
+            // TODO: prepare part serializer in advance
+
+            var serializer = partAttribute.ContentType == null
+                ? null
+                : _context.SerializationManager.GetSerializer(partAttribute.ContentType);
+            return GetHttpContent(serializer, value, partAttribute.ContentType);
+        }
+
+        private static HttpContent GetHttpContent(ISerializer serializer, object value, MediaType contentType)
+        {
+            if (value is HttpContent httpContent)
+            {
+                return httpContent;
+            }
+
+            if (serializer == null)
+            {
+                throw new InvalidOperationException("No serializer for: " + contentType);
+            }
+
+            return serializer.Serialize(value, Encoding.UTF8, contentType);
+        }
+
 
         private async Task<object> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
