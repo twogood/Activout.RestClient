@@ -22,7 +22,7 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public async Task TestSendMultipart()
+        public async Task TestSendNullPart()
         {
             // Arrange
             var client = CreateClient();
@@ -38,7 +38,41 @@ namespace Activout.RestClient.Test
                 .Respond(HttpStatusCode.OK);
 
             // Act
-            await client.SendParts(new FormModel
+            await client.SendParts(null, 42);
+
+            // Assert
+            _mockHttp.VerifyNoOutstandingExpectation();
+
+            var multipartFormDataContent = collector.Message.Content as MultipartFormDataContent;
+            Assert.NotNull(multipartFormDataContent);
+
+            var content = multipartFormDataContent.ToArray();
+            Assert.Single(content);
+
+            var part = content[0];
+            Assert.Equal("42", await part.ReadAsStringAsync());
+            Assert.Equal("bar", part.Headers.ContentDisposition.Name);
+            Assert.Equal("form-data", part.Headers.ContentDisposition.DispositionType);
+        }
+
+        [Fact]
+        public async Task TestSendFormInForm()
+        {
+            // Arrange
+            var client = CreateClient();
+            var collector = new HttpRequestMessageCollector();
+
+            _mockHttp
+                .Expect(HttpMethod.Post, BaseUri + "multipart")
+                .With(message =>
+                {
+                    collector.Message = message;
+                    return message.Content.Headers.ContentType.MediaType == "multipart/form-data";
+                })
+                .Respond(HttpStatusCode.OK);
+
+            // Act
+            await client.SendFormInForm(new FormModel
             {
                 MyInt = 42, MyString = "foobar"
             }, new[]
@@ -149,11 +183,17 @@ namespace Activout.RestClient.Test
             public Task<HttpContent> ReceiveHttpContent();
 
             [Post]
-            Task SendParts(
+            Task SendFormInForm(
                 [PartParam("", contentType: "application/x-www-form-urlencoded")]
                 FormModel form,
                 [PartParam("attachment", contentType: "application/octet-stream")]
                 Part<string>[] parts);
+
+
+            [Post]
+            Task SendParts(
+                [PartParam] string foo,
+                [PartParam] int bar);
         }
 
         public class FormModel

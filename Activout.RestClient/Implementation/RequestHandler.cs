@@ -19,6 +19,9 @@ namespace Activout.RestClient.Implementation
         // https://www.w3.org/Protocols/rfc2616/rfc2616-sec7.html#sec7.2.1
         private const string DefaultHttpContentType = "application/octet-stream";
 
+        // https://tools.ietf.org/html/rfc7578#section-4.4
+        private static readonly MediaType DefaultPartContentType = MediaType.ValueOf("text/plain");
+
         private readonly Type _actualReturnType;
         private readonly int _bodyArgumentIndex;
         private readonly MediaType _contentType;
@@ -272,12 +275,12 @@ namespace Activout.RestClient.Implementation
                         if (_parameters[i].ParameterType.IsArray)
                         {
                             var items = (object[]) rawValue;
-                            parts.AddRange(items.Select(item =>
+                            parts.AddRange(items.SelectMany(item =>
                                 GetPartNameAndHttpContent(partAttribute, parameterName, item)));
                         }
                         else
                         {
-                            parts.Add(GetPartNameAndHttpContent(partAttribute, parameterName, rawValue));
+                            parts.AddRange(GetPartNameAndHttpContent(partAttribute, parameterName, rawValue));
                         }
 
                         handled = true;
@@ -316,7 +319,8 @@ namespace Activout.RestClient.Implementation
             return cancellationToken;
         }
 
-        private Part<HttpContent> GetPartNameAndHttpContent(PartParamAttribute partAttribute, string parameterName,
+        private IEnumerable<Part<HttpContent>> GetPartNameAndHttpContent(PartParamAttribute partAttribute,
+            string parameterName,
             object rawValue)
         {
             string fileName = null;
@@ -329,22 +333,24 @@ namespace Activout.RestClient.Implementation
                 fileName = part.FileName;
             }
 
-            return new Part<HttpContent>
+            if (rawValue is { })
             {
-                Content = GetPartHttpContent(partAttribute, rawValue),
-                Name = partName ?? partAttribute.Name ?? parameterName,
-                FileName = fileName ?? partAttribute.FileName
-            };
+                yield return new Part<HttpContent>
+                {
+                    Content = GetPartHttpContent(partAttribute, rawValue),
+                    Name = partName ?? partAttribute.Name ?? parameterName,
+                    FileName = fileName ?? partAttribute.FileName
+                };
+            }
         }
 
         private HttpContent GetPartHttpContent(PartParamAttribute partAttribute, object value)
         {
             // TODO: prepare part serializer in advance
 
-            var serializer = partAttribute.ContentType == null
-                ? null
-                : _context.SerializationManager.GetSerializer(partAttribute.ContentType);
-            return GetHttpContent(serializer, value, partAttribute.ContentType);
+            var contentType = partAttribute.ContentType ?? DefaultPartContentType;
+            var serializer = _context.SerializationManager.GetSerializer(contentType);
+            return GetHttpContent(serializer, value, contentType);
         }
 
         private static HttpContent GetHttpContent(ISerializer serializer, object value, MediaType contentType)
