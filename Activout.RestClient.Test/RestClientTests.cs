@@ -8,19 +8,22 @@ using System.Threading;
 using System.Threading.Tasks;
 using Activout.RestClient.Helpers.Implementation;
 using Activout.RestClient.Test.MovieReviews;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Activout.RestClient.Test
 {
     public class RestClientTests
     {
-        public RestClientTests()
+        public RestClientTests(ITestOutputHelper outputHelper)
         {
             _restClientFactory = Services.CreateRestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
+            _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
         }
 
         private const string BaseUri = "http://localhost:9080/movieReviewService";
@@ -29,12 +32,14 @@ namespace Activout.RestClient.Test
 
         private readonly IRestClientFactory _restClientFactory;
         private readonly MockHttpMessageHandler _mockHttp;
+        private readonly ILoggerFactory _loggerFactory;
 
         private IRestClientBuilder CreateRestClientBuilder()
         {
             return _restClientFactory.CreateBuilder()
                 .Accept("application/json")
                 .ContentType("application/json")
+                .With(_loggerFactory.CreateLogger<RestClientTests>())
                 .With(_mockHttp.ToHttpClient())
                 .BaseUri(BaseUri);
         }

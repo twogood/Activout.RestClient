@@ -7,6 +7,8 @@ using Activout.RestClient.DomainExceptions;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Activout.RestClient.Implementation
 {
@@ -25,6 +27,7 @@ namespace Activout.RestClient.Implementation
             ErrorResponseType = typeof(string);
         }
 
+        public ILogger Logger { get; internal set; } = NullLogger.Instance;
         public Uri BaseUri { get; internal set; }
         public string BaseTemplate { get; internal set; }
         public ISerializer DefaultSerializer { get; internal set; }

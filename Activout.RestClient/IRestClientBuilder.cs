@@ -3,6 +3,7 @@ using System.Net.Http;
 using Activout.RestClient.DomainExceptions;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace Activout.RestClient
 {
@@ -11,6 +12,7 @@ namespace Activout.RestClient
         IRestClientBuilder BaseUri(Uri apiUri);
         IRestClientBuilder ContentType(MediaType contentType);
         IRestClientBuilder Header(string name, object value);
+        IRestClientBuilder With(ILogger logger);
         IRestClientBuilder With(HttpClient httpClient);
         IRestClientBuilder With(IRequestLogger requestLogger);
         IRestClientBuilder With(IDeserializer deserializer);

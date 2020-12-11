@@ -11,6 +11,7 @@ using Activout.RestClient.DomainExceptions;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace Activout.RestClient.Implementation
 {
@@ -36,6 +37,8 @@ namespace Activout.RestClient.Implementation
         private readonly IParamConverter[] _paramConverters;
         private readonly IDomainExceptionMapper _domainExceptionMapper;
         private readonly List<KeyValuePair<string, object>> _requestHeaders = new List<KeyValuePair<string, object>>();
+
+        private bool DebugLoggingEnabled => _context.Logger.IsEnabled(LogLevel.Debug);
 
         public RequestHandler(MethodInfo method, RestClientContext context)
         {
@@ -373,10 +376,34 @@ namespace Activout.RestClient.Implementation
         {
             PrepareRequestMessage(request);
 
+            if (DebugLoggingEnabled)
+            {
+                _context.Logger.LogDebug("{Request}", request);
+
+                if (request.Content != null)
+                {
+                    await request.Content.LoadIntoBufferAsync();
+                    _context.Logger.LogDebug("{RequestContent}",
+                        (await request.Content.ReadAsStringAsync()).SafeSubstring(0, 1000));
+                }
+            }
+
             HttpResponseMessage response;
             using (_context.RequestLogger.TimeOperation(request))
             {
                 response = await _context.HttpClient.SendAsync(request, cancellationToken);
+            }
+
+            if (DebugLoggingEnabled)
+            {
+                _context.Logger.LogDebug("{Response}", response);
+
+                if (response.Content != null)
+                {
+                    await response.Content.LoadIntoBufferAsync();
+                    _context.Logger.LogDebug("{ResponseContent}",
+                        (await response.Content.ReadAsStringAsync()).SafeSubstring(0, 1000));
+                }
             }
 
             if (_actualReturnType == typeof(HttpStatusCode))

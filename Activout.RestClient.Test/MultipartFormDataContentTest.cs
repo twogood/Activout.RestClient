@@ -3,8 +3,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using RichardSzalay.MockHttp;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Activout.RestClient.Test
 {
@@ -14,11 +16,13 @@ namespace Activout.RestClient.Test
 
         private readonly IRestClientFactory _restClientFactory;
         private readonly MockHttpMessageHandler _mockHttp;
+        private readonly ILoggerFactory _loggerFactory;
 
-        public MultipartFormDataContentTest()
+        public MultipartFormDataContentTest(ITestOutputHelper outputHelper)
         {
             _restClientFactory = Services.CreateRestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
+            _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
         }
 
         [Fact]
@@ -206,6 +210,7 @@ namespace Activout.RestClient.Test
         {
             return _restClientFactory.CreateBuilder()
                 .With(_mockHttp.ToHttpClient())
+                .With(_loggerFactory.CreateLogger<MultipartFormDataContentTest>())
                 .BaseUri(new Uri(BaseUri));
         }
 

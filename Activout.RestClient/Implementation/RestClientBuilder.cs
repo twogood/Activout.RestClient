@@ -7,6 +7,7 @@ using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
 using Activout.RestClient.Serialization.Implementation;
+using Microsoft.Extensions.Logging;
 
 namespace Activout.RestClient.Implementation
 {
@@ -49,6 +50,12 @@ namespace Activout.RestClient.Implementation
         public IRestClientBuilder Header(string name, object value)
         {
             _context.DefaultHeaders.Add(new KeyValuePair<string, object>(name, value));
+            return this;
+        }
+
+        public IRestClientBuilder With(ILogger logger)
+        {
+            _context.Logger = logger;
             return this;
         }
 
