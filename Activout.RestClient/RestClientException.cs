@@ -61,7 +61,9 @@ namespace Activout.RestClient
             return (T) ErrorResponse;
         }
 
+#if !NET5_0_OR_GREATER
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             if (info == null) throw new ArgumentNullException(nameof(info));

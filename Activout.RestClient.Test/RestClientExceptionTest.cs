@@ -60,6 +60,7 @@ namespace Activout.RestClient.Test
             Assert.Equal(expectedMessage, sut.Message);
         }
 
+#if !NET5_0_OR_GREATER
         [Fact]
         public void RestClientException_serialization_deserialization_test()
         {
@@ -82,5 +83,6 @@ namespace Activout.RestClient.Test
             Assert.Equal(originalException.Message, deserializedException.Message);
             Assert.Equal(originalException.ErrorResponse, deserializedException.ErrorResponse);
         }
+#endif
     }
 }
