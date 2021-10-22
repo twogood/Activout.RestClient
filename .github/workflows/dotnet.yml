@@ -30,6 +30,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal --blame-hang-timeout 45s --blame-hang-dump-type full
     - name: Archive test results
       uses: actions/upload-artifact@v2
+      if: always()
       with:
         name: TestResults
         path: |
