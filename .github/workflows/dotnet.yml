@@ -27,4 +27,4 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       timeout-minutes: 1
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal --blame-hang-timeout 45s --blame-hang-dump-type full
