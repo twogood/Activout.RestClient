@@ -193,7 +193,7 @@ namespace Activout.RestClient.Implementation
 
             SetHeaders(request, headers);
 
-            if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put)
+            if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put|| _httpMethod == HttpMethod.Patch)
             {
                 if (partParams.Count != 0)
                 {

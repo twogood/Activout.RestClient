@@ -40,6 +40,10 @@ namespace Activout.RestClient.Test.MovieReviews
         [Path("/{movieId}/reviews/{reviewId}")]
         Review UpdateReview(string movieId, [PathParam] string reviewId, Review review);
 
+        [Patch]
+        [Path("/{movieId}/reviews/{reviewId}")]
+        Review PartialUpdateReview(string movieId, [PathParam] string reviewId, Review review);
+
         [Post("/import.csv")]
         [ContentType("text/csv")]
         Task Import(string csv);
