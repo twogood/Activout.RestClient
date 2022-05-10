@@ -1,5 +1,4 @@
 # Activout Rest Client
-[![Build Status](https://travis-ci.org/twogood/Activout.RestClient.svg?branch=master)](https://travis-ci.org/twogood/Activout.RestClient)
 [![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=Activout.RestClient&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=Activout.RestClient)
 [![NuGet Badge](https://buildstats.info/nuget/Activout.RestClient)](https://www.nuget.org/packages/Activout.RestClient/)
 
