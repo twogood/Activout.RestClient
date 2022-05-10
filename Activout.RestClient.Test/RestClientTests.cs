@@ -365,6 +365,35 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
+        public void TestPatchSync()
+        {
+            // arrange
+            var movieId = "*MOVIE_ID*";
+            var reviewId = "*REVIEW_ID*";
+            _mockHttp
+                .When(HttpMethod.Patch, $"{BaseUri}/movies/{movieId}/reviews/{reviewId}")
+                .Respond(request => request.Content);
+
+            var reviewSvc = CreateMovieReviewService();
+
+            // act
+            var text = "This was actally really good!";
+            var stars = 5;
+            var review = new Review(stars, text)
+            {
+                MovieId = movieId,
+                ReviewId = reviewId
+            };
+            var result = reviewSvc.PartialUpdateReview(movieId, reviewId, review);
+
+            // assert
+            Assert.Equal(movieId, result.MovieId);
+            Assert.Equal(reviewId, result.ReviewId);
+            Assert.Equal(stars, result.Stars);
+            Assert.Equal(text, result.Text);
+        }
+
+        [Fact]
         public async Task TestGetHttpContent()
         {
             // arrange
