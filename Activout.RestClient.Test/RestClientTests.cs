@@ -186,7 +186,7 @@ namespace Activout.RestClient.Test
 
             // act
             cancellationTokenSource.Cancel();
-            await Assert.ThrowsAsync<OperationCanceledException>(() =>
+            await Assert.ThrowsAsync<TaskCanceledException>(() =>
                 reviewSvc.GetAllMoviesCancellable(cancellationTokenSource.Token));
 
             // assert
