@@ -12,27 +12,28 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: [ '6.0.x', '7.0.x', '8.0.0-rc2' ]
+        dotnet-version: [ '6.0.x', '7.0.x', '8.0.x' ]
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup dotnet ${{ matrix.dotnet-version }}
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: {{ matrix.dotnet-version }}
-    - name: Display dotnet version
-      run: dotnet --version
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      timeout-minutes: 2
-      run: dotnet test --no-build --verbosity normal --blame-hang-timeout 45s --blame-hang-dump-type full
-    - name: Archive test results
-      uses: actions/upload-artifact@v2
-      if: always()
-      with:
-        name: TestResults
-        path: |
-          /home/runner/work/Activout.RestClient/Activout.RestClient/Activout.RestClient.Test/TestResults/
+      - uses: actions/checkout@v4
+      - name: Setup dotnet ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: {{ matrix.dotnet-version }}
+      - name: Display dotnet version
+        run: dotnet --version
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        timeout-minutes: 2
+        run: dotnet test --no-build --verbosity normal --blame-hang-timeout 45s --blame-hang-dump-type full
+      - name: Archive test results
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: TestResults
+          path: |
+            /home/runner/work/Activout.RestClient/Activout.RestClient/Activout.RestClient.Test/TestResults/
+
