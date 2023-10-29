@@ -193,7 +193,7 @@ namespace Activout.RestClient.Implementation
 
             SetHeaders(request, headers);
 
-            if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put|| _httpMethod == HttpMethod.Patch)
+            if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put || _httpMethod == HttpMethod.Patch)
             {
                 if (partParams.Count != 0)
                 {
@@ -277,7 +277,7 @@ namespace Activout.RestClient.Implementation
                     {
                         if (_parameters[i].ParameterType.IsArray)
                         {
-                            var items = (object[]) rawValue;
+                            var items = (object[])rawValue;
                             parts.AddRange(items.SelectMany(item =>
                                 GetPartNameAndHttpContent(partAttribute, parameterName, item)));
                         }
@@ -485,7 +485,7 @@ namespace Activout.RestClient.Implementation
             HttpResponseMessage response,
             string contentTypeMediaType)
         {
-            var exception = (Exception) new RestClientException(request.RequestUri, response.StatusCode,
+            var exception = (Exception)new RestClientException(request.RequestUri, response.StatusCode,
                 "No deserializer found for " + contentTypeMediaType);
 
             if (response.IsSuccessStatusCode || !_context.UseDomainException)

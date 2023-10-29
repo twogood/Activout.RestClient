@@ -5,7 +5,7 @@ namespace Activout.RestClient.Implementation
         public static string SafeSubstring(this string value, int startIndex, int length)
         {
             if (string.IsNullOrWhiteSpace(value)) return string.Empty;
-            
+
             if (value.Length >= (startIndex + length))
             {
                 return value.Substring(startIndex, length);

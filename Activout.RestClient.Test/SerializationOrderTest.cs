@@ -37,10 +37,10 @@ namespace Activout.RestClient.Test
             _mockHttp
                 .Expect(HttpMethod.Get, BaseUri)
                 .Respond(new StringContent(JsonConvert.SerializeObject(new
-                    {
-                        my_value = "snake",
-                        MyValue = "camel"
-                    }),
+                {
+                    my_value = "snake",
+                    MyValue = "camel"
+                }),
                     Encoding.UTF8,
                     "application/json"));
 
@@ -70,7 +70,8 @@ namespace Activout.RestClient.Test
                     {
                         NamingStrategy = new SnakeCaseNamingStrategy()
                     }
-                }) {Order = orderOfJsonDeserializer})
+                })
+                { Order = orderOfJsonDeserializer })
                 .Build<ISerializationOrderClient>();
         }
 

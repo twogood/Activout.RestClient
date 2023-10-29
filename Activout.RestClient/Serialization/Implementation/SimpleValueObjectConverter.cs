@@ -40,7 +40,7 @@ namespace Activout.RestClient.Serialization.Implementation
 
         private static ConstructorInfo GetValueConstructor(Type objectType, PropertyInfo valueProperty)
         {
-            return objectType.GetConstructor(new[] {valueProperty.PropertyType});
+            return objectType.GetConstructor(new[] { valueProperty.PropertyType });
         }
 
         private static PropertyInfo GetValueProperty(Type objectType)

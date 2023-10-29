@@ -34,7 +34,7 @@ namespace Activout.RestClient.Implementation
             };
         }
 
-        
+
         public IRestClientBuilder BaseUri(Uri apiUri)
         {
             _context.BaseUri = AddTrailingSlash(apiUri);

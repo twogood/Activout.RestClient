@@ -68,7 +68,7 @@ namespace Activout.RestClient.Test
             _mockHttp.VerifyNoOutstandingExpectation();
 
             Assert.IsType<RestClientException>(aggregateException.InnerException);
-            var exception = (RestClientException) aggregateException.InnerException;
+            var exception = (RestClientException)aggregateException.InnerException;
 
             Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
             var error = exception.GetErrorResponse<ErrorResponse>();
@@ -102,12 +102,12 @@ namespace Activout.RestClient.Test
             _mockHttp
                 .Expect(HttpMethod.Get, $"{BaseUri}/movies/{movieId}/reviews")
                 .Respond(HttpStatusCode.NotFound, request => new StringContent(JsonConvert.SerializeObject(new
-                    {
-                        Errors = new object[]
+                {
+                    Errors = new object[]
                         {
                             new {Message = "Sorry, that page does not exist", Code = 34}
                         }
-                    }),
+                }),
                     Encoding.UTF8,
                     "application/json"));
         }
@@ -119,12 +119,12 @@ namespace Activout.RestClient.Test
             _mockHttp
                 .When(HttpMethod.Get, $"{BaseUri}/movies/{MovieId}/reviews/{ReviewId}")
                 .Respond(HttpStatusCode.NotFound, request => new StringContent(JsonConvert.SerializeObject(new
-                    {
-                        Errors = new object[]
+                {
+                    Errors = new object[]
                         {
                             new {Message = "Sorry, that page does not exist", Code = 34}
                         }
-                    }),
+                }),
                     Encoding.UTF8,
                     "application/json"));
 
@@ -134,7 +134,7 @@ namespace Activout.RestClient.Test
             var aggregateException = Assert.Throws<AggregateException>(() => reviewSvc.GetReview(MovieId, ReviewId));
 
             // assert
-            var exception = (RestClientException) aggregateException.GetBaseException();
+            var exception = (RestClientException)aggregateException.GetBaseException();
             Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
 
             dynamic dynamicError = exception.ErrorResponse;
@@ -222,7 +222,7 @@ namespace Activout.RestClient.Test
             var aggregateException = Assert.Throws<AggregateException>(() => reviewSvc.Fail());
 
             // assert
-            var exception = (RestClientException) aggregateException.GetBaseException();
+            var exception = (RestClientException)aggregateException.GetBaseException();
             Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
 
             Assert.NotNull(exception.ErrorResponse);
@@ -469,7 +469,7 @@ namespace Activout.RestClient.Test
             // arrange
             _mockHttp
                 .When($"{BaseUri}/movies/bytes")
-                .Respond(new ByteArrayContent(new byte[] {42}));
+                .Respond(new ByteArrayContent(new byte[] { 42 }));
 
             var reviewSvc = CreateMovieReviewService();
 
@@ -477,7 +477,7 @@ namespace Activout.RestClient.Test
             var bytes = await reviewSvc.GetByteArray();
 
             // assert
-            Assert.Equal(new byte[] {42}, bytes);
+            Assert.Equal(new byte[] { 42 }, bytes);
         }
 
         [Fact]
@@ -486,7 +486,7 @@ namespace Activout.RestClient.Test
             // arrange
             _mockHttp
                 .When($"{BaseUri}/movies/byte-object")
-                .Respond(new ByteArrayContent(new byte[] {42}));
+                .Respond(new ByteArrayContent(new byte[] { 42 }));
 
             var reviewSvc = CreateMovieReviewService();
 
@@ -494,7 +494,7 @@ namespace Activout.RestClient.Test
             var byteArrayObject = await reviewSvc.GetByteArrayObject();
 
             // assert
-            Assert.Equal(new byte[] {42}, byteArrayObject.Bytes);
+            Assert.Equal(new byte[] { 42 }, byteArrayObject.Bytes);
         }
 
         [Fact]

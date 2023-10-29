@@ -33,7 +33,7 @@ namespace Activout.RestClient.Serialization.Implementation
 
             return new FormUrlEncodedContent(
                 properties
-                    .Select(p => new {Property = p, Value = p.GetValue(data)})
+                    .Select(p => new { Property = p, Value = p.GetValue(data) })
                     .Where(x => x.Value != null)
                     .Select(x => new KeyValuePair<string, string>(GetKey(x.Property), SerializeValue(x.Value)))
             );

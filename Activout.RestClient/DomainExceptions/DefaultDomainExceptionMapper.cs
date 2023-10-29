@@ -34,11 +34,11 @@ namespace Activout.RestClient.DomainExceptions
 
             try
             {
-                return (Exception) Activator.CreateInstance(_domainExceptionType, domainError, innerException);
+                return (Exception)Activator.CreateInstance(_domainExceptionType, domainError, innerException);
             }
             catch (MissingMethodException)
             {
-                return (Exception) Activator.CreateInstance(_domainExceptionType, domainError);
+                return (Exception)Activator.CreateInstance(_domainExceptionType, domainError);
             }
         }
 
@@ -50,14 +50,14 @@ namespace Activout.RestClient.DomainExceptions
             }
 
             return (from property in GetProperties(data.GetType())
-                let attributes = property.GetCustomAttributes(typeof(DomainErrorAttribute), true)
-                    .Cast<DomainErrorAttribute>()
-                    .ToList()
-                where attributes.Any()
-                let value = property.GetValue(data)
-                from a in attributes
-                where a.ApiValue.Equals(value)
-                select a.DomainValue).FirstOrDefault();
+                    let attributes = property.GetCustomAttributes(typeof(DomainErrorAttribute), true)
+                        .Cast<DomainErrorAttribute>()
+                        .ToList()
+                    where attributes.Any()
+                    let value = property.GetValue(data)
+                    from a in attributes
+                    where a.ApiValue.Equals(value)
+                    select a.DomainValue).FirstOrDefault();
         }
 
         private object MapHttpStatusCodeByEnumName(HttpResponseMessage httpResponseMessage)
@@ -89,8 +89,8 @@ namespace Activout.RestClient.DomainExceptions
         private object MapGenericClientOrServerError(HttpResponseMessage httpResponseMessage)
         {
             var httpStatusCode = httpResponseMessage.StatusCode;
-            return ((int) httpStatusCode > 500 ? GetDomainErrorValue((HttpStatusCode) 500) : null)
-                   ?? ((int) httpStatusCode > 400 ? GetDomainErrorValue((HttpStatusCode) 400) : null);
+            return ((int)httpStatusCode > 500 ? GetDomainErrorValue((HttpStatusCode)500) : null)
+                   ?? ((int)httpStatusCode > 400 ? GetDomainErrorValue((HttpStatusCode)400) : null);
         }
 
         [SuppressMessage("SonarCloud", "S1523")]

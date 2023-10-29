@@ -41,9 +41,9 @@ namespace Activout.RestClient.Test
             // Arrange
             _mockHttp.Expect(BaseUri)
                 .Respond(new StringContent(JsonConvert.SerializeObject(new
-                    {
-                        Value = "PascalCase"
-                    }),
+                {
+                    Value = "PascalCase"
+                }),
                     Encoding.UTF8,
                     "application/json"));
 
@@ -62,9 +62,9 @@ namespace Activout.RestClient.Test
         {
             _mockHttp.Expect(BaseUri)
                 .Respond(new StringContent(JsonConvert.SerializeObject(new
-                    {
-                        value = "CamelCase"
-                    }),
+                {
+                    value = "CamelCase"
+                }),
                     Encoding.UTF8,
                     "application/json"));
         }

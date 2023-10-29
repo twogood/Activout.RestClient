@@ -12,7 +12,7 @@ namespace Activout.RestClient.ParamConverter.Implementation
 
         public string ToString(object value)
         {
-            return value == null ? "" : ((DateTime) value).ToString("o");
+            return value == null ? "" : ((DateTime)value).ToString("o");
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Activout.RestClient.ParamConverter.Implementation
 
         public ParamConverterManager()
         {
-            ParamConverters = new List<IParamConverter> {new DateTimeIso8601ParamConverter(), new ToStringParamConverter()};
+            ParamConverters = new List<IParamConverter> { new DateTimeIso8601ParamConverter(), new ToStringParamConverter() };
         }
 
         public IParamConverter GetConverter(ParameterInfo parameterInfo)

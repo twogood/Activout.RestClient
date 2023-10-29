@@ -78,7 +78,8 @@ namespace Activout.RestClient.Test
             // Act
             await client.SendFormInForm(new FormModel
             {
-                MyInt = 42, MyString = "foobar"
+                MyInt = 42,
+                MyString = "foobar"
             }, new[]
             {
                 new Part<string>

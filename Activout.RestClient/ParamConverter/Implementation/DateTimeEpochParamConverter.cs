@@ -11,7 +11,7 @@ namespace Activout.RestClient.ParamConverter.Implementation
             return (date.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
         }
     }
-    
+
     public class DateTimeEpochParamConverter : IParamConverter
     {
         public bool CanConvert(ParameterInfo parameterInfo)
@@ -21,7 +21,7 @@ namespace Activout.RestClient.ParamConverter.Implementation
 
         public string ToString(object value)
         {
-            return value == null ? "" : ((DateTime) value).ToUnixTime().ToString();
+            return value == null ? "" : ((DateTime)value).ToUnixTime().ToString();
         }
     }
 }

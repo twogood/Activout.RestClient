@@ -9,7 +9,7 @@ namespace Activout.RestClient
     {
         public static T GetValue<T>(this SerializationInfo self, string name)
         {
-            return (T) self.GetValue(name, typeof(T));
+            return (T)self.GetValue(name, typeof(T));
         }
 
         public static bool IsSerializable(this object obj)
@@ -58,7 +58,7 @@ namespace Activout.RestClient
 
         public T GetErrorResponse<T>()
         {
-            return (T) ErrorResponse;
+            return (T)ErrorResponse;
         }
 
 #if !NET5_0_OR_GREATER

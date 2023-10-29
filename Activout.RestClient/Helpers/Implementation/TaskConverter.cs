@@ -26,7 +26,7 @@ namespace Activout.RestClient.Helpers.Implementation
 
         public object ConvertReturnType(Task<object> task)
         {
-            return _continueWith.Invoke(task, new object[] {_lambda});
+            return _continueWith.Invoke(task, new object[] { _lambda });
         }
 
         private static MethodInfo GetContinueWithMethod(Type actualReturnType)
@@ -35,10 +35,10 @@ namespace Activout.RestClient.Helpers.Implementation
             var baseFuncType = typeof(Func<,>);
             var continueWithMethod = ObjectTaskType.GetMethods()
                 .Where(x => x.Name == nameof(Task.ContinueWith) && x.GetParameters().Length == 1)
-                .Select(x => new {M = x, P = x.GetParameters()})
+                .Select(x => new { M = x, P = x.GetParameters() })
                 .Where(x => x.P[0].ParameterType.IsGenericType &&
                             x.P[0].ParameterType.GetGenericTypeDefinition() == baseFuncType)
-                .Select(x => new {x.M, A = x.P[0].ParameterType.GetGenericArguments()})
+                .Select(x => new { x.M, A = x.P[0].ParameterType.GetGenericArguments() })
                 .Where(x => x.A[0].IsGenericType
                             && x.A[0].GetGenericTypeDefinition() == typeof(Task<>))
                 .Select(x => x.M)
@@ -62,7 +62,7 @@ namespace Activout.RestClient.Helpers.Implementation
         private static LambdaExpression InvokeLambdaMethod(MethodBase lambdaMethod, UnaryExpression expression,
             ParameterExpression parameter)
         {
-            return (LambdaExpression) lambdaMethod.Invoke(null, new object[] {expression, new[] {parameter}});
+            return (LambdaExpression)lambdaMethod.Invoke(null, new object[] { expression, new[] { parameter } });
         }
 
         private static MethodInfo GetLambdaMethod()

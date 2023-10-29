@@ -82,10 +82,10 @@ namespace Activout.RestClient.Test
             _mockHttp
                 .Expect(BaseUri)
                 .Respond(new StringContent(JsonConvert.SerializeObject(new
-                    {
-                        FooBar = "foobar",
-                        NullableInteger = 42
-                    }),
+                {
+                    FooBar = "foobar",
+                    NullableInteger = 42
+                }),
                     Encoding.UTF8,
                     "application/json"));
 
@@ -106,10 +106,10 @@ namespace Activout.RestClient.Test
             _mockHttp
                 .Expect(BaseUri)
                 .Respond(new StringContent(JsonConvert.SerializeObject(new
-                    {
-                        FooBar = (string) null,
-                        NullableInteger = (int?) null
-                    }),
+                {
+                    FooBar = (string)null,
+                    NullableInteger = (int?)null
+                }),
                     Encoding.UTF8,
                     "application/json"));
 

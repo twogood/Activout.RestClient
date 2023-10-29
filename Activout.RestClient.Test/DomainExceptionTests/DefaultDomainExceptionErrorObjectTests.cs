@@ -101,7 +101,7 @@ namespace Activout.RestClient.Test.DomainExceptionTests
             Assert.Equal(error, exception.Error);
             Assert.IsType<RestClientException>(exception.InnerException);
         }
-        
+
         private static HttpResponseMessage JsonHttpResponseMessage(HttpStatusCode httpStatusCode, MyApiError myApiError)
         {
             return new HttpResponseMessage(httpStatusCode)

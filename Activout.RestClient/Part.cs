@@ -11,7 +11,7 @@ namespace Activout.RestClient
     {
         public T Content
         {
-            get => (T) InternalContent;
+            get => (T)InternalContent;
             set => InternalContent = value;
         }
     }
