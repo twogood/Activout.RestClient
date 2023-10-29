@@ -101,7 +101,7 @@ namespace Activout.RestClient.Test
         {
             _mockHttp
                 .Expect(HttpMethod.Get, $"{BaseUri}/movies/{movieId}/reviews")
-                .Respond(HttpStatusCode.NotFound, request => new StringContent(JsonConvert.SerializeObject(new
+                .Respond(HttpStatusCode.NotFound, _ => new StringContent(JsonConvert.SerializeObject(new
                 {
                     Errors = new object[]
                         {
@@ -118,7 +118,7 @@ namespace Activout.RestClient.Test
             // arrange
             _mockHttp
                 .When(HttpMethod.Get, $"{BaseUri}/movies/{MovieId}/reviews/{ReviewId}")
-                .Respond(HttpStatusCode.NotFound, request => new StringContent(JsonConvert.SerializeObject(new
+                .Respond(HttpStatusCode.NotFound, _ => new StringContent(JsonConvert.SerializeObject(new
                 {
                     Errors = new object[]
                         {
@@ -213,7 +213,7 @@ namespace Activout.RestClient.Test
             // arrange
             _mockHttp
                 .When(HttpMethod.Get, $"{BaseUri}/movies/fail")
-                .Respond(HttpStatusCode.BadRequest, request => new ByteArrayContent(new byte[0]));
+                .Respond(HttpStatusCode.BadRequest, _ => new ByteArrayContent(Array.Empty<byte>()));
 
             var reviewSvc = CreateMovieReviewService();
 
@@ -289,21 +289,16 @@ namespace Activout.RestClient.Test
         public async Task TestPostJsonAsync()
         {
             // arrange
-            var movieId = "FOOBAR";
+            const string movieId = "FOOBAR";
             _mockHttp
                 .When(HttpMethod.Post, $"{BaseUri}/movies/{movieId}/reviews")
                 .WithHeaders("Content-Type", "application/json; charset=utf-8")
-                .Respond(request =>
-                {
-                    var content = request.Content.ReadAsStringAsync().Result;
-                    content = content.Replace("\"ReviewId\":null", "\"ReviewId\":\"*REVIEW_ID*\"");
-                    return new StringContent(content, Encoding.UTF8, "application/json");
-                });
+                .Respond(Handler);
 
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            var text = "This was a delightful comedy, but not terribly realistic.";
+            const string text = "This was a delightful comedy, but not terribly realistic.";
             var stars = 3;
             var review = new Review(stars, text);
             var result = await reviewSvc.SubmitReview(movieId, review);
@@ -312,6 +307,13 @@ namespace Activout.RestClient.Test
             Assert.Equal("*REVIEW_ID*", result.ReviewId);
             Assert.Equal(stars, result.Stars);
             Assert.Equal(text, result.Text);
+        }
+
+        private HttpContent Handler(HttpRequestMessage request)
+        {
+            var content = request.Content!.ReadAsStringAsync().Result;
+            content = content.Replace("\"ReviewId\":null", "\"ReviewId\":\"*REVIEW_ID*\"");
+            return new StringContent(content, Encoding.UTF8, "application/json");
         }
 
         [Fact]
@@ -346,7 +348,7 @@ namespace Activout.RestClient.Test
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            var text = "This was actally really good!";
+            var text = "This was actually really good!";
             var stars = 5;
             var review = new Review(stars, text)
             {
@@ -375,8 +377,8 @@ namespace Activout.RestClient.Test
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            var text = "This was actally really good!";
-            var stars = 5;
+            const string text = "This was actually really good!";
+            const int stars = 5;
             var review = new Review(stars, text)
             {
                 MovieId = movieId,
@@ -590,16 +592,18 @@ namespace Activout.RestClient.Test
 
             // act
             var responseMessage1 = await reviewSvc.SendFooHeader("bar");
-            var requestHeaders1 = responseMessage1.RequestMessage.Headers;
+            var requestHeaders1 = responseMessage1.RequestMessage?.Headers;
 
             var responseMessage2 = await reviewSvc.SendFooHeader("bar");
-            var requestHeaders2 = responseMessage2.RequestMessage.Headers;
+            var requestHeaders2 = responseMessage2.RequestMessage?.Headers;
 
             // assert
+            Assert.NotNull(requestHeaders1);
             Assert.NotNull(requestHeaders1.Authorization);
             Assert.Equal("Basic SECRET", requestHeaders1.Authorization.ToString());
             Assert.NotEmpty(requestHeaders1.GetValues("X-Tick"));
 
+            Assert.NotNull(requestHeaders2);
             Assert.NotEqual(
                 requestHeaders1.GetValues("X-Tick").First(),
                 requestHeaders2.GetValues("X-Tick").First());

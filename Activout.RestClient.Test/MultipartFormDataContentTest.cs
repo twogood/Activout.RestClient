@@ -37,7 +37,7 @@ namespace Activout.RestClient.Test
                 .With(message =>
                 {
                     collector.Message = message;
-                    return message.Content.Headers.ContentType.MediaType == "multipart/form-data";
+                    return message.Content?.Headers.ContentType?.MediaType == "multipart/form-data";
                 })
                 .Respond(HttpStatusCode.OK);
 
@@ -55,8 +55,8 @@ namespace Activout.RestClient.Test
 
             var part = content[0];
             Assert.Equal("42", await part.ReadAsStringAsync());
-            Assert.Equal("bar", part.Headers.ContentDisposition.Name);
-            Assert.Equal("form-data", part.Headers.ContentDisposition.DispositionType);
+            Assert.Equal("bar", part.Headers.ContentDisposition?.Name);
+            Assert.Equal("form-data", part.Headers.ContentDisposition?.DispositionType);
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace Activout.RestClient.Test
                 .With(message =>
                 {
                     collector.Message = message;
-                    return message.Content.Headers.ContentType.MediaType == "multipart/form-data";
+                    return message.Content?.Headers.ContentType?.MediaType == "multipart/form-data";
                 })
                 .Respond(HttpStatusCode.OK);
 
@@ -105,18 +105,18 @@ namespace Activout.RestClient.Test
 
             var formContent = content[0];
             Assert.Equal("MyString=foobar&MyInt=42", await formContent.ReadAsStringAsync());
-            Assert.Null(formContent.Headers.ContentDisposition.Name);
-            Assert.Null(formContent.Headers.ContentDisposition.FileName);
+            Assert.Null(formContent.Headers.ContentDisposition?.Name);
+            Assert.Null(formContent.Headers.ContentDisposition?.FileName);
 
             var attachment1 = content[1];
             Assert.Equal("foo", await attachment1.ReadAsStringAsync());
-            Assert.Equal("attachment", attachment1.Headers.ContentDisposition.Name);
-            Assert.Equal("foo.txt", attachment1.Headers.ContentDisposition.FileName);
+            Assert.Equal("attachment", attachment1.Headers.ContentDisposition?.Name);
+            Assert.Equal("foo.txt", attachment1.Headers.ContentDisposition?.FileName);
 
             var attachment2 = content[2];
             Assert.Equal("bar", await attachment2.ReadAsStringAsync());
-            Assert.Equal("attachment", attachment2.Headers.ContentDisposition.Name);
-            Assert.Equal("bar.txt", attachment2.Headers.ContentDisposition.FileName);
+            Assert.Equal("attachment", attachment2.Headers.ContentDisposition?.Name);
+            Assert.Equal("bar.txt", attachment2.Headers.ContentDisposition?.FileName);
         }
 
         [Fact]
@@ -127,7 +127,7 @@ namespace Activout.RestClient.Test
 
             _mockHttp
                 .Expect(HttpMethod.Post, BaseUri + "multipart")
-                .With(message => message.Content.Headers.ContentType.MediaType == "multipart/form-data")
+                .With(message => message.Content?.Headers.ContentType?.MediaType == "multipart/form-data")
                 .Respond(HttpStatusCode.OK);
 
             // Act
@@ -149,7 +149,7 @@ namespace Activout.RestClient.Test
                 .Respond(HttpStatusCode.OK, new MultipartFormDataContent());
 
             // Act
-            var content = await client.ReceiveMultipartFormDataContent();
+            _ = await client.ReceiveMultipartFormDataContent();
 
             // Assert
             _mockHttp.VerifyNoOutstandingExpectation();

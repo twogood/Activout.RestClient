@@ -379,7 +379,7 @@ namespace Activout.RestClient.Implementation
                 {
                     await request.Content.LoadIntoBufferAsync();
                     _context.Logger.LogDebug("{RequestContent}",
-                        (await request.Content.ReadAsStringAsync()).SafeSubstring(0, 1000));
+                        (await request.Content.ReadAsStringAsync(cancellationToken)).SafeSubstring(0, 1000));
                 }
             }
 
@@ -393,12 +393,9 @@ namespace Activout.RestClient.Implementation
             {
                 _context.Logger.LogDebug("{Response}", response);
 
-                if (response.Content != null)
-                {
-                    await response.Content.LoadIntoBufferAsync();
-                    _context.Logger.LogDebug("{ResponseContent}",
-                        (await response.Content.ReadAsStringAsync()).SafeSubstring(0, 1000));
-                }
+                await response.Content.LoadIntoBufferAsync();
+                _context.Logger.LogDebug("{ResponseContent}",
+                    (await response.Content.ReadAsStringAsync(cancellationToken)).SafeSubstring(0, 1000));
             }
 
             if (_actualReturnType == typeof(HttpStatusCode))
@@ -430,7 +427,7 @@ namespace Activout.RestClient.Implementation
         {
             var type = response.IsSuccessStatusCode ? _actualReturnType : _errorResponseType;
 
-            if (type == typeof(void) || response.Content == null)
+            if (type == typeof(void))
             {
                 return null;
             }
@@ -441,7 +438,7 @@ namespace Activout.RestClient.Implementation
                 return response.Content;
             }
 
-            var contentTypeMediaType = response.Content.Headers?.ContentType?.MediaType ?? DefaultHttpContentType;
+            var contentTypeMediaType = response.Content.Headers.ContentType?.MediaType ?? DefaultHttpContentType;
             var deserializer = _context.SerializationManager.GetDeserializer(new MediaType(contentTypeMediaType));
             if (deserializer == null)
             {
@@ -466,7 +463,7 @@ namespace Activout.RestClient.Implementation
         private async Task<Exception> CreateDeserializationException(HttpRequestMessage request,
             HttpResponseMessage response, Exception e)
         {
-            var errorResponse = response.Content == null ? null : await response.Content.ReadAsStringAsync();
+            var errorResponse = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode || !_context.UseDomainException)
             {

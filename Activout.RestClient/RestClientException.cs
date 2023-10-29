@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace Activout.RestClient
 {
@@ -47,7 +46,7 @@ namespace Activout.RestClient
             var typeName = info.GetString(nameof(Type));
             if (typeName != null)
             {
-                ErrorResponse = info.GetValue(nameof(ErrorResponse), Type.GetType(typeName));
+                ErrorResponse = info.GetValue(nameof(ErrorResponse), Type.GetType(typeName) ?? typeof(object));
             }
         }
 
