@@ -1,12 +1,11 @@
 using System;
 
-namespace Activout.RestClient
+namespace Activout.RestClient;
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Interface)]
+public class PathAttribute : TemplateAttribute
 {
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Interface)]
-    public class PathAttribute : TemplateAttribute
+    public PathAttribute(string template) : base(template)
     {
-        public PathAttribute(string template) : base(template)
-        {
-        }
     }
 }

@@ -1,9 +1,8 @@
 ﻿using System.Reflection;
 
-namespace Activout.RestClient.ParamConverter
+namespace Activout.RestClient.ParamConverter;
+
+public interface IParamConverterManager
 {
-    public interface IParamConverterManager
-    {
-        IParamConverter GetConverter(ParameterInfo parameterInfo);
-    }
+    IParamConverter GetConverter(ParameterInfo parameterInfo);
 }

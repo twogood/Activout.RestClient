@@ -1,9 +1,8 @@
-namespace Activout.RestClient
+namespace Activout.RestClient;
+
+public class AcceptAttribute : HeaderAttribute
 {
-    public class AcceptAttribute : HeaderAttribute
+    public AcceptAttribute(string value) : base("Accept", value)
     {
-        public AcceptAttribute(string value) : base("Accept", value)
-        {
-        }
     }
 }

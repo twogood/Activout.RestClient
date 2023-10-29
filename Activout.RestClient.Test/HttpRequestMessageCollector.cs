@@ -1,9 +1,8 @@
 using System.Net.Http;
 
-namespace Activout.RestClient.Test
+namespace Activout.RestClient.Test;
+
+public class HttpRequestMessageCollector
 {
-    public class HttpRequestMessageCollector
-    {
-        public HttpRequestMessage Message { get; set; }
-    }
+    public HttpRequestMessage Message { get; set; }
 }

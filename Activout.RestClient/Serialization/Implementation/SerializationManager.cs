@@ -4,57 +4,56 @@ using System.Collections.Immutable;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace Activout.RestClient.Serialization.Implementation
+namespace Activout.RestClient.Serialization.Implementation;
+
+public class SerializationManager : ISerializationManager
 {
-    public class SerializationManager : ISerializationManager
+    public static readonly IReadOnlyCollection<JsonConverter> DefaultJsonConverters = new List<JsonConverter>
+        {new SimpleValueObjectConverter()}.ToImmutableList();
+
+    private static readonly JsonSerializerSettings DefaultJsonSerializerSettings = new()
     {
-        public static readonly IReadOnlyCollection<JsonConverter> DefaultJsonConverters = new List<JsonConverter>
-            {new SimpleValueObjectConverter()}.ToImmutableList();
+        Converters = DefaultJsonConverters.ToList()
+    };
 
-        private static readonly JsonSerializerSettings DefaultJsonSerializerSettings = new JsonSerializerSettings
+    public static readonly IReadOnlyCollection<ISerializer> DefaultSerializers = new List<ISerializer>
         {
-            Converters = DefaultJsonConverters.ToList()
-        };
+            new FormUrlEncodedSerializer(),
+            new JsonSerializer(DefaultJsonSerializerSettings),
+            new StringSerializer(),
+            new ByteArraySerializer()
+        }
+        .ToImmutableList();
 
-        public static readonly IReadOnlyCollection<ISerializer> DefaultSerializers = new List<ISerializer>
+    public static readonly IReadOnlyCollection<IDeserializer> DefaultDeserializers =
+        new List<IDeserializer>
             {
-                new FormUrlEncodedSerializer(),
-                new JsonSerializer(DefaultJsonSerializerSettings),
-                new StringSerializer(),
-                new ByteArraySerializer()
+                new JsonDeserializer(DefaultJsonSerializerSettings),
+                new StringDeserializer(),
+                new ByteArrayDeserializer()
             }
             .ToImmutableList();
 
-        public static readonly IReadOnlyCollection<IDeserializer> DefaultDeserializers =
-            new List<IDeserializer>
-                {
-                    new JsonDeserializer(DefaultJsonSerializerSettings),
-                    new StringDeserializer(),
-                    new ByteArrayDeserializer()
-                }
-                .ToImmutableList();
 
+    private IReadOnlyCollection<ISerializer> Serializers { get; }
+    private IReadOnlyCollection<IDeserializer> Deserializers { get; }
 
-        private IReadOnlyCollection<ISerializer> Serializers { get; }
-        private IReadOnlyCollection<IDeserializer> Deserializers { get; }
+    public SerializationManager(IReadOnlyCollection<ISerializer> serializers = null,
+        IReadOnlyCollection<IDeserializer> deserializers = null)
+    {
+        Serializers = (serializers ?? DefaultSerializers).OrderBy(s => s.Order).ToArray();
+        Deserializers = (deserializers ?? DefaultDeserializers).OrderBy(s => s.Order).ToArray();
+    }
 
-        public SerializationManager(IReadOnlyCollection<ISerializer> serializers = null,
-            IReadOnlyCollection<IDeserializer> deserializers = null)
-        {
-            Serializers = (serializers ?? DefaultSerializers).OrderBy(s => s.Order).ToArray();
-            Deserializers = (deserializers ?? DefaultDeserializers).OrderBy(s => s.Order).ToArray();
-        }
+    public IDeserializer GetDeserializer(MediaType mediaType)
+    {
+        if (mediaType == null) throw new ArgumentNullException(nameof(mediaType));
+        return Deserializers.FirstOrDefault(serializer => serializer.CanDeserialize(mediaType));
+    }
 
-        public IDeserializer GetDeserializer(MediaType mediaType)
-        {
-            if (mediaType == null) throw new ArgumentNullException(nameof(mediaType));
-            return Deserializers.FirstOrDefault(serializer => serializer.CanDeserialize(mediaType));
-        }
-
-        public ISerializer GetSerializer(MediaType mediaType)
-        {
-            if (mediaType == null) throw new ArgumentNullException(nameof(mediaType));
-            return Serializers.FirstOrDefault(serializer => serializer.CanSerialize(mediaType));
-        }
+    public ISerializer GetSerializer(MediaType mediaType)
+    {
+        if (mediaType == null) throw new ArgumentNullException(nameof(mediaType));
+        return Serializers.FirstOrDefault(serializer => serializer.CanSerialize(mediaType));
     }
 }

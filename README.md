@@ -66,8 +66,8 @@ This allows for a much more natural coding style, and the underlying implementat
 
 ## Usage notes
 
-- Built for ASP.NET Core 3.1
-- Both synchronous and asynchronous calls are supported. Asynchronous is recommended.
+- Built for ASP.NET Core 7.0
+- Only asynchronous calls (`Task` or `Task<>`) are supported.
 - Additional serializers and deserializers can be added at will.
 - Support for custom error objects via \[ErrorResponse\] attribute. These will be included in a RestClientException that is thrown if the API call fails.
 
@@ -84,6 +84,10 @@ public static IServiceCollection AddRestClient(this IServiceCollection self)
 }
 ```
 
+
+## Breaking changes in version 4
+
+- Synchronous calls are no longer supported. All methods must return `Task` or `Task<>`.
 
 ## Breaking changes in version 3
 

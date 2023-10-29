@@ -1,9 +1,8 @@
-﻿namespace Activout.RestClient
+﻿namespace Activout.RestClient;
+
+public class PathParamAttribute : NamedParamAttribute
 {
-    public class PathParamAttribute : NamedParamAttribute
+    public PathParamAttribute(string name = null) : base(name)
     {
-        public PathParamAttribute(string name = null) : base(name)
-        {
-        }
     }
 }

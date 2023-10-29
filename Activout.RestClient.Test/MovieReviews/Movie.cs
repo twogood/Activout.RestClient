@@ -1,10 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Activout.RestClient.Test.MovieReviews
+namespace Activout.RestClient.Test.MovieReviews;
+
+[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
+public class Movie
 {
-    [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
-    public class Movie
-    {
-        public string Title { get; set; }
-    }
+    public string Title { get; set; }
 }

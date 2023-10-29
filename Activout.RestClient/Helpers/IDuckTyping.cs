@@ -1,7 +1,6 @@
-﻿namespace Activout.RestClient.Helpers
+﻿namespace Activout.RestClient.Helpers;
+
+public interface IDuckTyping
 {
-    public interface IDuckTyping
-    {
-        TInterface DuckType<TInterface>(object originalDynamic) where TInterface : class;
-    }
+    TInterface DuckType<TInterface>(object originalDynamic) where TInterface : class;
 }

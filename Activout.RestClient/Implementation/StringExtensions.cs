@@ -1,22 +1,21 @@
-namespace Activout.RestClient.Implementation
+namespace Activout.RestClient.Implementation;
+
+public static class StringExtensions
 {
-    public static class StringExtensions
+    public static string SafeSubstring(this string value, int startIndex, int length)
     {
-        public static string SafeSubstring(this string value, int startIndex, int length)
+        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+
+        if (value.Length >= startIndex + length)
         {
-            if (string.IsNullOrWhiteSpace(value)) return string.Empty;
-
-            if (value.Length >= (startIndex + length))
-            {
-                return value.Substring(startIndex, length);
-            }
-
-            if (value.Length >= startIndex)
-            {
-                return value.Substring(startIndex);
-            }
-
-            return string.Empty;
+            return value.Substring(startIndex, length);
         }
+
+        if (value.Length >= startIndex)
+        {
+            return value[startIndex..];
+        }
+
+        return string.Empty;
     }
 }

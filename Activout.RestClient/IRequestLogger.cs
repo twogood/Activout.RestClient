@@ -1,10 +1,9 @@
 using System;
 using System.Net.Http;
 
-namespace Activout.RestClient
+namespace Activout.RestClient;
+
+public interface IRequestLogger
 {
-    public interface IRequestLogger
-    {
-        IDisposable TimeOperation(HttpRequestMessage httpRequestMessage);
-    }
+    IDisposable TimeOperation(HttpRequestMessage httpRequestMessage);
 }
