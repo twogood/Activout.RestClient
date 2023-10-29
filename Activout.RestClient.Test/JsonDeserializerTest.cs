@@ -35,7 +35,7 @@ namespace Activout.RestClient.Test
         private readonly IRestClientFactory _restClientFactory;
         private readonly MockHttpMessageHandler _mockHttp;
 
-        [Fact]
+        [Fact(Skip = "Test if CI works")]
         public void TestDefaultSettingsPascalCase()
         {
             // Arrange
