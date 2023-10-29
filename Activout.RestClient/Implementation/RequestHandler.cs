@@ -210,12 +210,7 @@ namespace Activout.RestClient.Implementation
             }
 
             var task = SendAsync(request, cancellationToken);
-
-            if (IsVoidTask())
-                return task;
-            if (_returnType.BaseType == typeof(Task) && _returnType.IsGenericType)
-                return _converter.ConvertReturnType(task) as Task;
-            throw new NotImplementedException("Return type must be Task or Task<T>");
+            return IsVoidTask() ? task : _converter.ConvertReturnType(task);
         }
 
         private static MultipartFormDataContent CreateMultipartFormDataContent(

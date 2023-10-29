@@ -24,9 +24,9 @@ namespace Activout.RestClient.Helpers.Implementation
             _continueWith = GetContinueWithMethod(actualReturnType);
         }
 
-        public object ConvertReturnType(Task<object> task)
+        public Task ConvertReturnType(Task<object> task)
         {
-            return _continueWith.Invoke(task, new object[] { _lambda });
+            return (Task)_continueWith.Invoke(task, new object[] { _lambda });
         }
 
         private static MethodInfo GetContinueWithMethod(Type actualReturnType)

@@ -24,7 +24,7 @@ namespace Activout.RestClient.Helpers.Implementation
             _taskProperty = _type.GetProperty("Task");
         }
 
-        public object ConvertReturnType(Task<object> task)
+        public Task ConvertReturnType(Task<object> task)
         {
             var taskCompletionSource = Activator.CreateInstance(_type);
 
@@ -45,9 +45,9 @@ namespace Activout.RestClient.Helpers.Implementation
             }
         }
 
-        private object GetTask(object taskCompletionSource)
+        private Task GetTask(object taskCompletionSource)
         {
-            return _taskProperty.GetValue(taskCompletionSource);
+            return (Task)_taskProperty.GetValue(taskCompletionSource);
         }
 
         private void SetException(object taskCompletionSource, Exception e)
