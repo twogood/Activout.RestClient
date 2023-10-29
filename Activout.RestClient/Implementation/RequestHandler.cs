@@ -133,7 +133,7 @@ namespace Activout.RestClient.Implementation
                 return typeof(void);
             if (IsGenericTask())
                 return _returnType.GenericTypeArguments[0];
-            return _returnType;
+            throw new InvalidOperationException("Return type must be Task or Task<T>");
         }
 
         private string ExpandTemplate(Dictionary<string, object> routeParams)
@@ -170,7 +170,7 @@ namespace Activout.RestClient.Implementation
             if (requestUri != null) request.RequestUri = requestUri;
         }
 
-        public object Send(object[] args)
+        public Task Send(object[] args)
         {
             var headers = new List<KeyValuePair<string, object>>();
             headers.AddRange(_requestHeaders);
@@ -214,8 +214,8 @@ namespace Activout.RestClient.Implementation
             if (IsVoidTask())
                 return task;
             if (_returnType.BaseType == typeof(Task) && _returnType.IsGenericType)
-                return _converter.ConvertReturnType(task);
-            return task.Result;
+                return _converter.ConvertReturnType(task) as Task;
+            throw new NotImplementedException("Return type must be Task or Task<T>");
         }
 
         private static MultipartFormDataContent CreateMultipartFormDataContent(

@@ -113,7 +113,7 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public void TestErrorSync()
+        public async Task TestErrorSync()
         {
             // arrange
             _mockHttp
@@ -131,10 +131,9 @@ namespace Activout.RestClient.Test
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            var aggregateException = Assert.Throws<AggregateException>(() => reviewSvc.GetReview(MovieId, ReviewId));
+            var exception = await Assert.ThrowsAsync<RestClientException>(async () => await reviewSvc.GetReview(MovieId, ReviewId));
 
             // assert
-            var exception = (RestClientException)aggregateException.GetBaseException();
             Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
 
             dynamic dynamicError = exception.ErrorResponse;
@@ -209,7 +208,7 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public void TestErrorEmptyNoContentType()
+        public async Task TestErrorEmptyNoContentType()
         {
             // arrange
             _mockHttp
@@ -219,10 +218,9 @@ namespace Activout.RestClient.Test
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            var aggregateException = Assert.Throws<AggregateException>(() => reviewSvc.Fail());
+            var exception = await Assert.ThrowsAsync<RestClientException>(() => reviewSvc.Fail());
 
             // assert
-            var exception = (RestClientException)aggregateException.GetBaseException();
             Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
 
             Assert.NotNull(exception.ErrorResponse);
@@ -336,7 +334,7 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public void TestPutSync()
+        public async Task TestPutSync()
         {
             // arrange
             var movieId = "*MOVIE_ID*";
@@ -355,7 +353,7 @@ namespace Activout.RestClient.Test
                 MovieId = movieId,
                 ReviewId = reviewId
             };
-            var result = reviewSvc.UpdateReview(movieId, reviewId, review);
+            var result = await reviewSvc.UpdateReview(movieId, reviewId, review);
 
             // assert
             Assert.Equal(movieId, result.MovieId);
@@ -365,7 +363,7 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public void TestPatchSync()
+        public async Task TestPatchSync()
         {
             // arrange
             var movieId = "*MOVIE_ID*";
@@ -384,7 +382,7 @@ namespace Activout.RestClient.Test
                 MovieId = movieId,
                 ReviewId = reviewId
             };
-            var result = reviewSvc.PartialUpdateReview(movieId, reviewId, review);
+            var result = await reviewSvc.PartialUpdateReview(movieId, reviewId, review);
 
             // assert
             Assert.Equal(movieId, result.MovieId);
@@ -404,7 +402,7 @@ namespace Activout.RestClient.Test
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            var httpContent = reviewSvc.GetHttpContent();
+            var httpContent = await reviewSvc.GetHttpContent();
 
             // assert
             Assert.Equal("[]", await httpContent.ReadAsStringAsync());
@@ -421,14 +419,14 @@ namespace Activout.RestClient.Test
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            var httpResponseMessage = reviewSvc.GetHttpResponseMessage();
+            var httpResponseMessage = await reviewSvc.GetHttpResponseMessage();
 
             // assert
             Assert.Equal("[]", await httpResponseMessage.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void TestGetJObject()
+        public async Task TestGetJObject()
         {
             // arrange
             _mockHttp
@@ -438,7 +436,7 @@ namespace Activout.RestClient.Test
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            dynamic jObject = reviewSvc.GetJObject();
+            dynamic jObject = await reviewSvc.GetJObject();
 
             // assert
             string foo = jObject.foo;

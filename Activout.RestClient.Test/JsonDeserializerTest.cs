@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using Activout.RestClient.Serialization.Implementation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -19,7 +20,7 @@ namespace Activout.RestClient.Test
 
     public interface IClient
     {
-        Data GetData();
+        Task<Data> GetData();
     }
 
     public class JsonDeserializerTest
@@ -36,7 +37,7 @@ namespace Activout.RestClient.Test
         private readonly MockHttpMessageHandler _mockHttp;
 
         [Fact]
-        public void TestDefaultSettingsPascalCase()
+        public async Task TestDefaultSettingsPascalCase()
         {
             // Arrange
             _mockHttp.Expect(BaseUri)
@@ -51,7 +52,7 @@ namespace Activout.RestClient.Test
                 .Build<IClient>();
 
             // Act
-            var data = client.GetData();
+            var data = await client.GetData();
 
             // Assert
             _mockHttp.VerifyNoOutstandingExpectation();
@@ -70,7 +71,7 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public void TestCamelCaseWithDeserializer()
+        public async Task TestCamelCaseWithDeserializer()
         {
             // Arrange
             MockCamelCaseResponse();
@@ -83,7 +84,7 @@ namespace Activout.RestClient.Test
                 .Build<IClient>();
 
             // Act
-            var data = client.GetData();
+            var data = await client.GetData();
 
             // Assert
             _mockHttp.VerifyNoOutstandingExpectation();
@@ -91,7 +92,7 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public void TestCamelCaseWithSerializationManager()
+        public async Task TestCamelCaseWithSerializationManager()
         {
             // Arrange
             MockCamelCaseResponse();
@@ -108,7 +109,7 @@ namespace Activout.RestClient.Test
                 .Build<IClient>();
 
             // Act
-            var data = client.GetData();
+            var data = await client.GetData();
 
             // Assert
             _mockHttp.VerifyNoOutstandingExpectation();

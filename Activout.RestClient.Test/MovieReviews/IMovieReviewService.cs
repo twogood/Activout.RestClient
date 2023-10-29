@@ -23,14 +23,14 @@ namespace Activout.RestClient.Test.MovieReviews
         Task<IEnumerable<Review>> GetAllReviews(string movieId);
 
         [Get("/{movieId}/reviews/{reviewId}")]
-        Review GetReview(string movieId, string reviewId);
+        Task<Review> GetReview(string movieId, string reviewId);
 
         [Delete("/{movieId}/reviews/{reviewId}")]
-        void DeleteReview(string movieId, string reviewId);
+        Task DeleteReview(string movieId, string reviewId);
 
         [Get("/fail")]
         [ErrorResponse(typeof(byte[]))]
-        void Fail();
+        Task Fail();
 
         [Post]
         [Path("/{movieId}/reviews")]
@@ -38,11 +38,11 @@ namespace Activout.RestClient.Test.MovieReviews
 
         [Put]
         [Path("/{movieId}/reviews/{reviewId}")]
-        Review UpdateReview(string movieId, [PathParam] string reviewId, Review review);
+        Task<Review> UpdateReview(string movieId, [PathParam] string reviewId, Review review);
 
         [Patch]
         [Path("/{movieId}/reviews/{reviewId}")]
-        Review PartialUpdateReview(string movieId, [PathParam] string reviewId, Review review);
+        Task<Review> PartialUpdateReview(string movieId, [PathParam] string reviewId, Review review);
 
         [Post("/import.csv")]
         [ContentType("text/csv")]
@@ -53,12 +53,12 @@ namespace Activout.RestClient.Test.MovieReviews
             [QueryParam] DateTime begin,
             [QueryParam] DateTime end);
 
-        HttpContent GetHttpContent();
+        Task<HttpContent> GetHttpContent();
 
-        HttpResponseMessage GetHttpResponseMessage();
+        Task<HttpResponseMessage> GetHttpResponseMessage();
 
         [Path("/object")]
-        JObject GetJObject();
+        Task<JObject> GetJObject();
 
         [Path("/array")]
         Task<JArray> GetJArray();

@@ -28,7 +28,7 @@ namespace Activout.RestClient.Test
 
     public interface IValueObjectClient
     {
-        Stuff GetStuff();
+        Task<Stuff> GetStuff();
 
         [Post]
         Task SetStuff(Stuff wrapper);
@@ -76,7 +76,7 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public void TestSimpleValueObjectDeserialization()
+        public async Task TestSimpleValueObjectDeserialization()
         {
             // Arrange
             _mockHttp
@@ -92,7 +92,7 @@ namespace Activout.RestClient.Test
             var client = CreateClient();
 
             // Act
-            var result = client.GetStuff();
+            var result = await client.GetStuff();
 
             // Assert
             _mockHttp.VerifyNoOutstandingExpectation();
@@ -100,7 +100,7 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public void TestSimpleValueObjectDeserializationWithNulls()
+        public async Task TestSimpleValueObjectDeserializationWithNulls()
         {
             // Arrange
             _mockHttp
@@ -116,7 +116,7 @@ namespace Activout.RestClient.Test
             var client = CreateClient();
 
             // Act
-            var result = client.GetStuff();
+            var result = await client.GetStuff();
 
             // Assert
             _mockHttp.VerifyNoOutstandingExpectation();
