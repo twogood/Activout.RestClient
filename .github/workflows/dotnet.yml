@@ -31,7 +31,7 @@ jobs:
         run: dotnet build --no-restore
       - name: Test
         timeout-minutes: 2
-        run: dotnet test --no-build --verbosity normal --blame-hang-timeout 45s --blame-hang-dump-type full
+        run: dotnet test --no-build --verbosity normal --blame --blame-hang-timeout 45s --blame-hang-dump-type full
       - name: Archive test results
         uses: actions/upload-artifact@v3
         if: always()
