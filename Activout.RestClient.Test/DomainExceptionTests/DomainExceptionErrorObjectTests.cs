@@ -9,132 +9,131 @@ using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
 
-namespace Activout.RestClient.Test.DomainExceptionTests
+namespace Activout.RestClient.Test.DomainExceptionTests;
+
+internal class MyDomainErrorObject
 {
-    internal class MyDomainErrorObject
-    {
-        public MyDomainErrorEnum ErrorEnum { get; }
+    public MyDomainErrorEnum ErrorEnum { get; }
 
-        public MyDomainErrorObject(MyDomainErrorEnum errorEnum)
-        {
-            ErrorEnum = errorEnum;
-        }
+    public MyDomainErrorObject(MyDomainErrorEnum errorEnum)
+    {
+        ErrorEnum = errorEnum;
+    }
+}
+
+internal class MyDomainErrorObjectException : Exception
+{
+    public MyDomainErrorObject Error { get; }
+
+    public MyDomainErrorObjectException(MyDomainErrorObject error, Exception innerException = null) : base(
+        error.ToString(), innerException)
+    {
+        Error = error;
+    }
+}
+
+[ErrorResponse(typeof(MyApiErrorResponse))]
+[DomainException(typeof(MyDomainErrorObjectException))]
+public interface IMyApiErrorObjectClient
+{
+    Task Api();
+}
+
+internal class MyDomainExceptionObjectMapper : AbstractDomainExceptionMapper
+{
+    protected override Exception CreateException(HttpResponseMessage httpResponseMessage, object data,
+        Exception innerException)
+    {
+        var domainError = data is MyApiErrorResponse errorResponse && errorResponse.Code == MyApiError.Bar
+            ? new MyDomainErrorObject(MyDomainErrorEnum.DomainBar)
+            : new MyDomainErrorObject(MyDomainErrorEnum.Unknown);
+
+        return new MyDomainErrorObjectException(domainError, innerException);
+    }
+}
+
+internal class MyDomainExceptionMapperFactory : DefaultDomainExceptionMapperFactory
+{
+    public override IDomainExceptionMapper CreateDomainExceptionMapper(
+        MethodInfo method,
+        Type errorResponseType,
+        Type exceptionType)
+    {
+        return exceptionType == typeof(MyDomainErrorObjectException)
+            ? new MyDomainExceptionObjectMapper()
+            : base.CreateDomainExceptionMapper(method, errorResponseType, exceptionType);
+    }
+}
+
+public class DomainExceptionErrorObjectTests
+{
+    private const string BaseUri = "https://example.com";
+
+    private readonly MockHttpMessageHandler _mockHttp;
+    private readonly IMyApiErrorObjectClient _myApiClient;
+
+    public DomainExceptionErrorObjectTests()
+    {
+        _mockHttp = new MockHttpMessageHandler();
+
+        _myApiClient = Services.CreateRestClientFactory()
+            .CreateBuilder()
+            .With(_mockHttp.ToHttpClient())
+            .BaseUri(new Uri(BaseUri))
+            .With(new MyDomainExceptionMapperFactory())
+            .Build<IMyApiErrorObjectClient>();
     }
 
-    internal class MyDomainErrorObjectException : Exception
+    [Fact]
+    public async Task TestMapApiErrorObject()
     {
-        public MyDomainErrorObject Error { get; }
+        // Arrange
+        _mockHttp
+            .Expect(BaseUri)
+            .Respond(_ => JsonHttpResponseMessage(HttpStatusCode.BadRequest, MyApiError.Bar));
 
-        public MyDomainErrorObjectException(MyDomainErrorObject error, Exception innerException = null) : base(
-            error.ToString(), innerException)
-        {
-            Error = error;
-        }
+        // Act
+        var exception = await Assert.ThrowsAsync<MyDomainErrorObjectException>(() =>
+            _myApiClient.Api());
+
+        // Assert
+        Assert.Equal(MyDomainErrorEnum.DomainBar, exception.Error.ErrorEnum);
     }
 
-    [ErrorResponse(typeof(MyApiErrorResponse))]
-    [DomainException(typeof(MyDomainErrorObjectException))]
-    public interface IMyApiErrorObjectClient
+    [Fact]
+    public async Task TestNoDeserializerFound()
     {
-        Task Api();
+        // Arrange
+        _mockHttp
+            .Expect(BaseUri)
+            .Respond(_ => HtmlHttpResponseMessage(HttpStatusCode.BadRequest));
+
+        // Act
+        var exception = await Assert.ThrowsAsync<MyDomainErrorObjectException>(() =>
+            _myApiClient.Api());
+
+        // Assert
+        Assert.Equal(MyDomainErrorEnum.Unknown, exception.Error.ErrorEnum);
+        Assert.IsType<MissingMethodException>(exception.InnerException);
     }
 
-    internal class MyDomainExceptionObjectMapper : AbstractDomainExceptionMapper
+    private static HttpResponseMessage JsonHttpResponseMessage(HttpStatusCode httpStatusCode, MyApiError myApiError)
     {
-        protected override Exception CreateException(HttpResponseMessage httpResponseMessage, object data,
-            Exception innerException)
+        return new HttpResponseMessage(httpStatusCode)
         {
-            var domainError = data is MyApiErrorResponse errorResponse && errorResponse.Code == MyApiError.Bar
-                ? new MyDomainErrorObject(MyDomainErrorEnum.DomainBar)
-                : new MyDomainErrorObject(MyDomainErrorEnum.Unknown);
-
-            return new MyDomainErrorObjectException(domainError, innerException);
-        }
-    }
-
-    internal class MyDomainExceptionMapperFactory : DefaultDomainExceptionMapperFactory
-    {
-        public override IDomainExceptionMapper CreateDomainExceptionMapper(
-            MethodInfo method,
-            Type errorResponseType,
-            Type exceptionType)
-        {
-            return exceptionType == typeof(MyDomainErrorObjectException)
-                ? new MyDomainExceptionObjectMapper()
-                : base.CreateDomainExceptionMapper(method, errorResponseType, exceptionType);
-        }
-    }
-
-    public class DomainExceptionErrorObjectTests
-    {
-        private const string BaseUri = "https://example.com";
-
-        private readonly MockHttpMessageHandler _mockHttp;
-        private readonly IMyApiErrorObjectClient _myApiClient;
-
-        public DomainExceptionErrorObjectTests()
-        {
-            _mockHttp = new MockHttpMessageHandler();
-
-            _myApiClient = Services.CreateRestClientFactory()
-                .CreateBuilder()
-                .With(_mockHttp.ToHttpClient())
-                .BaseUri(new Uri(BaseUri))
-                .With(new MyDomainExceptionMapperFactory())
-                .Build<IMyApiErrorObjectClient>();
-        }
-
-        [Fact]
-        public async Task TestMapApiErrorObject()
-        {
-            // Arrange
-            _mockHttp
-                .Expect(BaseUri)
-                .Respond(_ => JsonHttpResponseMessage(HttpStatusCode.BadRequest, MyApiError.Bar));
-
-            // Act
-            var exception = await Assert.ThrowsAsync<MyDomainErrorObjectException>(() =>
-                _myApiClient.Api());
-
-            // Assert
-            Assert.Equal(MyDomainErrorEnum.DomainBar, exception.Error.ErrorEnum);
-        }
-
-        [Fact]
-        public async Task TestNoDeserializerFound()
-        {
-            // Arrange
-            _mockHttp
-                .Expect(BaseUri)
-                .Respond(_ => HtmlHttpResponseMessage(HttpStatusCode.BadRequest));
-
-            // Act
-            var exception = await Assert.ThrowsAsync<MyDomainErrorObjectException>(() =>
-                _myApiClient.Api());
-
-            // Assert
-            Assert.Equal(MyDomainErrorEnum.Unknown, exception.Error.ErrorEnum);
-            Assert.IsType<MissingMethodException>(exception.InnerException);
-        }
-
-        private static HttpResponseMessage JsonHttpResponseMessage(HttpStatusCode httpStatusCode, MyApiError myApiError)
-        {
-            return new HttpResponseMessage(httpStatusCode)
+            Content = new StringContent(JsonConvert.SerializeObject(new MyApiErrorResponse
             {
-                Content = new StringContent(JsonConvert.SerializeObject(new MyApiErrorResponse
-                {
-                    Code = myApiError
-                }), Encoding.UTF8, "application/json")
-            };
-        }
+                Code = myApiError
+            }), Encoding.UTF8, "application/json")
+        };
+    }
 
-        private static HttpResponseMessage HtmlHttpResponseMessage(HttpStatusCode httpStatusCode)
+    private static HttpResponseMessage HtmlHttpResponseMessage(HttpStatusCode httpStatusCode)
+    {
+        return new HttpResponseMessage(httpStatusCode)
         {
-            return new HttpResponseMessage(httpStatusCode)
-            {
-                Content = new StringContent($"<html><head><title>Error {httpStatusCode}</title></head></html>",
-                    Encoding.UTF8, "text/html")
-            };
-        }
+            Content = new StringContent($"<html><head><title>Error {httpStatusCode}</title></head></html>",
+                Encoding.UTF8, "text/html")
+        };
     }
 }

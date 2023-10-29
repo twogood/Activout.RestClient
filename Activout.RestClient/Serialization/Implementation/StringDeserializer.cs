@@ -2,23 +2,22 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Activout.RestClient.Serialization.Implementation
+namespace Activout.RestClient.Serialization.Implementation;
+
+internal class StringDeserializer : IDeserializer
 {
-    internal class StringDeserializer : IDeserializer
+    public int Order { get; set; }
+
+    public async Task<object> Deserialize(HttpContent content, Type type)
     {
-        public int Order { get; set; }
+        var stringData = await content.ReadAsStringAsync();
+        return type == typeof(string)
+            ? stringData
+            : Activator.CreateInstance(type, stringData);
+    }
 
-        public async Task<object> Deserialize(HttpContent content, Type type)
-        {
-            var stringData = await content.ReadAsStringAsync();
-            return type == typeof(string)
-                ? stringData
-                : Activator.CreateInstance(type, stringData);
-        }
-
-        public bool CanDeserialize(MediaType mediaType)
-        {
-            return mediaType.Value.StartsWith("text/");
-        }
+    public bool CanDeserialize(MediaType mediaType)
+    {
+        return mediaType.Value.StartsWith("text/");
     }
 }

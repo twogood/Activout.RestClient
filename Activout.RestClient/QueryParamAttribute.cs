@@ -1,9 +1,8 @@
-﻿namespace Activout.RestClient
+﻿namespace Activout.RestClient;
+
+public class QueryParamAttribute : NamedParamAttribute
 {
-    public class QueryParamAttribute : NamedParamAttribute
+    public QueryParamAttribute(string name = null) : base(name)
     {
-        public QueryParamAttribute(string name = null) : base(name)
-        {
-        }
     }
 }

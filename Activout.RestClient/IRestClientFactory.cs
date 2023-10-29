@@ -1,7 +1,6 @@
-﻿namespace Activout.RestClient
+﻿namespace Activout.RestClient;
+
+public interface IRestClientFactory
 {
-    public interface IRestClientFactory
-    {
-        IRestClientBuilder CreateBuilder();
-    }
+    IRestClientBuilder CreateBuilder();
 }

@@ -1,15 +1,14 @@
 ﻿using System;
 
-namespace Activout.RestClient
-{
-    [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Method)]
-    public class ErrorResponseAttribute : Attribute
-    {
-        public ErrorResponseAttribute(Type type)
-        {
-            Type = type;
-        }
+namespace Activout.RestClient;
 
-        public Type Type { get; }
+[AttributeUsage(AttributeTargets.Interface | AttributeTargets.Method)]
+public class ErrorResponseAttribute : Attribute
+{
+    public ErrorResponseAttribute(Type type)
+    {
+        Type = type;
     }
+
+    public Type Type { get; }
 }

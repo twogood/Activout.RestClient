@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace Activout.RestClient
+namespace Activout.RestClient;
+
+[AttributeUsage(AttributeTargets.Parameter)]
+public class FormParamAttribute : NamedParamAttribute
 {
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class FormParamAttribute : NamedParamAttribute
+    public FormParamAttribute(string name = null) : base(name)
     {
-        public FormParamAttribute(string name = null) : base(name)
-        {
-        }
     }
 }

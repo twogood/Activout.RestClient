@@ -8,112 +8,111 @@ using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
 
-namespace Activout.RestClient.Test
+namespace Activout.RestClient.Test;
+
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
+public class FormData
 {
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
-    public class FormData
-    {
-        public string SomeString { get; set; } = "foo";
-        public string Unused { get; set; } = null;
-        public int SomeNumber { get; set; } = 42;
-        [JsonProperty("another")] public string AnotherString { get; set; } = "bar";
-    }
+    public string SomeString { get; set; } = "foo";
+    public string Unused { get; set; } = null;
+    public int SomeNumber { get; set; } = 42;
+    [JsonProperty("another")] public string AnotherString { get; set; } = "bar";
+}
 
+[ContentType("application/x-www-form-urlencoded")]
+public interface IFormPostClient
+{
     [ContentType("application/x-www-form-urlencoded")]
-    public interface IFormPostClient
-    {
-        [ContentType("application/x-www-form-urlencoded")]
-        [Post("/form")]
-        Task PostObject(FormData formData);
+    [Post("/form")]
+    Task PostObject(FormData formData);
 
-        [Post("/form")]
-        Task PostEnumerable(IEnumerable<KeyValuePair<string, string>> formData);
+    [Post("/form")]
+    Task PostEnumerable(IEnumerable<KeyValuePair<string, string>> formData);
+}
+
+public class BodyArgumentFormPostTest
+{
+    private const string BaseUri = "http://example.com/";
+
+    private readonly IRestClientFactory _restClientFactory;
+    private readonly MockHttpMessageHandler _mockHttp;
+
+    public BodyArgumentFormPostTest()
+    {
+        _restClientFactory = Services.CreateRestClientFactory();
+        _mockHttp = new MockHttpMessageHandler();
     }
 
-    public class BodyArgumentFormPostTest
+    private IRestClientBuilder CreateRestClientBuilder()
     {
-        private const string BaseUri = "http://example.com/";
+        return _restClientFactory.CreateBuilder()
+            .With(_mockHttp.ToHttpClient())
+            .BaseUri(new Uri(BaseUri));
+    }
 
-        private readonly IRestClientFactory _restClientFactory;
-        private readonly MockHttpMessageHandler _mockHttp;
+    private IFormPostClient CreateClient()
+    {
+        return CreateRestClientBuilder()
+            .Build<IFormPostClient>();
+    }
 
-        public BodyArgumentFormPostTest()
+    [Fact]
+    public async Task TestFormDataObject()
+    {
+        // Arrange
+        var client = CreateClient();
+
+        _mockHttp
+            .Expect(HttpMethod.Post, BaseUri + "form")
+            .WithFormData("SomeString", "foo")
+            .WithFormData("SomeNumber", "42")
+            .WithFormData("another", "bar")
+            .Respond(HttpStatusCode.OK);
+
+        // Act
+        await client.PostObject(new FormData());
+
+        // Assert
+        _mockHttp.VerifyNoOutstandingExpectation();
+    }
+
+    [Fact]
+    public async Task TestFormDataNull()
+    {
+        // Arrange
+        var client = CreateClient();
+
+        _mockHttp
+            .Expect(HttpMethod.Post, BaseUri + "form")
+            .Respond(HttpStatusCode.OK);
+
+        // Act
+        await client.PostObject(null);
+
+        // Assert
+        _mockHttp.VerifyNoOutstandingExpectation();
+    }
+
+    [Fact]
+    public async Task TestFormDataEnumerable()
+    {
+        // Arrange
+        var client = CreateClient();
+
+        _mockHttp
+            .Expect(HttpMethod.Post, BaseUri + "form")
+            .WithFormData("SomeString", "foo")
+            .WithFormData("SomeNumber", "42")
+            .Respond(HttpStatusCode.OK);
+
+        // Act
+        await client.PostEnumerable(new[]
         {
-            _restClientFactory = Services.CreateRestClientFactory();
-            _mockHttp = new MockHttpMessageHandler();
-        }
+            new KeyValuePair<string, string>("SomeString", "foo"),
+            new KeyValuePair<string, string>("SomeNumber", "42"),
+        });
 
-        private IRestClientBuilder CreateRestClientBuilder()
-        {
-            return _restClientFactory.CreateBuilder()
-                .With(_mockHttp.ToHttpClient())
-                .BaseUri(new Uri(BaseUri));
-        }
-
-        private IFormPostClient CreateClient()
-        {
-            return CreateRestClientBuilder()
-                .Build<IFormPostClient>();
-        }
-
-        [Fact]
-        public async Task TestFormDataObject()
-        {
-            // Arrange
-            var client = CreateClient();
-
-            _mockHttp
-                .Expect(HttpMethod.Post, BaseUri + "form")
-                .WithFormData("SomeString", "foo")
-                .WithFormData("SomeNumber", "42")
-                .WithFormData("another", "bar")
-                .Respond(HttpStatusCode.OK);
-
-            // Act
-            await client.PostObject(new FormData());
-
-            // Assert
-            _mockHttp.VerifyNoOutstandingExpectation();
-        }
-
-        [Fact]
-        public async Task TestFormDataNull()
-        {
-            // Arrange
-            var client = CreateClient();
-
-            _mockHttp
-                .Expect(HttpMethod.Post, BaseUri + "form")
-                .Respond(HttpStatusCode.OK);
-
-            // Act
-            await client.PostObject(null);
-
-            // Assert
-            _mockHttp.VerifyNoOutstandingExpectation();
-        }
-
-        [Fact]
-        public async Task TestFormDataEnumerable()
-        {
-            // Arrange
-            var client = CreateClient();
-
-            _mockHttp
-                .Expect(HttpMethod.Post, BaseUri + "form")
-                .WithFormData("SomeString", "foo")
-                .WithFormData("SomeNumber", "42")
-                .Respond(HttpStatusCode.OK);
-
-            // Act
-            await client.PostEnumerable(new[]
-            {
-                new KeyValuePair<string, string>("SomeString", "foo"),
-                new KeyValuePair<string, string>("SomeNumber", "42"),
-            });
-
-            // Assert
-            _mockHttp.VerifyNoOutstandingExpectation();
-        }
+        // Assert
+        _mockHttp.VerifyNoOutstandingExpectation();
     }
 }

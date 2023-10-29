@@ -2,61 +2,61 @@
 using System.Net;
 using Xunit;
 
-namespace Activout.RestClient.Test
+namespace Activout.RestClient.Test;
+
+// https://blogs.msdn.microsoft.com/agileer/2013/05/17/the-correct-way-to-code-a-custom-exception-class/
+public class RestClientExceptionTest
 {
-    // https://blogs.msdn.microsoft.com/agileer/2013/05/17/the-correct-way-to-code-a-custom-exception-class/
-    public class RestClientExceptionTest
+    private static readonly Uri RequestUri = new("http://localhost");
+
+    [Fact]
+    public void RestClientException_default_ctor()
     {
-        private static readonly Uri RequestUri = new Uri("http://localhost");
+        // Arrange
+        const string expectedMessage = "Exception of type 'Activout.RestClient.RestClientException' was thrown.";
 
-        [Fact]
-        public void RestClientException_default_ctor()
-        {
-            // Arrange
-            const string expectedMessage = "Exception of type 'Activout.RestClient.RestClientException' was thrown.";
+        // Act
+        var sut = new RestClientException(RequestUri, HttpStatusCode.InternalServerError, null);
 
-            // Act
-            var sut = new RestClientException(RequestUri, HttpStatusCode.InternalServerError, null);
+        // Assert
+        Assert.Null(sut.ErrorResponse);
+        Assert.Null(sut.InnerException);
+        Assert.Equal(HttpStatusCode.InternalServerError, sut.StatusCode);
+        Assert.Equal(expectedMessage, sut.Message);
+    }
 
-            // Assert
-            Assert.Null(sut.ErrorResponse);
-            Assert.Null(sut.InnerException);
-            Assert.Equal(HttpStatusCode.InternalServerError, sut.StatusCode);
-            Assert.Equal(expectedMessage, sut.Message);
-        }
+    [Fact]
+    public void RestClientException_ctor_string()
+    {
+        // Arrange
+        const string expectedMessage = "message";
 
-        [Fact]
-        public void RestClientException_ctor_string()
-        {
-            // Arrange
-            const string expectedMessage = "message";
+        // Act
+        var sut = new RestClientException(RequestUri, HttpStatusCode.InternalServerError, expectedMessage);
 
-            // Act
-            var sut = new RestClientException(RequestUri, HttpStatusCode.InternalServerError, expectedMessage);
+        // Assert
+        Assert.Equal(expectedMessage, sut.ErrorResponse);
+        Assert.Null(sut.InnerException);
+        Assert.Equal(HttpStatusCode.InternalServerError, sut.StatusCode);
+        Assert.Equal(expectedMessage, sut.Message);
+    }
 
-            // Assert
-            Assert.Equal(expectedMessage, sut.ErrorResponse);
-            Assert.Null(sut.InnerException);
-            Assert.Equal(HttpStatusCode.InternalServerError, sut.StatusCode);
-            Assert.Equal(expectedMessage, sut.Message);
-        }
+    [Fact]
+    public void RestClientException_ctor_string_ex()
+    {
+        // Arrange
+        const string expectedMessage = "message";
+        var innerEx = new Exception("foo");
 
-        [Fact]
-        public void RestClientException_ctor_string_ex()
-        {
-            // Arrange
-            const string expectedMessage = "message";
-            var innerEx = new Exception("foo");
+        // Act
+        var sut = new RestClientException(RequestUri, HttpStatusCode.InternalServerError, expectedMessage, innerEx);
 
-            // Act
-            var sut = new RestClientException(RequestUri, HttpStatusCode.InternalServerError, expectedMessage, innerEx);
-
-            // Assert
-            Assert.Equal(expectedMessage, sut.ErrorResponse);
-            Assert.Equal(HttpStatusCode.InternalServerError, sut.StatusCode);
-            Assert.Equal(innerEx, sut.InnerException);
-            Assert.Equal(expectedMessage, sut.Message);
-        }
+        // Assert
+        Assert.Equal(expectedMessage, sut.ErrorResponse);
+        Assert.Equal(HttpStatusCode.InternalServerError, sut.StatusCode);
+        Assert.Equal(innerEx, sut.InnerException);
+        Assert.Equal(expectedMessage, sut.Message);
+    }
 
 #if !NET5_0_OR_GREATER
         [Fact]
@@ -82,5 +82,4 @@ namespace Activout.RestClient.Test
             Assert.Equal(originalException.ErrorResponse, deserializedException.ErrorResponse);
         }
 #endif
-    }
 }
