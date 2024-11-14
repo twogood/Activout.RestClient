@@ -30,11 +30,11 @@ jobs:
       - name: Test
         timeout-minutes: 2
         run: dotnet test --no-build
-      - name: Archive test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: TestResults
-          path: |
-            /home/runner/work/Activout.RestClient/Activout.RestClient/Activout.RestClient.Test/TestResults/
+#      - name: Archive test results
+#        uses: actions/upload-artifact@v4
+#        if: always()
+#        with:
+#          name: TestResults
+#          path: |
+#            /home/runner/work/Activout.RestClient/Activout.RestClient/Activout.RestClient.Test/TestResults/
 
