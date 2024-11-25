@@ -15,7 +15,7 @@ namespace Activout.RestClient
 
         public static ITaskConverterFactory CreateTaskConverterFactory()
         {
-            return new TaskConverter2Factory();
+            return new TaskConverter3Factory();
         }
 
         public static IRestClientFactory CreateRestClientFactory(
