@@ -33,7 +33,14 @@ namespace Activout.RestClient.Implementation
                                         throw new ArgumentNullException(nameof(paramConverterManager))
             };
         }
-
+        
+        public RestClientBuilder(
+            IDuckTyping duckTyping,
+            RestClientContext context)
+        {
+            _duckTyping = duckTyping ?? throw new ArgumentNullException(nameof(duckTyping));
+            _context = context with { DefaultHeaders = [..context.DefaultHeaders] };
+        }
 
         public IRestClientBuilder BaseUri(Uri apiUri)
         {
@@ -47,8 +54,13 @@ namespace Activout.RestClient.Implementation
             return this;
         }
 
-        public IRestClientBuilder Header(string name, object value)
+        public IRestClientBuilder Header(string name, object value, bool replace = false)
         {
+            if (replace)
+            {
+                _context.DefaultHeaders.RemoveAll(h => h.Key == name);
+            }
+
             _context.DefaultHeaders.Add(new KeyValuePair<string, object>(name, value));
             return this;
         }

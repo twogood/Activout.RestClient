@@ -12,32 +12,21 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Activout.RestClient.Implementation
 {
-    internal class RestClientContext
+    internal record RestClientContext
     {
-        private static readonly Collection<MediaType> JsonMediaTypeCollection = new Collection<MediaType>
-        {
-            MediaType.ValueOf("application/json")
-        };
-
-        public RestClientContext()
-        {
-            BaseTemplate = "";
-            DefaultContentType = JsonMediaTypeCollection.FirstOrDefault();
-            DefaultHeaders = new List<KeyValuePair<string, object>>();
-            ErrorResponseType = typeof(string);
-        }
+        private static readonly Collection<MediaType> JsonMediaTypeCollection = [MediaType.ValueOf("application/json")];
 
         public ILogger Logger { get; internal set; } = NullLogger.Instance;
         public Uri BaseUri { get; internal set; }
-        public string BaseTemplate { get; internal set; }
+        public string BaseTemplate { get; internal set; } = "";
         public ISerializer DefaultSerializer { get; internal set; }
         public ISerializationManager SerializationManager { get; internal set; }
         public HttpClient HttpClient { get; internal set; }
         public ITaskConverterFactory TaskConverterFactory { get; internal set; }
-        public Type ErrorResponseType { get; internal set; }
-        public MediaType DefaultContentType { get; internal set; }
+        public Type ErrorResponseType { get; internal set; } = typeof(string);
+        public MediaType DefaultContentType { get; internal set; } = JsonMediaTypeCollection.FirstOrDefault();
         public IParamConverterManager ParamConverterManager { get; internal set; }
-        public List<KeyValuePair<string, object>> DefaultHeaders { get; }
+        public List<KeyValuePair<string, object>> DefaultHeaders { get; set; } = [];
         public IRequestLogger RequestLogger { get; set; } = new DummyRequestLogger();
         public Type DomainExceptionType { get; set; }
         public IDomainExceptionMapperFactory DomainExceptionMapperFactory { get; set; }
