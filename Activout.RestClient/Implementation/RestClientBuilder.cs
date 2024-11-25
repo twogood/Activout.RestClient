@@ -33,8 +33,8 @@ namespace Activout.RestClient.Implementation
                                         throw new ArgumentNullException(nameof(paramConverterManager))
             };
         }
-        
-        public RestClientBuilder(
+
+        internal RestClientBuilder(
             IDuckTyping duckTyping,
             RestClientContext context)
         {
