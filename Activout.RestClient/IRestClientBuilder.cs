@@ -11,7 +11,7 @@ namespace Activout.RestClient
     {
         IRestClientBuilder BaseUri(Uri apiUri);
         IRestClientBuilder ContentType(MediaType contentType);
-        IRestClientBuilder Header(string name, object value);
+        IRestClientBuilder Header(string name, object value, bool replace = false);
         IRestClientBuilder With(ILogger logger);
         IRestClientBuilder With(HttpClient httpClient);
         IRestClientBuilder With(IRequestLogger requestLogger);

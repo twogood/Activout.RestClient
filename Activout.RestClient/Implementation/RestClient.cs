@@ -8,14 +8,12 @@ using Activout.RestClient.DomainExceptions;
 
 namespace Activout.RestClient.Implementation
 {
-    internal class RestClient<T> : DynamicObject where T : class
+    internal class RestClient<T> : DynamicObject, IExtendable where T : class 
     {
         private readonly RestClientContext _context;
         private readonly Type _type;
-
-        private readonly IDictionary<MethodInfo, RequestHandler> _requestHandlers =
-            new ConcurrentDictionary<MethodInfo, RequestHandler>();
-
+        private readonly ConcurrentDictionary<MethodInfo, RequestHandler> _requestHandlers = new();
+        
         public RestClient(RestClientContext context)
         {
             _type = typeof(T);
@@ -23,6 +21,8 @@ namespace Activout.RestClient.Implementation
             HandleAttributes();
             _context.DefaultSerializer = _context.SerializationManager.GetSerializer(_context.DefaultContentType);
         }
+        
+        public IExtendableContext ExtendableContext => new ExtendableContextImpl(_context, _type);
 
         private void HandleAttributes()
         {

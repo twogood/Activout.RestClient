@@ -1,4 +1,5 @@
-﻿using Activout.RestClient.Helpers;
+﻿using System;
+using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 
 namespace Activout.RestClient.Implementation
@@ -22,6 +23,16 @@ namespace Activout.RestClient.Implementation
         public IRestClientBuilder CreateBuilder()
         {
             return new RestClientBuilder(_duckTyping, _paramConverterManager, _taskConverterFactory);
+        }
+
+        public IRestClientBuilder Extend(IExtendable client)
+        {
+            if (client.ExtendableContext is not ExtendableContextImpl extendableContext)
+            {
+                throw new InvalidOperationException("Client must be created by Activout.RestClient");
+            }
+
+            return new RestClientBuilder(_duckTyping, extendableContext.Context);
         }
     }
 }

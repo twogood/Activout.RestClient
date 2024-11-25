@@ -10,7 +10,7 @@ namespace Activout.RestClient.Test.MovieReviews
 {
     [Path("movies")]
     [ErrorResponse(typeof(ErrorResponse))]
-    public interface IMovieReviewService
+    public interface IMovieReviewService : IExtendable
     {
         [Get]
         Task<IEnumerable<Movie>> GetAllMovies();
