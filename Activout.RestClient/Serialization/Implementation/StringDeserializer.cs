@@ -6,7 +6,7 @@ namespace Activout.RestClient.Serialization.Implementation
 {
     internal class StringDeserializer : IDeserializer
     {
-        public int Order { get; set; }
+        public int Order { get; set; } = 1000;
 
         public async Task<object> Deserialize(HttpContent content, Type type)
         {

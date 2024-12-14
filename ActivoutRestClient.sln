@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Activout.RestClient", "Acti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Activout.RestClient.Test", "Activout.RestClient.Test\Activout.RestClient.Test.csproj", "{C8B95066-254F-4D82-9FF4-B4233AC476F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Activout.RestClient.Xml", "Activout.RestClient.Xml\Activout.RestClient.Xml.csproj", "{D7BA14C1-E8E1-4DD7-95B4-C2D7CC10D11D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Activout.RestClient.Xml.Test", "Activout.RestClient.Xml.Test\Activout.RestClient.Xml.Test.csproj", "{AEDBF6CA-65A6-42E3-B991-3B954ACCA94D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{C8B95066-254F-4D82-9FF4-B4233AC476F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8B95066-254F-4D82-9FF4-B4233AC476F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8B95066-254F-4D82-9FF4-B4233AC476F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7BA14C1-E8E1-4DD7-95B4-C2D7CC10D11D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7BA14C1-E8E1-4DD7-95B4-C2D7CC10D11D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7BA14C1-E8E1-4DD7-95B4-C2D7CC10D11D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7BA14C1-E8E1-4DD7-95B4-C2D7CC10D11D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEDBF6CA-65A6-42E3-B991-3B954ACCA94D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEDBF6CA-65A6-42E3-B991-3B954ACCA94D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEDBF6CA-65A6-42E3-B991-3B954ACCA94D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEDBF6CA-65A6-42E3-B991-3B954ACCA94D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
