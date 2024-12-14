@@ -6,7 +6,7 @@ namespace Activout.RestClient.Xml.Test;
 public class Review
 {
     [XmlElement("stars")] public int Stars { get; set; }
-    [XmlElement("text")] public string Text { get; set; }
+    [XmlElement("text")] public string Text { get; set; } = "";
 }
 
 [XmlRoot("movie")]
