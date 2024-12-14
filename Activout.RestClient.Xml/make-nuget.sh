@@ -6,8 +6,8 @@ if [ -z "$VERSION" ]; then
 	exit 1
 fi
 dotnet pack \
-	-p:Title="Activout Rest Client" \
-	-p:Description="Create a REST(ish) API client only by defining the C# interface you want." \
+	-p:Title="Activout Rest Client - XML Support" \
+	-p:Description="XML Support for Activout.RestClient." \
 	-p:PackageVersion="$VERSION" \
 	-p:PackageLicenseExpression="MIT" \
 	-p:PackageProjectUrl="https://github.com/twogood/Activout.RestClient" \
@@ -16,7 +16,7 @@ dotnet pack \
 	--configuration=Release \
 	--include-symbols \
 	--include-source \
-	Activout.RestClient/Activout.RestClient.csproj
+	./Activout.RestClient.Xml.csproj
 
 echo "Upload:"
 echo "https://www.nuget.org/packages/manage/upload"

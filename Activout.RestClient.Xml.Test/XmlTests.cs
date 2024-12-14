@@ -88,7 +88,7 @@ public class XmlTests(ITestOutputHelper outputHelper)
     }
 
     [Fact]
-    public Task TestAddReview()
+    public async Task TestAddReview()
     {
         _mockHttp.When(HttpMethod.Post, $"{BaseUri}/movies/42/reviews")
             .WithPartialContent("<stars>5</stars>")
@@ -96,7 +96,7 @@ public class XmlTests(ITestOutputHelper outputHelper)
             .Respond(HttpStatusCode.NoContent);
 
         var xmlClient = CreateXmlMovieClient();
-        return xmlClient.AddReview(42, new Review { Stars = 5, Text = "Great movie! ÅÄÖ" });
+        await xmlClient.AddReview(42, new Review { Stars = 5, Text = "Great movie! ÅÄÖ" });
     }
 
     private IRestClientBuilder CreateRestClientBuilder()
