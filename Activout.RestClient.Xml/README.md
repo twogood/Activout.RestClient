@@ -10,7 +10,7 @@ It provides support for XML serialization and deserialization.
 
 ```C#
 var restClientFactory = Services.CreateRestClientFactory();
-var restClient = restClientFactory
+var xmlClient = restClientFactory
     .CreateBuilder()
     .WithXml()  // Add XML support
     .BaseUri(BaseUri)
