@@ -21,3 +21,5 @@ dotnet pack \
 echo "Upload:"
 echo "https://www.nuget.org/packages/manage/upload"
 
+ls -1 "$(pwd)"/bin/Release/*."$VERSION".*nupkg
+
