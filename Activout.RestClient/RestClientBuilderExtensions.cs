@@ -17,13 +17,13 @@ namespace Activout.RestClient
 
         public static IRestClientBuilder Accept(this IRestClientBuilder self, string accept)
         {
-            return self.Header("Accept", accept);
+            return self.Header("Accept", accept, true);
         }
 
         public static IRestClientBuilder Header(this IRestClientBuilder self,
             AuthenticationHeaderValue authenticationHeaderValue)
         {
-            return self.Header("Authorization", authenticationHeaderValue);
+            return self.Header("Authorization", authenticationHeaderValue, true);
         }
     }
 }
