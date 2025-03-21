@@ -12,7 +12,7 @@ namespace Activout.RestClient.Test
 {
     public class MultipartFormDataContentTest
     {
-        private const string BaseUri = "http://example.com/";
+        private const string BaseUri = "https://example.com/";
 
         private readonly IRestClientFactory _restClientFactory;
         private readonly MockHttpMessageHandler _mockHttp;

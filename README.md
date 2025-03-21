@@ -50,7 +50,7 @@ var restClientFactory = Services.CreateRestClientFactory();
 var movieReviewService = restClientFactory
             .CreateBuilder()
             .With(_httpClient)
-            .BaseUri(new Uri("http://localhost:9080/movieReviewService"))
+            .BaseUri(new Uri("https://example.com/movieReviewService"))
             .Build<IMovieReviewService>();
 
 Review review = new Review(stars: 3, "This was a delightful comedy, but not terribly realistic.");
