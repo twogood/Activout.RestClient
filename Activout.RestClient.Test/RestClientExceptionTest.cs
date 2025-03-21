@@ -9,7 +9,7 @@ namespace Activout.RestClient.Test
     // https://blogs.msdn.microsoft.com/agileer/2013/05/17/the-correct-way-to-code-a-custom-exception-class/
     public class RestClientExceptionTest
     {
-        private static readonly Uri RequestUri = new Uri("http://localhost");
+        private static readonly Uri RequestUri = new Uri("https://example.com");
 
         [Fact]
         public void RestClientException_default_ctor()

@@ -42,7 +42,7 @@ namespace Activout.RestClient.Test
             _mockHttp = new MockHttpMessageHandler();
         }
 
-        private const string BaseUri = "http://example.com/api/";
+        private const string BaseUri = "https://example.com/api/";
 
         private readonly IRestClientFactory _restClientFactory;
         private readonly MockHttpMessageHandler _mockHttp;

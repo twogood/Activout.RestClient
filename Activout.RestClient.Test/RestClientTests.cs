@@ -26,7 +26,7 @@ namespace Activout.RestClient.Test
             _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
         }
 
-        private const string BaseUri = "http://localhost:9080/movieReviewService";
+        private const string BaseUri = "https://example.com/movieReviewService";
         private const string MovieId = "*MOVIE_ID*";
         private const string ReviewId = "*REVIEW_ID*";
 

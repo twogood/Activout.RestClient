@@ -12,7 +12,7 @@ namespace Activout.RestClient.Test
 {
     public class SerializationOrderTest
     {
-        private const string BaseUri = "http://example.com/";
+        private const string BaseUri = "https://example.com/";
         private const int OrderFirst = -1000;
         private const int OrderLast = 1000;
 
