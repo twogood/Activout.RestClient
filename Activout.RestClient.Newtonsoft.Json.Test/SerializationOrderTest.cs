@@ -77,8 +77,8 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
         private IRestClientBuilder CreateRestClientBuilder()
         {
             return _restClientFactory.CreateBuilder()
-                .With(_mockHttp.ToHttpClient())
                 .WithNewtonsoftJson()
+                .With(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri));
         }
     }
