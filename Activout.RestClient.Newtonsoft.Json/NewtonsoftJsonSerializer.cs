@@ -1,18 +1,19 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using Activout.RestClient.Serialization;
 using Newtonsoft.Json;
 
-namespace Activout.RestClient.Serialization.Implementation
+namespace Activout.RestClient.Newtonsoft.Json
 {
-    public class JsonSerializer : ISerializer
+    public class NewtonsoftJsonSerializer : ISerializer
     {
         private readonly JsonSerializerSettings _jsonSerializerSettings;
 
         public IReadOnlyCollection<MediaType> SupportedMediaTypes => JsonHelper.SupportedMediaTypes;
 
-        public JsonSerializer(JsonSerializerSettings jsonSerializerSettings)
+        public NewtonsoftJsonSerializer(JsonSerializerSettings jsonSerializerSettings)
         {
             _jsonSerializerSettings = jsonSerializerSettings;
         }

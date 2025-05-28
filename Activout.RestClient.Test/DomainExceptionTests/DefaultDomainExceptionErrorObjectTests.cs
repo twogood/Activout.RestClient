@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Activout.RestClient.DomainExceptions;
+using Activout.RestClient.Newtonsoft.Json;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
@@ -43,6 +44,7 @@ namespace Activout.RestClient.Test.DomainExceptionTests
 
             _defaultMapperApiClient = Services.CreateRestClientFactory()
                 .CreateBuilder()
+                .WithNewtonsoftJson()
                 .With(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri))
                 .Build<ISomeApiErrorObjectClient>();

@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Activout.RestClient.Xml", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Activout.RestClient.Xml.Test", "Activout.RestClient.Xml.Test\Activout.RestClient.Xml.Test.csproj", "{AEDBF6CA-65A6-42E3-B991-3B954ACCA94D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Activout.RestClient.Newtonsoft.Json", "Activout.RestClient.Newtonsoft.Json\Activout.RestClient.Newtonsoft.Json.csproj", "{0D33957E-E4C6-4C17-AEBA-6D6B2A90F1CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{AEDBF6CA-65A6-42E3-B991-3B954ACCA94D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEDBF6CA-65A6-42E3-B991-3B954ACCA94D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AEDBF6CA-65A6-42E3-B991-3B954ACCA94D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D33957E-E4C6-4C17-AEBA-6D6B2A90F1CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D33957E-E4C6-4C17-AEBA-6D6B2A90F1CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D33957E-E4C6-4C17-AEBA-6D6B2A90F1CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D33957E-E4C6-4C17-AEBA-6D6B2A90F1CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

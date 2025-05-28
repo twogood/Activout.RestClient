@@ -17,6 +17,7 @@
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Activout.RestClient.Newtonsoft.Json\Activout.RestClient.Newtonsoft.Json.csproj" />
     <ProjectReference Include="..\Activout.RestClient\Activout.RestClient.csproj" />
   </ItemGroup>
 </Project>
