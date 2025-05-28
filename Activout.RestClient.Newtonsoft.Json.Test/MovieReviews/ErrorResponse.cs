@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Activout.RestClient.Test.MovieReviews
+namespace Activout.RestClient.Newtonsoft.Json.Test.MovieReviews
 {
     public class ErrorResponse
     {

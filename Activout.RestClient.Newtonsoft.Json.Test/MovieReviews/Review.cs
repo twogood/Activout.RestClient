@@ -1,4 +1,4 @@
-﻿namespace Activout.RestClient.Test.MovieReviews
+﻿namespace Activout.RestClient.Newtonsoft.Json.Test.MovieReviews
 {
     public class Review
     {

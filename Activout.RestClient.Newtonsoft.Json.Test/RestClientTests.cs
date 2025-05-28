@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Activout.RestClient.Helpers.Implementation;
 using Activout.RestClient.Newtonsoft.Json.Test.MovieReviews;
-using Activout.RestClient.Test.MovieReviews;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json;
