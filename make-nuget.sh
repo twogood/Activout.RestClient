@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 cd "$(dirname "$0")" || exit 1
 VERSION=$1
 if [ -z "$VERSION" ]; then
@@ -21,3 +22,4 @@ dotnet pack \
 echo "Upload:"
 echo "https://www.nuget.org/packages/manage/upload"
 
+ls -1 "$(pwd)"/Activout.RestClient/bin/Release/*."$VERSION".*nupkg

@@ -1,9 +1,6 @@
-using Activout.RestClient.Serialization;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Activout.RestClient.Newtonsoft.Json
 {
@@ -19,7 +16,7 @@ namespace Activout.RestClient.Newtonsoft.Json
         };
 
         public static IRestClientBuilder WithNewtonsoftJson(this IRestClientBuilder builder,
-            JsonSerializerSettings jsonSerializerSettings = null)
+            JsonSerializerSettings? jsonSerializerSettings = null)
         {
             var settings = jsonSerializerSettings ?? DefaultJsonSerializerSettings;
 

@@ -22,7 +22,7 @@ public class NewtonsoftJsonDeserializer : IDeserializer
 
     public int Order { get; set; }
 
-    public async Task<object> Deserialize(HttpContent content, Type type)
+    public async Task<object?> Deserialize(HttpContent content, Type type)
     {
         if (type == typeof(JObject))
         {
