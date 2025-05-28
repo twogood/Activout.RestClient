@@ -1,4 +1,4 @@
-namespace Activout.RestClient.Test.DomainExceptionTests
+namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
 {
     public class MyApiErrorResponse
     {

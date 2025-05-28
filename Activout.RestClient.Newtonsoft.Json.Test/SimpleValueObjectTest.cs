@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
 
-namespace Activout.RestClient.Test
+namespace Activout.RestClient.Newtonsoft.Json.Test
 {
     public class MySimpleValueObject
     {
@@ -128,6 +128,7 @@ namespace Activout.RestClient.Test
         {
             return _restClientFactory.CreateBuilder()
                 .With(_mockHttp.ToHttpClient())
+                .WithNewtonsoftJson()
                 .BaseUri(new Uri(BaseUri))
                 .Build<IValueObjectClient>();
         }

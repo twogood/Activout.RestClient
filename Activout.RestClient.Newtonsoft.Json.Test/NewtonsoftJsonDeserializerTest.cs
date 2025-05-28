@@ -3,13 +3,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using Activout.RestClient.Newtonsoft.Json;
 using Activout.RestClient.Serialization.Implementation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using RichardSzalay.MockHttp;
 using Xunit;
 
-namespace Activout.RestClient.Test
+namespace Activout.RestClient.Newtonsoft.Json.Test
 {
     [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
     public class Data
@@ -22,9 +23,9 @@ namespace Activout.RestClient.Test
         Data GetData();
     }
 
-    public class JsonDeserializerTest
+    public class NewtonsoftJsonDeserializerTest
     {
-        public JsonDeserializerTest()
+        public NewtonsoftJsonDeserializerTest()
         {
             _restClientFactory = Services.CreateRestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
@@ -76,7 +77,7 @@ namespace Activout.RestClient.Test
             MockCamelCaseResponse();
 
             var client = CreateRestClientBuilder()
-                .With(new JsonDeserializer(new JsonSerializerSettings
+                .With(new NewtonsoftJsonDeserializer(new JsonSerializerSettings
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 }))
@@ -97,7 +98,7 @@ namespace Activout.RestClient.Test
             MockCamelCaseResponse();
 
             var deserializers = SerializationManager.DefaultDeserializers.ToList();
-            deserializers.Add(new JsonDeserializer(new JsonSerializerSettings
+            deserializers.Add(new NewtonsoftJsonDeserializer(new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             }));
@@ -118,6 +119,7 @@ namespace Activout.RestClient.Test
         private IRestClientBuilder CreateRestClientBuilder()
         {
             return _restClientFactory.CreateBuilder()
+                .WithNewtonsoftJson()
                 .With(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri));
         }

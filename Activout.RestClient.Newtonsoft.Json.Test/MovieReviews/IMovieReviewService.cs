@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace Activout.RestClient.Test.MovieReviews
+namespace Activout.RestClient.Newtonsoft.Json.Test.MovieReviews
 {
     [Path("movies")]
     [ErrorResponse(typeof(ErrorResponse))]

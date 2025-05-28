@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
 
-namespace Activout.RestClient.Test.DomainExceptionTests
+namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
 {
     internal class MyDomainErrorObject
     {
@@ -78,6 +78,7 @@ namespace Activout.RestClient.Test.DomainExceptionTests
 
             _myApiClient = Services.CreateRestClientFactory()
                 .CreateBuilder()
+                .WithNewtonsoftJson()
                 .With(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri))
                 .With(new MyDomainExceptionMapperFactory())

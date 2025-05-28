@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace Activout.RestClient.Serialization.Implementation
+namespace Activout.RestClient.Newtonsoft.Json
 {
     public static class JsonHelper
     {

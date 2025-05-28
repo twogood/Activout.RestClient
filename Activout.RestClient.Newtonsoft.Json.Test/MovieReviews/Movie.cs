@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Activout.RestClient.Test.MovieReviews
+namespace Activout.RestClient.Newtonsoft.Json.Test.MovieReviews
 {
     [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
     public class Movie

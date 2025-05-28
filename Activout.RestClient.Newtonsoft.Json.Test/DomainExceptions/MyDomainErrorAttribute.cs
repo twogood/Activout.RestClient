@@ -1,6 +1,6 @@
 using Activout.RestClient.DomainExceptions;
 
-namespace Activout.RestClient.Test.DomainExceptionTests
+namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
 {
     internal class MyDomainErrorAttribute : DomainErrorAttribute
     {

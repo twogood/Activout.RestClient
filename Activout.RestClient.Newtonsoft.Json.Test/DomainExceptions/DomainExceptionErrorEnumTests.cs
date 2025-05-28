@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
 
-namespace Activout.RestClient.Test.DomainExceptionTests
+namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
 {
     internal class MyDomainErrorEnumException : Exception
     {
@@ -47,6 +47,7 @@ namespace Activout.RestClient.Test.DomainExceptionTests
             _myApiClient = Services.CreateRestClientFactory()
                 .CreateBuilder()
                 .With(_mockHttp.ToHttpClient())
+                .WithNewtonsoftJson()
                 .BaseUri(new Uri(BaseUri))
                 .Build<IMyApiClient>();
         }

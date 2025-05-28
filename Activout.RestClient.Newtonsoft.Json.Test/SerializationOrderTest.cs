@@ -2,13 +2,12 @@ using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Activout.RestClient.Serialization.Implementation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using RichardSzalay.MockHttp;
 using Xunit;
 
-namespace Activout.RestClient.Test
+namespace Activout.RestClient.Newtonsoft.Json.Test
 {
     public class SerializationOrderTest
     {
@@ -64,7 +63,7 @@ namespace Activout.RestClient.Test
         private ISerializationOrderClient CreateClient(int orderOfJsonDeserializer)
         {
             return CreateRestClientBuilder()
-                .With(new JsonDeserializer(new JsonSerializerSettings()
+                .With(new NewtonsoftJsonDeserializer(new JsonSerializerSettings()
                 {
                     ContractResolver = new DefaultContractResolver()
                     {
@@ -78,6 +77,7 @@ namespace Activout.RestClient.Test
         private IRestClientBuilder CreateRestClientBuilder()
         {
             return _restClientFactory.CreateBuilder()
+                .WithNewtonsoftJson()
                 .With(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri));
         }

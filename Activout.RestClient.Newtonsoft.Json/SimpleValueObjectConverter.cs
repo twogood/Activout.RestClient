@@ -1,8 +1,7 @@
-using System;
 using System.Reflection;
 using Newtonsoft.Json;
 
-namespace Activout.RestClient.Serialization.Implementation
+namespace Activout.RestClient.Newtonsoft.Json
 {
     /*
      * We define a "simple value object" as an object that has:
@@ -14,17 +13,16 @@ namespace Activout.RestClient.Serialization.Implementation
      */
     public class SimpleValueObjectConverter : JsonConverter
     {
-        public override void WriteJson(JsonWriter writer, object value, Newtonsoft.Json.JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            var valueProperty = GetValueProperty(value.GetType());
-            serializer.Serialize(writer, valueProperty.GetValue(value));
+            var valueProperty = GetValueProperty(value!.GetType());
+            serializer.Serialize(writer, valueProperty!.GetValue(value));
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
-            Newtonsoft.Json.JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             var valueProperty = GetValueProperty(objectType);
-            var value = serializer.Deserialize(reader, valueProperty.PropertyType);
+            var value = serializer.Deserialize(reader, valueProperty!.PropertyType);
             return value == null ? null : Activator.CreateInstance(objectType, value);
         }
 
@@ -38,19 +36,19 @@ namespace Activout.RestClient.Serialization.Implementation
             return constructor != null;
         }
 
-        private static ConstructorInfo GetValueConstructor(Type objectType, PropertyInfo valueProperty)
+        private static ConstructorInfo? GetValueConstructor(Type objectType, PropertyInfo valueProperty)
         {
-            return objectType.GetConstructor(new[] { valueProperty.PropertyType });
+            return objectType.GetConstructor([valueProperty.PropertyType]);
         }
 
-        private static PropertyInfo GetValueProperty(Type objectType)
+        private static PropertyInfo? GetValueProperty(Type objectType)
         {
             return objectType.GetProperty("Value");
         }
 
-        private static ConstructorInfo GetDefaultConstructor(Type objectType)
+        private static ConstructorInfo? GetDefaultConstructor(Type objectType)
         {
-            return objectType.GetConstructor(new Type[0]);
+            return objectType.GetConstructor([]);
         }
     }
 }

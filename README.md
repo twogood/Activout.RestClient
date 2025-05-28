@@ -1,6 +1,4 @@
 # Activout Rest Client
-[![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=Activout.RestClient&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=Activout.RestClient)
-[![NuGet Badge](https://buildstats.info/nuget/Activout.RestClient)](https://www.nuget.org/packages/Activout.RestClient/)
 
 Create a REST(ish) API client only by defining the C# interface you want.
 
@@ -50,6 +48,7 @@ var restClientFactory = Services.CreateRestClientFactory();
 var movieReviewService = restClientFactory
             .CreateBuilder()
             .With(_httpClient)
+            .WithNewtonsoftJson()
             .BaseUri(new Uri("https://example.com/movieReviewService"))
             .Build<IMovieReviewService>();
 
@@ -83,7 +82,11 @@ public static IServiceCollection AddRestClient(this IServiceCollection self)
   return self;
 }
 ```
+## Breaking changes in version 5
 
+- Replaced `[JsonProperty]` (`JsonPropertyAttribute`) in HTTP form data classes with `[FormKey]` (`FormKeyAttribute`) to
+  avoid dependency on Newtonsoft.Json.
+- Extracted package `Activout.RestClient.Newtonsoft.Json` to make Activout.RestClient independent of Newtonsoft.Json.
 
 ## Breaking changes in version 3
 

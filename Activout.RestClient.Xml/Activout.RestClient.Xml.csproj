@@ -11,4 +11,8 @@
       <ProjectReference Include="..\Activout.RestClient\Activout.RestClient.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
+
 </Project>
