@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Activout.RestClient.Newtons
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Activout.RestClient.Newtonsoft.Json.Test", "Activout.RestClient.Newtonsoft.Json.Test\Activout.RestClient.Newtonsoft.Json.Test.csproj", "{D4DE7929-0435-46AB-93F3-5615536CA08D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Activout.RestClient.Json", "Activout.RestClient.Json\Activout.RestClient.Json.csproj", "{2CD1BA4F-3ECB-4073-8E2D-A43C323AA0D6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Activout.RestClient.Json", "Activout.RestClient.Json\Activout.RestClient.Json.csproj", "{F20DCE91-F49F-47AE-A531-1D2A03EF7F1B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +47,10 @@ Global
 		{D4DE7929-0435-46AB-93F3-5615536CA08D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4DE7929-0435-46AB-93F3-5615536CA08D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4DE7929-0435-46AB-93F3-5615536CA08D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2CD1BA4F-3ECB-4073-8E2D-A43C323AA0D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2CD1BA4F-3ECB-4073-8E2D-A43C323AA0D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2CD1BA4F-3ECB-4073-8E2D-A43C323AA0D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2CD1BA4F-3ECB-4073-8E2D-A43C323AA0D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F20DCE91-F49F-47AE-A531-1D2A03EF7F1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F20DCE91-F49F-47AE-A531-1D2A03EF7F1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F20DCE91-F49F-47AE-A531-1D2A03EF7F1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F20DCE91-F49F-47AE-A531-1D2A03EF7F1B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
