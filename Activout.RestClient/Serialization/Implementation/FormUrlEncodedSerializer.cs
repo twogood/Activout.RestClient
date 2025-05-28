@@ -3,7 +3,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
-using Newtonsoft.Json;
 
 namespace Activout.RestClient.Serialization.Implementation
 {
@@ -51,8 +50,9 @@ namespace Activout.RestClient.Serialization.Implementation
 
         private static string GetKey(MemberInfo property)
         {
-            var attribute = property.GetCustomAttribute<JsonPropertyAttribute>();
-            return attribute == null ? property.Name : attribute.PropertyName;
+            var attribute = property.GetCustomAttribute<FormKeyAttribute>();
+            return attribute == null ? property.Name : attribute.KeyName;
         }
     }
 }
+

@@ -9,6 +9,7 @@ namespace Activout.RestClient.Serialization.Implementation
     {
         public static readonly IReadOnlyCollection<ISerializer> DefaultSerializers = new List<ISerializer>
             {
+                new FormUrlEncodedSerializer(),
                 new StringSerializer(),
                 new ByteArraySerializer()
             }

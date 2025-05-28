@@ -17,7 +17,7 @@ namespace Activout.RestClient.Test
         public string SomeString { get; set; } = "foo";
         public string Unused { get; set; } = null;
         public int SomeNumber { get; set; } = 42;
-        [JsonProperty("another")] public string AnotherString { get; set; } = "bar";
+        [FormKey("another")] public string AnotherString { get; set; } = "bar";
     }
 
     [ContentType("application/x-www-form-urlencoded")]
@@ -119,3 +119,4 @@ namespace Activout.RestClient.Test
         }
     }
 }
+
