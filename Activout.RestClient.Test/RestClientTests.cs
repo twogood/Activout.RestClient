@@ -51,6 +51,40 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
+        public async Task TestExtendClient()
+        {
+            // arrange
+            _mockHttp
+                .Expect($"{BaseUri}/movies/string")
+                .WithHeaders("accept", "text/plain")
+                .WithHeaders("Authorization", "Bearer 111")
+                .Respond(new StringContent("foo"));
+
+            _mockHttp
+                .Expect($"{BaseUri}/movies/string")
+                .WithHeaders("accept", "text/plain")
+                .WithHeaders("Authorization", "Bearer 222")
+                .Respond(new StringContent("bar"));
+
+            var movieReviewService1 = CreateRestClientBuilder()
+                .Header(new AuthenticationHeaderValue("Bearer", "111"))
+                .Build<IMovieReviewService>();
+            
+            var movieReviewService2 = _restClientFactory
+                .Extend(movieReviewService1)
+                .Header(new AuthenticationHeaderValue("Bearer", "222"))
+                .Build<IMovieReviewService>();
+            
+            // act
+            var result1 = await movieReviewService1.GetString();
+            var result2 = await movieReviewService2.GetString();
+
+            // assert
+            Assert.Equal("foo", result1);
+            Assert.Equal("bar", result2);
+        }
+
+        [Fact]
         public async Task TestErrorAsyncWithOldTaskConverter()
         {
             // arrange
