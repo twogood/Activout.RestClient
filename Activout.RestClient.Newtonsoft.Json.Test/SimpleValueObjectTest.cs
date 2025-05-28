@@ -3,12 +3,11 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Activout.RestClient.Newtonsoft.Json;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
 
-namespace Activout.RestClient.Test
+namespace Activout.RestClient.Newtonsoft.Json.Test
 {
     public class MySimpleValueObject
     {

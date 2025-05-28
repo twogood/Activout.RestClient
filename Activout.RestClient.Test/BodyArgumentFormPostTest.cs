@@ -4,8 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Activout.RestClient.Newtonsoft.Json;
-using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
 

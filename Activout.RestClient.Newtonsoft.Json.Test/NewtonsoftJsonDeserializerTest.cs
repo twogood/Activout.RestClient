@@ -10,7 +10,7 @@ using Newtonsoft.Json.Serialization;
 using RichardSzalay.MockHttp;
 using Xunit;
 
-namespace Activout.RestClient.Test
+namespace Activout.RestClient.Newtonsoft.Json.Test
 {
     [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
     public class Data

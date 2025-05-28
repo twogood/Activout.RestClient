@@ -4,9 +4,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Activout.RestClient.Test.MovieReviews;
 using Newtonsoft.Json.Linq;
 
-namespace Activout.RestClient.Test.MovieReviews
+namespace Activout.RestClient.Newtonsoft.Json.Test.MovieReviews
 {
     [Path("movies")]
     [ErrorResponse(typeof(ErrorResponse))]

@@ -1,9 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>default</LangVersion>
   </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.6.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
@@ -16,7 +19,10 @@
     </PackageReference>
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\Activout.RestClient\Activout.RestClient.csproj" />
+    <ProjectReference Include="..\Activout.RestClient.Newtonsoft.Json\Activout.RestClient.Newtonsoft.Json.csproj" />
   </ItemGroup>
+
 </Project>

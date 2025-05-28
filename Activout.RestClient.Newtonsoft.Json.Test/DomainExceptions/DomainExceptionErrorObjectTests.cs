@@ -5,12 +5,11 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Activout.RestClient.DomainExceptions;
-using Activout.RestClient.Newtonsoft.Json;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
 
-namespace Activout.RestClient.Test.DomainExceptionTests
+namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
 {
     internal class MyDomainErrorObject
     {

@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Activout.RestClient.Helpers.Implementation;
-using Activout.RestClient.Newtonsoft.Json;
+using Activout.RestClient.Newtonsoft.Json.Test.MovieReviews;
 using Activout.RestClient.Test.MovieReviews;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -16,7 +16,7 @@ using RichardSzalay.MockHttp;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Activout.RestClient.Test
+namespace Activout.RestClient.Newtonsoft.Json.Test
 {
     public class RestClientTests
     {
