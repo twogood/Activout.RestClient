@@ -67,6 +67,8 @@ public class SimpleValueObjectConverter : JsonConverterFactory
     // Inner converter that handles the actual conversion
     private class SimpleValueObjectConverterInner<TObject, TValue> : JsonConverter<TObject>
     {
+        private static readonly PropertyInfo ValuePropertyInfo = typeof(TObject).GetProperty("Value")!;
+
         public override TObject? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType == JsonTokenType.Null)
@@ -87,7 +89,7 @@ public class SimpleValueObjectConverter : JsonConverterFactory
                 return;
             }
 
-            var propertyValue = typeof(TObject).GetProperty("Value").GetValue(value);
+            var propertyValue = ValuePropertyInfo.GetValue(value);
             JsonSerializer.Serialize(writer, propertyValue, options);
         }
     }
