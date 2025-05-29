@@ -13,7 +13,7 @@ var restClientFactory = Services.CreateRestClientFactory();
 var movieReviewService = restClientFactory
             .CreateBuilder()
             .With(_httpClient)
-            .WithSystemTextJson()   // Use se this package
+            .WithSystemTextJson()   // Use this package
             .BaseUri(new Uri("https://example.com/movieReviewService"))
             .Build<IMovieReviewService>();
 
