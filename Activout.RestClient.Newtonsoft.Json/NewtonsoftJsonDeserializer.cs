@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Activout.RestClient.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,7 +8,7 @@ public class NewtonsoftJsonDeserializer : IDeserializer
 {
     private readonly JsonSerializerSettings _jsonSerializerSettings;
 
-    public IReadOnlyCollection<MediaType> SupportedMediaTypes => JsonHelper.SupportedMediaTypes;
+    public IReadOnlyCollection<MediaType> SupportedMediaTypes => NewtonsoftJsonDefaults.SupportedMediaTypes;
 
     public NewtonsoftJsonDeserializer(JsonSerializerSettings jsonSerializerSettings)
     {
