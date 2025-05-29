@@ -19,6 +19,11 @@ namespace Activout.RestClient.Serialization.Implementation
         {
             var bytes = await content.ReadAsByteArrayAsync();
 
+            if (bytes.Length == 0)
+            {
+                return type == typeof(byte[]) ? bytes : null;
+            }
+
             return type == typeof(byte[])
                 ? bytes
                 : Activator.CreateInstance(type, bytes);
