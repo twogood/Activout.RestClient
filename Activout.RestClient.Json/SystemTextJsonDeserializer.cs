@@ -29,9 +29,10 @@ public class SystemTextJsonDeserializer(
     /// <returns>The deserialized object.</returns>
     public async Task<object?> Deserialize(HttpContent content, Type type)
     {
-        using var stream = await content.ReadAsStreamAsync();
+        await using var stream = await content.ReadAsStreamAsync();
 
-        if (stream == null || stream.Length == 0)
+        // ReSharper disable once MergeIntoPattern
+        if (stream.CanSeek && stream.Length == 0)
         {
             return null;
         }
