@@ -29,14 +29,14 @@ public class SystemTextJsonDeserializer(
     /// <returns>The deserialized object.</returns>
     public async Task<object?> Deserialize(HttpContent content, Type type)
     {
-        var json = await content.ReadAsStringAsync();
+        using var stream = await content.ReadAsStreamAsync();
 
-        if (string.IsNullOrWhiteSpace(json))
+        if (stream == null || stream.Length == 0)
         {
             return null;
         }
 
-        return JsonSerializer.Deserialize(json, type, _serializerOptions);
+        return await JsonSerializer.DeserializeAsync(stream, type, _serializerOptions);
     }
 
     /// <summary>
