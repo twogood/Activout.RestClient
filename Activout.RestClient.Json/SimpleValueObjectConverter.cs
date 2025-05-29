@@ -23,10 +23,10 @@ public class SimpleValueObjectConverter : JsonConverterFactory
     {
         if (Nullable.GetUnderlyingType(typeToConvert) != null) return false;
         if (GetDefaultConstructor(typeToConvert) != null) return false;
-            
+
         var valueProperty = GetValueProperty(typeToConvert);
         if (valueProperty == null) return false;
-            
+
         var constructor = GetValueConstructor(typeToConvert, valueProperty);
         return constructor != null;
     }
@@ -40,18 +40,18 @@ public class SimpleValueObjectConverter : JsonConverterFactory
     public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {
         var valueProperty = GetValueProperty(typeToConvert);
-        var valueType = valueProperty.PropertyType;
-            
+        var valueType = valueProperty!.PropertyType;
+
         var converterType = typeof(SimpleValueObjectConverterInner<,>).MakeGenericType(
-            typeToConvert, 
+            typeToConvert,
             valueType);
-                
+
         return (JsonConverter)Activator.CreateInstance(converterType);
     }
 
-    private static ConstructorInfo GetValueConstructor(Type objectType, PropertyInfo valueProperty)
+    private static ConstructorInfo? GetValueConstructor(Type objectType, PropertyInfo valueProperty)
     {
-        return objectType.GetConstructor(new[] { valueProperty.PropertyType });
+        return objectType.GetConstructor([valueProperty.PropertyType]);
     }
 
     private static PropertyInfo? GetValueProperty(Type objectType)

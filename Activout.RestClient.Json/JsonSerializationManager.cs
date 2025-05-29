@@ -12,7 +12,7 @@ public class JsonSerializationManager : ISerializationManager
     /// <summary>
     /// Gets the default JSON converters.
     /// </summary>
-    public static readonly IReadOnlyCollection<System.Text.Json.Serialization.JsonConverter> DefaultJsonConverters = 
+    public static readonly IReadOnlyCollection<System.Text.Json.Serialization.JsonConverter> DefaultJsonConverters =
         new List<System.Text.Json.Serialization.JsonConverter> { new SimpleValueObjectConverter() }.ToImmutableList();
 
     /// <summary>
@@ -21,7 +21,8 @@ public class JsonSerializationManager : ISerializationManager
     public static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+        PropertyNameCaseInsensitive = true
     };
 
     static JsonSerializationManager()
@@ -69,14 +70,14 @@ public class JsonSerializationManager : ISerializationManager
             allSerializers.AddRange(serializers);
         }
         allSerializers.AddRange(DefaultSerializers);
-            
+
         var allDeserializers = new List<IDeserializer>();
         if (deserializers != null)
         {
             allDeserializers.AddRange(deserializers);
         }
         allDeserializers.AddRange(DefaultDeserializers);
-            
+
         Serializers = allSerializers.OrderBy(s => s.Order).ToArray();
         Deserializers = allDeserializers.OrderBy(s => s.Order).ToArray();
     }
@@ -103,3 +104,4 @@ public class JsonSerializationManager : ISerializationManager
         return Serializers.FirstOrDefault(serializer => serializer.CanSerialize(mediaType));
     }
 }
+

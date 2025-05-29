@@ -38,7 +38,7 @@ public class SystemTextJsonDeserializer : IDeserializer
     public async Task<object> Deserialize(HttpContent content, Type type)
     {
         var json = await content.ReadAsStringAsync();
-            
+
         if (string.IsNullOrWhiteSpace(json))
         {
             return null;
