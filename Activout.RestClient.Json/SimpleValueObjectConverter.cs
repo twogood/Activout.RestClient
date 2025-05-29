@@ -46,7 +46,7 @@ public class SimpleValueObjectConverter : JsonConverterFactory
             typeToConvert,
             valueType);
 
-        return (JsonConverter)Activator.CreateInstance(converterType);
+        return (JsonConverter)Activator.CreateInstance(converterType)!;
     }
 
     private static ConstructorInfo? GetValueConstructor(Type objectType, PropertyInfo valueProperty)

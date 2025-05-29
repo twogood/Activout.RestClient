@@ -12,15 +12,15 @@ public static class RestClientBuilderJsonExtensions
     /// </summary>
     /// <param name="builder">The REST client builder instance.</param>
     /// <param name="jsonSerializerOptions">Optional custom JSON serializer options. If not provided, default options will be used.</param>
+    /// <param name="supportedMediaTypes">Optional list of content types to support. If not provided, defaults will be used.</param>
     /// <returns>The REST client builder instance.</returns>
     public static IRestClientBuilder WithSystemTextJson(this IRestClientBuilder builder,
-        JsonSerializerOptions? jsonSerializerOptions = null)
+        JsonSerializerOptions? jsonSerializerOptions = null,
+        MediaType[]? supportedMediaTypes = null)
     {
-        var options = jsonSerializerOptions ?? SystemTextJsonDefaults.DefaultJsonSerializerOptions;
-
         // Register the serializer and deserializer
-        builder.With(new SystemTextJsonSerializer(options));
-        builder.With(new SystemTextJsonDeserializer(options));
+        builder.With(new SystemTextJsonSerializer(jsonSerializerOptions, supportedMediaTypes));
+        builder.With(new SystemTextJsonDeserializer(jsonSerializerOptions, supportedMediaTypes));
 
         return builder;
     }

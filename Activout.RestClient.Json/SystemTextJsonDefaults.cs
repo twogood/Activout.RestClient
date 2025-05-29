@@ -11,14 +11,22 @@ namespace Activout.RestClient.Json;
 public static class SystemTextJsonDefaults
 {
     /// <summary>
+    /// Gets the collection of supported media types.
+    /// </summary>
+    public static readonly MediaType[] MediaTypes =
+    [
+        MediaType.ValueOf("application/json")
+    ];
+
+    /// <summary>
     /// Gets the default JSON converters.
     /// </summary>
-    public static readonly JsonConverter[] DefaultJsonConverters = [new SimpleValueObjectConverter()];
+    public static readonly JsonConverter[] JsonConverters = [new SimpleValueObjectConverter()];
 
     /// <summary>
     /// Gets the default JSON serializer options.
     /// </summary>
-    public static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions
+    public static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -27,9 +35,9 @@ public static class SystemTextJsonDefaults
 
     static SystemTextJsonDefaults()
     {
-        foreach (var converter in DefaultJsonConverters)
+        foreach (var converter in JsonConverters)
         {
-            DefaultJsonSerializerOptions.Converters.Add(converter);
+            SerializerOptions.Converters.Add(converter);
         }
     }
 }

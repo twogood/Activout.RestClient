@@ -6,17 +6,9 @@ using Xunit;
 
 namespace Activout.RestClient.Json.Test;
 
-public class MySimpleValueObject
-{
-    public string Value { get; }
+public record MySimpleValueObject(string Value);
 
-    public MySimpleValueObject(string value)
-    {
-        Value = value;
-    }
-}
-
-public class Stuff
+public class ApiData
 {
     public MySimpleValueObject? FooBar { get; init; }
     public int? NullableInteger { get; init; }
@@ -24,10 +16,10 @@ public class Stuff
 
 public interface IValueObjectClient
 {
-    Task<Stuff> GetStuff();
+    Task<ApiData> GetData();
 
     [Post]
-    Task SetStuff(Stuff wrapper);
+    Task SetData(ApiData wrapper);
 }
 
 public class SimpleValueObjectTest
@@ -52,14 +44,14 @@ public class SimpleValueObjectTest
 
         var client = CreateClient();
 
-        var wrapper = new Stuff
+        var wrapper = new ApiData
         {
             FooBar = new MySimpleValueObject("foobar"),
             NullableInteger = 42
         };
 
         // Act
-        await client.SetStuff(wrapper);
+        await client.SetData(wrapper);
 
         // Assert
         _mockHttp.VerifyNoOutstandingExpectation();
@@ -82,11 +74,11 @@ public class SimpleValueObjectTest
         var client = CreateClient();
 
         // Act
-        var result = await client.GetStuff();
+        var result = await client.GetData();
 
         // Assert
         _mockHttp.VerifyNoOutstandingExpectation();
-        Assert.Equal("foobar", result.FooBar.Value);
+        Assert.Equal("foobar", result.FooBar?.Value);
     }
 
     [Fact]
@@ -97,7 +89,7 @@ public class SimpleValueObjectTest
             .Expect(BaseUri)
             .Respond(new StringContent(JsonSerializer.Serialize(new
             {
-                FooBar = (string)null,
+                FooBar = (string?)null,
                 NullableInteger = (int?)null
             }),
                 Encoding.UTF8,
@@ -106,7 +98,7 @@ public class SimpleValueObjectTest
         var client = CreateClient();
 
         // Act
-        var result = await client.GetStuff();
+        var result = await client.GetData();
 
         // Assert
         _mockHttp.VerifyNoOutstandingExpectation();

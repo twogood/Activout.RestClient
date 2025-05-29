@@ -8,23 +8,14 @@ namespace Activout.RestClient.Json;
 /// Implementation of <see cref="ISerializer"/> that serializes objects as JSON
 /// using System.Text.Json.
 /// </summary>
-public class SystemTextJsonSerializer : ISerializer
+public class SystemTextJsonSerializer(
+    JsonSerializerOptions? jsonSerializerOptions = null,
+    MediaType[]? supportedMediaTypes = null) : ISerializer
 {
-    private readonly JsonSerializerOptions _jsonSerializerOptions;
+    private readonly JsonSerializerOptions _serializerOptions =
+        jsonSerializerOptions ?? SystemTextJsonDefaults.SerializerOptions;
 
-    /// <summary>
-    /// Gets the collection of supported media types.
-    /// </summary>
-    public IReadOnlyCollection<MediaType> SupportedMediaTypes => JsonHelper.SupportedMediaTypes;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SystemTextJsonSerializer"/> class with the specified options.
-    /// </summary>
-    /// <param name="jsonSerializerOptions">The JSON serializer options.</param>
-    public SystemTextJsonSerializer(JsonSerializerOptions jsonSerializerOptions)
-    {
-        _jsonSerializerOptions = jsonSerializerOptions;
-    }
+    private readonly MediaType[] _supportedMediaTypes = supportedMediaTypes ?? SystemTextJsonDefaults.MediaTypes;
 
     /// <summary>
     /// Gets or sets the order of this serializer in the chain of serializers.
@@ -41,7 +32,7 @@ public class SystemTextJsonSerializer : ISerializer
     public HttpContent Serialize(object data, Encoding encoding, MediaType mediaType)
     {
         return new StringContent(
-            JsonSerializer.Serialize(data, _jsonSerializerOptions),
+            JsonSerializer.Serialize(data, _serializerOptions),
             encoding, mediaType.Value);
     }
 
@@ -52,6 +43,6 @@ public class SystemTextJsonSerializer : ISerializer
     /// <returns><c>true</c> if this serializer can serialize the specified media type; otherwise, <c>false</c>.</returns>
     public bool CanSerialize(MediaType mediaType)
     {
-        return SupportedMediaTypes.Contains(mediaType);
+        return _supportedMediaTypes.Contains(mediaType);
     }
 }
