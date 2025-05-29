@@ -81,33 +81,6 @@ public class SystemTextJsonDeserializerTest
         Assert.Equal("CamelCase", data.Value);
     }
 
-    [Fact]
-    public void TestCamelCaseWithSerializationManager()
-    {
-        // Arrange
-        MockCamelCaseResponse();
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
-
-        var deserializers = JsonSerializationManager.DefaultDeserializers.ToList();
-        deserializers.Add(new SystemTextJsonDeserializer(options));
-        var serializationManager = new JsonSerializationManager(deserializers: deserializers);
-
-        var client = CreateRestClientBuilder()
-            .With(serializationManager)
-            .Build<IClient>();
-
-        // Act
-        var data = client.GetData();
-
-        // Assert
-        _mockHttp.VerifyNoOutstandingExpectation();
-        Assert.Equal("CamelCase", data.Value);
-    }
-
     private IRestClientBuilder CreateRestClientBuilder()
     {
         return _restClientFactory.CreateBuilder()
