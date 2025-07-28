@@ -176,7 +176,6 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
         await reviewSvc.Import("foobar");
 
         // assert
-        //Assert.Equal("*REVIEW_ID*", result.ReviewId);
     }
 
     [Fact]
