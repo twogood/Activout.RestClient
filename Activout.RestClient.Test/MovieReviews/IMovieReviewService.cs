@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Activout.RestClient.Test.MovieReviews;
@@ -42,6 +43,13 @@ public interface IMovieReviewService
 
     [Path("/headers")]
     Task<HttpResponseMessage> SendFooHeader([HeaderParam("X-Foo")] string foo);
+
+    [Path("/string")]
+    [Accept("text/plain")]
+    Task<string> GetStringCancellable(CancellationToken cancellationToken);
+
+    [Path("/bytes")]
+    Task<byte[]> GetByteArrayCancellable(CancellationToken cancellationToken);
 }
 
 [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]

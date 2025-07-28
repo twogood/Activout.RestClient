@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Activout.RestClient.Test.MovieReviews;
 using Microsoft.Extensions.Logging;
+using Moq;
 using RichardSzalay.MockHttp;
 using Xunit;
 using Xunit.Abstractions;
@@ -35,6 +36,89 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
     {
         return CreateRestClientBuilder()
             .Build<IMovieReviewService>();
+    }
+
+    [Fact]
+    public async Task TestTimeoutAsync()
+    {
+        // arrange
+        _mockHttp
+            .When($"{BaseUri}/movies/string")
+            .Respond(async () =>
+            {
+                await Task.Delay(1000);
+                return null;
+            });
+
+        var httpClient = _mockHttp.ToHttpClient();
+        httpClient.Timeout = TimeSpan.FromMilliseconds(1);
+        var reviewSvc = _restClientFactory.CreateBuilder()
+            .With(httpClient)
+            .BaseUri(new Uri(BaseUri))
+            .Build<IMovieReviewService>();
+
+        // act
+        await Assert.ThrowsAsync<TaskCanceledException>(() => reviewSvc.GetString());
+
+        // assert
+    }
+
+    [Fact]
+    public async Task TestCancellationAsync()
+    {
+        // arrange
+        _mockHttp.When($"{BaseUri}/movies/string")
+            .Respond(_ => null);
+
+        var reviewSvc = CreateMovieReviewService();
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        // act
+        cancellationTokenSource.Cancel();
+        await Assert.ThrowsAsync<TaskCanceledException>(() =>
+            reviewSvc.GetStringCancellable(cancellationTokenSource.Token));
+
+        // assert
+    }
+
+    [Fact]
+    public async Task TestNoCancellationAsync()
+    {
+        // arrange
+        _mockHttp.When($"{BaseUri}/movies/string")
+            .Respond("text/plain", "test string");
+
+        var reviewSvc = CreateMovieReviewService();
+
+        // act
+        var result = await reviewSvc.GetStringCancellable(default);
+
+        // assert
+        Assert.Equal("test string", result);
+    }
+
+    [Fact]
+    public async Task TestRequestLogger()
+    {
+        // arrange
+        _mockHttp
+            .When($"{BaseUri}/movies/string")
+            .Respond("text/plain", "test");
+
+        var requestLoggerMock = new Mock<IRequestLogger>();
+        requestLoggerMock.Setup(x => x.TimeOperation(It.IsAny<HttpRequestMessage>()))
+            .Returns(() => new Mock<IDisposable>().Object);
+
+        var reviewSvc = CreateRestClientBuilder()
+            .With(requestLoggerMock.Object)
+            .Build<IMovieReviewService>();
+
+        // act
+        await reviewSvc.GetString();
+        await reviewSvc.GetString();
+
+        // assert
+        requestLoggerMock.Verify(x => x.TimeOperation(It.IsAny<HttpRequestMessage>()), Times.Exactly(2));
     }
 
     [Fact]
