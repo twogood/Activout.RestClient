@@ -7,6 +7,8 @@ using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using System.Net;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -16,6 +18,12 @@ public enum JsonImplementation
 {
     SystemTextJson,
     NewtonsoftJson
+}
+
+public enum JsonNullValueHandling
+{
+    Include,
+    Ignore
 }
 
 public class RestClientTests(ITestOutputHelper outputHelper)
@@ -28,21 +36,37 @@ public class RestClientTests(ITestOutputHelper outputHelper)
     private readonly MockHttpMessageHandler _mockHttp = new();
     private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
 
-    private IRestClientBuilder CreateRestClientBuilder(JsonImplementation jsonImplementation)
+    private IRestClientBuilder CreateRestClientBuilder(JsonImplementation jsonImplementation,
+        JsonNullValueHandling nullValueHandling = JsonNullValueHandling.Ignore)
     {
         var builder = _restClientFactory.CreateBuilder();
-        
+
+        var jsonSerializerOptions = new JsonSerializerOptions(SystemTextJsonDefaults.SerializerOptions)
+            {
+                DefaultIgnoreCondition = nullValueHandling == JsonNullValueHandling.Ignore
+                    ? JsonIgnoreCondition.WhenWritingNull
+                    : JsonIgnoreCondition.Never
+            };
+
+        var jsonSerializerSettings = new JsonSerializerSettings(NewtonsoftJsonDefaults.DefaultJsonSerializerSettings)
+            {
+                NullValueHandling = nullValueHandling == JsonNullValueHandling.Ignore
+                    ? NullValueHandling.Ignore
+                    : NullValueHandling.Include
+            };
+
         return jsonImplementation switch
         {
-            JsonImplementation.SystemTextJson => builder.WithSystemTextJson(),
-            JsonImplementation.NewtonsoftJson => builder.WithNewtonsoftJson(),
+            JsonImplementation.SystemTextJson => builder.WithSystemTextJson(jsonSerializerOptions),
+            JsonImplementation.NewtonsoftJson => builder.WithNewtonsoftJson(jsonSerializerSettings),
             _ => throw new ArgumentOutOfRangeException(nameof(jsonImplementation))
         };
     }
 
-    private IMovieReviewService CreateMovieReviewService(JsonImplementation jsonImplementation)
+    private IMovieReviewService CreateMovieReviewService(JsonImplementation jsonImplementation,
+        JsonNullValueHandling nullValueHandling = JsonNullValueHandling.Ignore)
     {
-        return CreateRestClientBuilder(jsonImplementation)
+        return CreateRestClientBuilder(jsonImplementation, nullValueHandling)
             .Accept("application/json")
             .ContentType("application/json")
             .With(_loggerFactory.CreateLogger<RestClientTests>())
@@ -205,45 +229,40 @@ public class RestClientTests(ITestOutputHelper outputHelper)
     }
 
     [Theory]
-    [InlineData(JsonImplementation.SystemTextJson)]
-    [InlineData(JsonImplementation.NewtonsoftJson)]
-    public async Task TestPostJsonAsync(JsonImplementation jsonImplementation)
+    [InlineData(JsonImplementation.SystemTextJson, JsonNullValueHandling.Include)]
+    [InlineData(JsonImplementation.NewtonsoftJson, JsonNullValueHandling.Include)]
+    [InlineData(JsonImplementation.SystemTextJson, JsonNullValueHandling.Ignore)]
+    [InlineData(JsonImplementation.NewtonsoftJson, JsonNullValueHandling.Ignore)]
+    public async Task TestPostJsonAsync(JsonImplementation jsonImplementation, JsonNullValueHandling nullValueHandling)
     {
         // arrange
-        var movieId = "FOOBAR";
-        
-        // The replacement logic needs to handle different JSON formats
         _mockHttp
-            .When(HttpMethod.Post, $"{BaseUri}/movies/{movieId}/reviews")
+            .When(HttpMethod.Post, $"{BaseUri}/movies/FOOBAR/reviews")
             .WithHeaders("Content-Type", "application/json; charset=utf-8")
             .Respond(request =>
             {
                 var content = request.Content!.ReadAsStringAsync().Result;
-                
-                // Handle different serialization formats
-                content = jsonImplementation switch
+                if (nullValueHandling == JsonNullValueHandling.Include)
                 {
-                    JsonImplementation.SystemTextJson => content.Replace("\"reviewId\":null", "\"reviewId\":\"*REVIEW_ID*\"")
-                                                                .Replace("}", ",\"reviewId\":\"*REVIEW_ID*\"}"), // Add reviewId if not present
-                    JsonImplementation.NewtonsoftJson => content.Replace("\"ReviewId\":null", "\"ReviewId\":\"*REVIEW_ID*\""),
-                    _ => throw new ArgumentOutOfRangeException(nameof(jsonImplementation))
-                };
-                
+                    content = content.Replace("\"ReviewId\":null", "\"ReviewId\":\"*REVIEW_ID*\"");
+                }
+                else
+                {
+                    content = content.Replace("}", ",\"ReviewId\":\"*REVIEW_ID*\"}");
+                }
                 return new StringContent(content, Encoding.UTF8, "application/json");
             });
 
-        var reviewSvc = CreateMovieReviewService(jsonImplementation);
+        var reviewSvc = CreateMovieReviewService(jsonImplementation, nullValueHandling);
 
         // act
-        var text = "This was a delightful comedy, but not terribly realistic.";
-        var stars = 3;
-        var review = new Review(stars, text);
-        var result = await reviewSvc.SubmitReview(movieId, review);
+        var review = new Review(3, "This was a delightful comedy, but not terribly realistic.");
+        var result = await reviewSvc.SubmitReview("FOOBAR", review);
 
         // assert
         Assert.Equal("*REVIEW_ID*", result.ReviewId);
-        Assert.Equal(stars, result.Stars);
-        Assert.Equal(text, result.Text);
+        Assert.Equal(3, result.Stars);
+        Assert.Equal("This was a delightful comedy, but not terribly realistic.", result.Text);
     }
 
     [Theory]
