@@ -191,13 +191,12 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
         public async Task TestPostJsonAsync()
         {
             // arrange
-            var movieId = "FOOBAR";
             _mockHttp
-                .When(HttpMethod.Post, $"{BaseUri}/movies/{movieId}/reviews")
+                .When(HttpMethod.Post, $"{BaseUri}/movies/FOOBAR/reviews")
                 .WithHeaders("Content-Type", "application/json; charset=utf-8")
                 .Respond(request =>
                 {
-                    var content = request.Content.ReadAsStringAsync().Result;
+                    var content = request.Content!.ReadAsStringAsync().Result;
                     content = content.Replace("\"ReviewId\":null", "\"ReviewId\":\"*REVIEW_ID*\"");
                     return new StringContent(content, Encoding.UTF8, "application/json");
                 });
@@ -205,15 +204,13 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
             var reviewSvc = CreateMovieReviewService();
 
             // act
-            var text = "This was a delightful comedy, but not terribly realistic.";
-            var stars = 3;
-            var review = new Review(stars, text);
-            var result = await reviewSvc.SubmitReview(movieId, review);
+            var review = new Review(3, "This was a delightful comedy, but not terribly realistic.");
+            var result = await reviewSvc.SubmitReview("FOOBAR", review);
 
             // assert
             Assert.Equal("*REVIEW_ID*", result.ReviewId);
-            Assert.Equal(stars, result.Stars);
-            Assert.Equal(text, result.Text);
+            Assert.Equal(3, result.Stars);
+            Assert.Equal("This was a delightful comedy, but not terribly realistic.", result.Text);
         }
 
         [Fact]

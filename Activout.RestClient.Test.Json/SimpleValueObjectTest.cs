@@ -37,24 +37,9 @@ public class SimpleValueObjectTest
     public async Task TestSimpleValueObjectSerialization(JsonImplementation jsonImplementation)
     {
         // Arrange
-        var expectedContent = jsonImplementation switch
-        {
-            JsonImplementation.SystemTextJson => System.Text.Json.JsonSerializer.Serialize(new
-            {
-                fooBar = "foobar",
-                nullableInteger = 42
-            }),
-            JsonImplementation.NewtonsoftJson => JsonConvert.SerializeObject(new
-            {
-                FooBar = "foobar",
-                NullableInteger = 42
-            }),
-            _ => throw new ArgumentOutOfRangeException(nameof(jsonImplementation))
-        };
-
         _mockHttp
             .Expect(HttpMethod.Post, BaseUri)
-            .WithContent(expectedContent)
+            .WithContent("{\"FooBar\":\"foobar\",\"NullableInteger\":42}")
             .Respond(HttpStatusCode.OK);
 
         var client = CreateClient(jsonImplementation);
@@ -78,24 +63,10 @@ public class SimpleValueObjectTest
     public async Task TestSimpleValueObjectDeserialization(JsonImplementation jsonImplementation)
     {
         // Arrange
-        var responseContent = jsonImplementation switch
-        {
-            JsonImplementation.SystemTextJson => System.Text.Json.JsonSerializer.Serialize(new
-            {
-                FooBar = "foobar",
-                NullableInteger = 42
-            }),
-            JsonImplementation.NewtonsoftJson => JsonConvert.SerializeObject(new
-            {
-                FooBar = "foobar",
-                NullableInteger = 42
-            }),
-            _ => throw new ArgumentOutOfRangeException(nameof(jsonImplementation))
-        };
-
         _mockHttp
             .Expect(BaseUri)
-            .Respond(new StringContent(responseContent, Encoding.UTF8, "application/json"));
+            .Respond(new StringContent("{\"FooBar\":\"foobar\",\"NullableInteger\":42}", Encoding.UTF8,
+                "application/json"));
 
         var client = CreateClient(jsonImplementation);
 

@@ -37,8 +37,8 @@ public class SimpleValueObjectTest
             .Expect(HttpMethod.Post, BaseUri)
             .WithContent(JsonSerializer.Serialize(new
             {
-                fooBar = "foobar",
-                nullableInteger = 42
+                FooBar = "foobar",
+                NullableInteger = 42
             }))
             .Respond(HttpStatusCode.OK);
 

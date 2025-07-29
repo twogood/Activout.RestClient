@@ -28,8 +28,8 @@ public static class SystemTextJsonDefaults
     /// </summary>
     public static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions
     {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        PropertyNamingPolicy = null,
+        DefaultIgnoreCondition = JsonIgnoreCondition.Never,
         PropertyNameCaseInsensitive = true
     };
 
