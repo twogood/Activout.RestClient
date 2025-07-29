@@ -33,6 +33,13 @@ public static class SystemTextJsonDefaults
         PropertyNameCaseInsensitive = true
     };
 
+    public static readonly JsonSerializerOptions CamelCaseSerializerOptions = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+        PropertyNameCaseInsensitive = true
+    };
+
     static SystemTextJsonDefaults()
     {
         foreach (var converter in JsonConverters)

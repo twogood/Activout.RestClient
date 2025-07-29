@@ -36,24 +36,42 @@ public class RestClientTests(ITestOutputHelper outputHelper)
     private readonly MockHttpMessageHandler _mockHttp = new();
     private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
 
+    private static readonly JsonSerializerOptions SystemTextJsonIncludeNulls =
+        new(SystemTextJsonDefaults.SerializerOptions)
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.Never
+        };
+
+    private static readonly JsonSerializerOptions SystemTextJsonIgnoreNulls =
+        new(SystemTextJsonDefaults.SerializerOptions)
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
+
+    private static readonly JsonSerializerSettings NewtonsoftJsonIncludeNulls =
+        new(NewtonsoftJsonDefaults.DefaultJsonSerializerSettings)
+        {
+            NullValueHandling = NullValueHandling.Include
+        };
+
+    private static readonly JsonSerializerSettings NewtonsoftJsonIgnoreNulls =
+        new(NewtonsoftJsonDefaults.DefaultJsonSerializerSettings)
+        {
+            NullValueHandling = NullValueHandling.Ignore
+        };
+
     private IRestClientBuilder CreateRestClientBuilder(JsonImplementation jsonImplementation,
         JsonNullValueHandling nullValueHandling = JsonNullValueHandling.Ignore)
     {
         var builder = _restClientFactory.CreateBuilder();
 
-        var jsonSerializerOptions = new JsonSerializerOptions(SystemTextJsonDefaults.SerializerOptions)
-            {
-                DefaultIgnoreCondition = nullValueHandling == JsonNullValueHandling.Ignore
-                    ? JsonIgnoreCondition.WhenWritingNull
-                    : JsonIgnoreCondition.Never
-            };
+        var jsonSerializerOptions = nullValueHandling == JsonNullValueHandling.Ignore
+            ? SystemTextJsonIgnoreNulls
+            : SystemTextJsonIncludeNulls;
 
-        var jsonSerializerSettings = new JsonSerializerSettings(NewtonsoftJsonDefaults.DefaultJsonSerializerSettings)
-            {
-                NullValueHandling = nullValueHandling == JsonNullValueHandling.Ignore
-                    ? NullValueHandling.Ignore
-                    : NullValueHandling.Include
-            };
+        var jsonSerializerSettings = nullValueHandling == JsonNullValueHandling.Ignore
+            ? NewtonsoftJsonIgnoreNulls
+            : NewtonsoftJsonIncludeNulls;
 
         return jsonImplementation switch
         {
@@ -136,12 +154,12 @@ public class RestClientTests(ITestOutputHelper outputHelper)
         _mockHttp
             .Expect(HttpMethod.Get, $"{BaseUri}/movies/{movieId}/reviews")
             .Respond(HttpStatusCode.NotFound, request => new StringContent(JsonConvert.SerializeObject(new
-            {
-                Errors = new object[]
+                {
+                    Errors = new object[]
                     {
-                        new {Message = "Sorry, that page does not exist", Code = 34}
+                        new { Message = "Sorry, that page does not exist", Code = 34 }
                     }
-            }),
+                }),
                 Encoding.UTF8,
                 "application/json"));
     }
@@ -155,12 +173,12 @@ public class RestClientTests(ITestOutputHelper outputHelper)
         _mockHttp
             .When(HttpMethod.Get, $"{BaseUri}/movies/{MovieId}/reviews/{ReviewId}")
             .Respond(HttpStatusCode.NotFound, request => new StringContent(JsonConvert.SerializeObject(new
-            {
-                Errors = new object[]
+                {
+                    Errors = new object[]
                     {
-                        new {Message = "Sorry, that page does not exist", Code = 34}
+                        new { Message = "Sorry, that page does not exist", Code = 34 }
                     }
-            }),
+                }),
                 Encoding.UTF8,
                 "application/json"));
 
@@ -250,6 +268,7 @@ public class RestClientTests(ITestOutputHelper outputHelper)
                 {
                     content = content.Replace("}", ",\"ReviewId\":\"*REVIEW_ID*\"}");
                 }
+
                 return new StringContent(content, Encoding.UTF8, "application/json");
             });
 
