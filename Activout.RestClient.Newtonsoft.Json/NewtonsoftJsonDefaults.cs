@@ -23,4 +23,10 @@ public static class NewtonsoftJsonDefaults
     {
         Converters = DefaultJsonConverters.ToList()
     };
+
+    public static readonly JsonSerializerSettings CamelCaseSerializerSettings = new()
+    {
+        Converters = DefaultJsonConverters.ToList(),
+        ContractResolver = CamelCasePropertyNamesContractResolver,
+    };
 }
