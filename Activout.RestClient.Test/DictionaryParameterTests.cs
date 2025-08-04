@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Activout.RestClient.Test.MovieReviews;
 using Microsoft.Extensions.Logging;
 using RichardSzalay.MockHttp;
 using Xunit;
@@ -37,7 +36,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
         };
 
         _mockHttp
-            .When("https://example.com/test")
+            .When("https://example.com/api/test")
             .WithQueryString("param1=value1&param2=value2")
             .Respond("application/json", "{}");
 
@@ -60,7 +59,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
         };
 
         _mockHttp
-            .When(HttpMethod.Post, "https://example.com/test")
+            .When(HttpMethod.Post, "https://example.com/api/test")
             .WithFormData("field1", "value1")
             .WithFormData("field2", "value2")
             .Respond("application/json", "{}");
@@ -84,7 +83,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
         };
 
         _mockHttp
-            .When("https://example.com/test")
+            .When("https://example.com/api/test")
             .WithHeaders("X-Custom-Header1", "value1")
             .WithHeaders("X-Custom-Header2", "value2")
             .Respond("application/json", "{}");
@@ -108,7 +107,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
         };
 
         _mockHttp
-            .When("https://example.com/test")
+            .When("https://example.com/api/test")
             .WithQueryString("param1=value1&param2=value2&singleParam=singleValue")
             .Respond("application/json", "{}");
 
@@ -127,7 +126,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
         var emptyParams = new Dictionary<string, string>();
 
         _mockHttp
-            .When("https://example.com/test")
+            .When("https://example.com/api/test")
             .Respond("application/json", "{}");
 
         // act
@@ -149,7 +148,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
         };
 
         _mockHttp
-            .When("https://example.com/test")
+            .When("https://example.com/api/test")
             .WithQueryString("param1=value1&param2=")
             .Respond("application/json", "{}");
 
@@ -167,7 +166,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
         var service = CreateRestClientBuilder().Build<ITestService>();
 
         _mockHttp
-            .When("https://example.com/test")
+            .When("https://example.com/api/test")
             .WithQueryString("regularParam=regularValue")
             .Respond("application/json", "{}");
 
@@ -181,18 +180,18 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
 
 public interface ITestService
 {
-    [Get("/test")]
+    [Get("test")]
     Task TestQueryParamDictionary([QueryParam] Dictionary<string, string> queryParams);
 
-    [Post("/test")]
+    [Post("test")]
     Task TestFormParamDictionary([FormParam] Dictionary<string, string> formParams);
 
-    [Get("/test")]
+    [Get("test")]
     Task TestHeaderParamDictionary([HeaderParam] Dictionary<string, string> headers);
 
-    [Get("/test")]
+    [Get("test")]
     Task TestMixedParams([QueryParam] Dictionary<string, string> queryParams, [QueryParam("singleParam")] string singleParam);
 
-    [Get("/test")]
+    [Get("test")]
     Task TestRegularParam([QueryParam("regularParam")] string regularParam);
 }
