@@ -118,6 +118,65 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
         // assert
         _mockHttp.VerifyNoOutstandingExpectation();
     }
+
+    [Fact]
+    public async Task TestEmptyDictionary()
+    {
+        // arrange
+        var service = CreateRestClientBuilder().Build<ITestService>();
+        var emptyParams = new Dictionary<string, string>();
+
+        _mockHttp
+            .When("https://example.com/test")
+            .Respond("application/json", "{}");
+
+        // act
+        await service.TestQueryParamDictionary(emptyParams);
+
+        // assert
+        _mockHttp.VerifyNoOutstandingExpectation();
+    }
+
+    [Fact]
+    public async Task TestNullDictionaryValues()
+    {
+        // arrange
+        var service = CreateRestClientBuilder().Build<ITestService>();
+        var paramsWithNull = new Dictionary<string, string>
+        {
+            ["param1"] = "value1",
+            ["param2"] = null
+        };
+
+        _mockHttp
+            .When("https://example.com/test")
+            .WithQueryString("param1=value1&param2=")
+            .Respond("application/json", "{}");
+
+        // act
+        await service.TestQueryParamDictionary(paramsWithNull);
+
+        // assert
+        _mockHttp.VerifyNoOutstandingExpectation();
+    }
+
+    [Fact]
+    public async Task TestBackwardCompatibilityWithNonDictionaryParams()
+    {
+        // arrange
+        var service = CreateRestClientBuilder().Build<ITestService>();
+
+        _mockHttp
+            .When("https://example.com/test")
+            .WithQueryString("regularParam=regularValue")
+            .Respond("application/json", "{}");
+
+        // act
+        await service.TestRegularParam("regularValue");
+
+        // assert
+        _mockHttp.VerifyNoOutstandingExpectation();
+    }
 }
 
 public interface ITestService
@@ -133,4 +192,7 @@ public interface ITestService
 
     [Get("/test")]
     Task TestMixedParams([QueryParam] Dictionary<string, string> queryParams, [QueryParam("singleParam")] string singleParam);
+
+    [Get("/test")]
+    Task TestRegularParam([QueryParam("regularParam")] string regularParam);
 }
