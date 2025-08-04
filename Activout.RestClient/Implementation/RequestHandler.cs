@@ -305,7 +305,7 @@ namespace Activout.RestClient.Implementation
                                 queryParams.Add(Uri.EscapeDataString(key) + "=" + Uri.EscapeDataString(value));
                             }
                         }
-                        else
+                        else if (rawValue != null) // Skip null values
                         {
                             queryParams.Add(Uri.EscapeDataString(queryParamAttribute.Name ?? parameterName) + "=" +
                                             Uri.EscapeDataString(stringValue));
@@ -323,7 +323,7 @@ namespace Activout.RestClient.Implementation
                                 formParams.Add(new KeyValuePair<string, string>(key, value));
                             }
                         }
-                        else
+                        else if (rawValue != null) // Skip null values
                         {
                             formParams.Add(new KeyValuePair<string, string>(formParamAttribute.Name ?? parameterName,
                                 stringValue));
@@ -341,7 +341,7 @@ namespace Activout.RestClient.Implementation
                                 headers.AddOrReplaceHeader(key, value, headerParamAttribute.Replace);
                             }
                         }
-                        else
+                        else if (rawValue != null) // Skip null values
                         {
                             headers.AddOrReplaceHeader(headerParamAttribute.Name ?? parameterName, stringValue,
                                 headerParamAttribute.Replace);
