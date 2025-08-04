@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -295,20 +296,56 @@ namespace Activout.RestClient.Implementation
                     }
                     else if (attribute is QueryParamAttribute queryParamAttribute)
                     {
-                        queryParams.Add(Uri.EscapeDataString(queryParamAttribute.Name ?? parameterName) + "=" +
-                                        Uri.EscapeDataString(stringValue));
+                        if (rawValue is IDictionary dictionary)
+                        {
+                            foreach (DictionaryEntry entry in dictionary)
+                            {
+                                var key = entry.Key?.ToString() ?? string.Empty;
+                                var value = entry.Value?.ToString() ?? string.Empty;
+                                queryParams.Add(Uri.EscapeDataString(key) + "=" + Uri.EscapeDataString(value));
+                            }
+                        }
+                        else
+                        {
+                            queryParams.Add(Uri.EscapeDataString(queryParamAttribute.Name ?? parameterName) + "=" +
+                                            Uri.EscapeDataString(stringValue));
+                        }
                         handled = true;
                     }
                     else if (attribute is FormParamAttribute formParamAttribute)
                     {
-                        formParams.Add(new KeyValuePair<string, string>(formParamAttribute.Name ?? parameterName,
-                            stringValue));
+                        if (rawValue is IDictionary dictionary)
+                        {
+                            foreach (DictionaryEntry entry in dictionary)
+                            {
+                                var key = entry.Key?.ToString() ?? string.Empty;
+                                var value = entry.Value?.ToString() ?? string.Empty;
+                                formParams.Add(new KeyValuePair<string, string>(key, value));
+                            }
+                        }
+                        else
+                        {
+                            formParams.Add(new KeyValuePair<string, string>(formParamAttribute.Name ?? parameterName,
+                                stringValue));
+                        }
                         handled = true;
                     }
                     else if (attribute is HeaderParamAttribute headerParamAttribute)
                     {
-                        headers.AddOrReplaceHeader(headerParamAttribute.Name ?? parameterName, stringValue,
-                            headerParamAttribute.Replace);
+                        if (rawValue is IDictionary dictionary)
+                        {
+                            foreach (DictionaryEntry entry in dictionary)
+                            {
+                                var key = entry.Key?.ToString() ?? string.Empty;
+                                var value = entry.Value?.ToString() ?? string.Empty;
+                                headers.AddOrReplaceHeader(key, value, headerParamAttribute.Replace);
+                            }
+                        }
+                        else
+                        {
+                            headers.AddOrReplaceHeader(headerParamAttribute.Name ?? parameterName, stringValue,
+                                headerParamAttribute.Replace);
+                        }
                         handled = true;
                     }
                 }
