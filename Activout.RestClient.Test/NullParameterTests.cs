@@ -26,24 +26,6 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
     }
 
     [Fact]
-    public async Task TestNullQueryParam_ShouldNotAddParameter()
-    {
-        // arrange
-        var service = CreateRestClientBuilder().Build<ITestNullService>();
-
-        // expect: no query parameters should be added for null value
-        _mockHttp
-            .When(HttpMethod.Get, "https://example.com/api/test")
-            .Respond("application/json", "{}");
-
-        // act
-        await service.TestNullQueryParam(null);
-
-        // assert
-        _mockHttp.VerifyNoOutstandingExpectation();
-    }
-
-    [Fact]
     public async Task TestEmptyStringQueryParam_ShouldAddParameter()
     {
         // arrange
@@ -56,32 +38,67 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
             .Respond("application/json", "{}");
 
         // act
-        await service.TestNullQueryParam("");
+        await service.TestQueryParam("");
 
         // assert
         _mockHttp.VerifyNoOutstandingExpectation();
     }
 
     [Fact]
-    public async Task TestNullFormParam_ShouldNotAddParameter()
+    public async Task TestEmptyStringFormParam_ShouldAddParameter()
     {
         // arrange
         var service = CreateRestClientBuilder().Build<ITestNullService>();
 
-        // expect: no form data should be added for null value, but it will try to serialize the null parameter as body
-        // This will fail without a serializer, which demonstrates the behavior change
-        try
-        {
-            await service.TestNullFormParam(null);
-        }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("No serializer for"))
-        {
-            // This is expected - when form params are skipped, it tries to serialize the body
-            // This proves our fix is working (null form params are being skipped)
-            return;
-        }
-        
-        throw new Exception("Expected InvalidOperationException due to missing serializer");
+        // expect: empty string should still be added as form parameter
+        _mockHttp
+            .When(HttpMethod.Post, "https://example.com/api/test")
+            .WithFormData("param", "")
+            .Respond("application/json", "{}");
+
+        // act
+        await service.TestFormParam("");
+
+        // assert
+        _mockHttp.VerifyNoOutstandingExpectation();
+    }
+
+    [Fact]
+    public async Task TestEmptyStringHeaderParam_ShouldAddHeader()
+    {
+        // arrange
+        var service = CreateRestClientBuilder().Build<ITestNullService>();
+
+        // expect: empty string should still be added as header
+        _mockHttp
+            .When("https://example.com/api/test")
+            .WithHeaders("X-Custom-Header", "")
+            .Respond("application/json", "{}");
+
+        // act
+        await service.TestHeaderParam("");
+
+        // assert
+        _mockHttp.VerifyNoOutstandingExpectation();
+    }
+
+    [Fact]
+    public async Task TestMixedNullAndValidQueryParams_ShouldOnlyAddValidParams()
+    {
+        // arrange
+        var service = CreateRestClientBuilder().Build<ITestNullService>();
+
+        // expect: only the valid parameter should be added, null param should be skipped
+        _mockHttp
+            .When("https://example.com/api/test")
+            .WithQueryString("validParam=validValue")
+            .Respond("application/json", "{}");
+
+        // act
+        await service.TestMixedQueryParams(null, "validValue");
+
+        // assert
+        _mockHttp.VerifyNoOutstandingExpectation();
     }
 
     [Fact]
@@ -104,75 +121,19 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
     }
 
     [Fact]
-    public async Task TestEmptyStringFormParam_ShouldAddParameter()
+    public async Task TestMixedNullAndValidHeaderParams_ShouldOnlyAddValidParams()
     {
         // arrange
         var service = CreateRestClientBuilder().Build<ITestNullService>();
 
-        // expect: empty string should still be added as form parameter
-        _mockHttp
-            .When(HttpMethod.Post, "https://example.com/api/test")
-            .WithFormData("param", "")
-            .Respond("application/json", "{}");
-
-        // act
-        await service.TestNullFormParam("");
-
-        // assert
-        _mockHttp.VerifyNoOutstandingExpectation();
-    }
-
-    [Fact]
-    public async Task TestNullHeaderParam_ShouldNotAddHeader()
-    {
-        // arrange
-        var service = CreateRestClientBuilder().Build<ITestNullService>();
-
-        // expect: no custom header should be added for null value
+        // expect: only the valid header should be added, null param should be skipped
         _mockHttp
             .When("https://example.com/api/test")
+            .WithHeaders("X-Valid-Header", "validValue")
             .Respond("application/json", "{}");
 
         // act
-        await service.TestNullHeaderParam(null);
-
-        // assert
-        _mockHttp.VerifyNoOutstandingExpectation();
-    }
-
-    [Fact]
-    public async Task TestEmptyStringHeaderParam_ShouldAddHeader()
-    {
-        // arrange
-        var service = CreateRestClientBuilder().Build<ITestNullService>();
-
-        // expect: empty string should still be added as header
-        _mockHttp
-            .When("https://example.com/api/test")
-            .WithHeaders("X-Custom-Header", "")
-            .Respond("application/json", "{}");
-
-        // act
-        await service.TestNullHeaderParam("");
-
-        // assert
-        _mockHttp.VerifyNoOutstandingExpectation();
-    }
-
-    [Fact]
-    public async Task TestMixedNullAndValidParams_ShouldOnlyAddValidParams()
-    {
-        // arrange
-        var service = CreateRestClientBuilder().Build<ITestNullService>();
-
-        // expect: only the valid parameter should be added, null param should be skipped
-        _mockHttp
-            .When("https://example.com/api/test")
-            .WithQueryString("validParam=validValue")
-            .Respond("application/json", "{}");
-
-        // act
-        await service.TestMixedParams(null, "validValue");
+        await service.TestMixedHeaderParams(null, "validValue");
 
         // assert
         _mockHttp.VerifyNoOutstandingExpectation();
@@ -259,19 +220,22 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
 public interface ITestNullService
 {
     [Get("test")]
-    Task TestNullQueryParam([QueryParam("param")] string param);
+    Task TestQueryParam([QueryParam("param")] string param);
 
     [Post("test")]
-    Task TestNullFormParam([FormParam("param")] string param);
+    Task TestFormParam([FormParam("param")] string param);
+
+    [Get("test")]
+    Task TestHeaderParam([HeaderParam("X-Custom-Header")] string param);
+
+    [Get("test")]
+    Task TestMixedQueryParams([QueryParam("nullParam")] string nullParam, [QueryParam("validParam")] string validParam);
 
     [Post("test")]
     Task TestMixedFormParams([FormParam("nullParam")] string nullParam, [FormParam("validParam")] string validParam);
 
-    [Post("test")]
-    Task TestNullHeaderParam([HeaderParam("X-Custom-Header")] string param);
-
     [Get("test")]
-    Task TestMixedParams([QueryParam("nullParam")] string nullParam, [QueryParam("validParam")] string validParam);
+    Task TestMixedHeaderParams([HeaderParam("X-Null-Header")] string nullHeader, [HeaderParam("X-Valid-Header")] string validHeader);
 
     [Get("test")]
     Task TestNullDictionaryValues([QueryParam] Dictionary<string, string> queryParams);
