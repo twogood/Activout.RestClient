@@ -15,47 +15,20 @@ namespace Activout.RestClient.ParamConverter.Implementation
 
         public IParamConverter GetConverter(ParameterInfo parameterInfo)
         {
-            foreach (var paramConverter in ParamConverters)
-            {
-                if (paramConverter.CanConvert(parameterInfo))
-                {
-                    return paramConverter;
-                }
-            }
-
-            return null;
+            return GetConverter(parameterInfo.ParameterType);
         }
 
         public IParamConverter GetConverter(Type type)
         {
             foreach (var paramConverter in ParamConverters)
             {
-                if (paramConverter.CanConvert(CreateParameterInfoForType(type)))
+                if (paramConverter.CanConvert(type))
                 {
                     return paramConverter;
                 }
             }
 
             return null;
-        }
-
-        private static ParameterInfo CreateParameterInfoForType(Type type)
-        {
-            // Create a minimal ParameterInfo-like object that only provides the Type
-            // This is used internally to reuse existing CanConvert logic
-            return new TypeOnlyParameterInfo(type);
-        }
-
-        private class TypeOnlyParameterInfo : ParameterInfo
-        {
-            private readonly Type _parameterType;
-
-            public TypeOnlyParameterInfo(Type parameterType)
-            {
-                _parameterType = parameterType;
-            }
-
-            public override Type ParameterType => _parameterType;
         }
     }
 }
