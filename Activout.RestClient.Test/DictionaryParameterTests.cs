@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -37,7 +39,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
 
         _mockHttp
             .When("https://example.com/api/test")
-            .WithQueryString("param1=value1&param2=value2")
+            .WithExactQueryString("param1=value1&param2=value2")
             .Respond("application/json", "{}");
 
         // act
@@ -108,7 +110,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
 
         _mockHttp
             .When("https://example.com/api/test")
-            .WithQueryString("param1=value1&param2=value2&singleParam=singleValue")
+            .WithExactQueryString("param1=value1&param2=value2&singleParam=singleValue")
             .Respond("application/json", "{}");
 
         // act
@@ -149,7 +151,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
 
         _mockHttp
             .When("https://example.com/api/test")
-            .WithQueryString("param1=value1&param2=")
+            .WithExactQueryString("param1=value1")
             .Respond("application/json", "{}");
 
         // act
@@ -167,11 +169,139 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
 
         _mockHttp
             .When("https://example.com/api/test")
-            .WithQueryString("regularParam=regularValue")
+            .WithExactQueryString("regularParam=regularValue")
             .Respond("application/json", "{}");
 
         // act
         await service.TestRegularParam("regularValue");
+
+        // assert
+        _mockHttp.VerifyNoOutstandingExpectation();
+    }
+
+    [Fact]
+    public async Task TestQueryParamDictionaryWithDateTime()
+    {
+        // arrange
+        var service = CreateRestClientBuilder().Build<ITestService>();
+        var testDate = new DateTime(2023, 12, 25, 14, 30, 45, DateTimeKind.Utc);
+        var expectedDateString = testDate.ToString("o"); // ISO 8601 format
+        var queryParams = new Dictionary<string, object>
+        {
+            ["stringParam"] = "value1",
+            ["dateParam"] = testDate
+        };
+
+        _mockHttp
+            .When("https://example.com/api/test")
+            .WithExactQueryString($"stringParam=value1&dateParam={Uri.EscapeDataString(expectedDateString)}")
+            .Respond("application/json", "{}");
+
+        // act
+        await service.TestQueryParamObjectDictionary(queryParams);
+
+        // assert
+        _mockHttp.VerifyNoOutstandingExpectation();
+    }
+
+    [Fact]
+    public async Task TestFormParamDictionaryWithDateTime()
+    {
+        // arrange
+        var service = CreateRestClientBuilder().Build<ITestService>();
+        var testDate = new DateTime(2023, 12, 25, 14, 30, 45, DateTimeKind.Utc);
+        var expectedDateString = testDate.ToString("o"); // ISO 8601 format
+        var formParams = new Dictionary<string, object>
+        {
+            ["stringField"] = "value1",
+            ["dateField"] = testDate
+        };
+
+        _mockHttp
+            .When(HttpMethod.Post, "https://example.com/api/test")
+            .WithFormData("stringField", "value1")
+            .WithFormData("dateField", expectedDateString)
+            .Respond("application/json", "{}");
+
+        // act
+        await service.TestFormParamObjectDictionary(formParams);
+
+        // assert
+        _mockHttp.VerifyNoOutstandingExpectation();
+    }
+
+    [Fact]
+    public async Task TestHeaderParamDictionaryWithDateTime()
+    {
+        // arrange
+        var service = CreateRestClientBuilder().Build<ITestService>();
+        var testDate = new DateTime(2023, 12, 25, 14, 30, 45, DateTimeKind.Utc);
+        var expectedDateString = testDate.ToString("o"); // ISO 8601 format
+        var headers = new Dictionary<string, object>
+        {
+            ["X-String-Header"] = "value1",
+            ["X-Date-Header"] = testDate
+        };
+
+        _mockHttp
+            .When("https://example.com/api/test")
+            .WithHeaders("X-String-Header", "value1")
+            .WithHeaders("X-Date-Header", expectedDateString)
+            .Respond("application/json", "{}");
+
+        // act
+        await service.TestHeaderParamObjectDictionary(headers);
+
+        // assert
+        _mockHttp.VerifyNoOutstandingExpectation();
+    }
+
+    [Fact]
+    public async Task TestGenericDictionaryWithDateTime()
+    {
+        // arrange
+        var service = CreateRestClientBuilder().Build<ITestService>();
+        var testDate = new DateTime(2023, 12, 25, 14, 30, 45, DateTimeKind.Utc);
+        var expectedDateString = testDate.ToString("o"); // ISO 8601 format
+        var queryParams = new Dictionary<string, DateTime>
+        {
+            ["startDate"] = testDate,
+            ["endDate"] = testDate.AddDays(1)
+        };
+
+        _mockHttp
+            .When("https://example.com/api/test")
+            .WithExactQueryString($"startDate={Uri.EscapeDataString(expectedDateString)}&endDate={Uri.EscapeDataString(testDate.AddDays(1).ToString("o"))}")
+            .Respond("application/json", "{}");
+
+        // act
+        await service.TestQueryParamDateTimeDictionary(queryParams);
+
+        // assert
+        _mockHttp.VerifyNoOutstandingExpectation();
+    }
+
+    [Fact]
+    public async Task TestNonGenericDictionaryWithDateTime()
+    {
+        // arrange
+        var service = CreateRestClientBuilder().Build<ITestService>();
+        var testDate = new DateTime(2023, 12, 25, 14, 30, 45, DateTimeKind.Utc);
+        var expectedDateString = testDate.ToString("o"); // ISO 8601 format
+        
+        var queryParams = new Hashtable
+        {
+            ["stringParam"] = "value1",
+            ["dateParam"] = testDate
+        };
+
+        _mockHttp
+            .When("https://example.com/api/test")
+            .WithExactQueryString($"stringParam=value1&dateParam={Uri.EscapeDataString(expectedDateString)}")
+            .Respond("application/json", "{}");
+
+        // act
+        await service.TestQueryParamNonGenericDictionary(queryParams);
 
         // assert
         _mockHttp.VerifyNoOutstandingExpectation();
@@ -194,4 +324,19 @@ public interface ITestService
 
     [Get("test")]
     Task TestRegularParam([QueryParam("regularParam")] string regularParam);
+
+    [Get("test")]
+    Task TestQueryParamObjectDictionary([QueryParam] Dictionary<string, object> queryParams);
+
+    [Post("test")]
+    Task TestFormParamObjectDictionary([FormParam] Dictionary<string, object> formParams);
+
+    [Get("test")]
+    Task TestHeaderParamObjectDictionary([HeaderParam] Dictionary<string, object> headers);
+
+    [Get("test")]
+    Task TestQueryParamDateTimeDictionary([QueryParam] Dictionary<string, DateTime> queryParams);
+
+    [Get("test")]
+    Task TestQueryParamNonGenericDictionary([QueryParam] IDictionary queryParams);
 }

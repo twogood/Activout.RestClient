@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Activout.RestClient.ParamConverter.Implementation
@@ -14,9 +15,14 @@ namespace Activout.RestClient.ParamConverter.Implementation
 
         public IParamConverter GetConverter(ParameterInfo parameterInfo)
         {
+            return GetConverter(parameterInfo.ParameterType);
+        }
+
+        public IParamConverter GetConverter(Type type)
+        {
             foreach (var paramConverter in ParamConverters)
             {
-                if (paramConverter.CanConvert(parameterInfo))
+                if (paramConverter.CanConvert(type))
                 {
                     return paramConverter;
                 }
