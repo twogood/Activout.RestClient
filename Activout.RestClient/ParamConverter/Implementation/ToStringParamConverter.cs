@@ -1,10 +1,10 @@
-﻿using System.Reflection;
+﻿using System;
 
 namespace Activout.RestClient.ParamConverter.Implementation
 {
     public class ToStringParamConverter : IParamConverter
     {
-        public bool CanConvert(ParameterInfo parameterInfo)
+        public bool CanConvert(Type type)
         {
             return true;
         }

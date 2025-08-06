@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 
 namespace Activout.RestClient.ParamConverter.Implementation
 {
@@ -14,9 +13,9 @@ namespace Activout.RestClient.ParamConverter.Implementation
 
     public class DateTimeEpochParamConverter : IParamConverter
     {
-        public bool CanConvert(ParameterInfo parameterInfo)
+        public bool CanConvert(Type type)
         {
-            return parameterInfo.ParameterType == typeof(DateTime);
+            return type == typeof(DateTime);
         }
 
         public string ToString(object value)
