@@ -14,7 +14,7 @@ namespace Activout.RestClient.ParamConverter.Implementation
 
     public class DateTimeEpochParamConverter : IParamConverter
     {
-        public bool CanConvert(Type type, ParameterInfo parameterInfo = null)
+        public bool CanConvert(Type type, ParameterInfo parameterInfo)
         {
             return type == typeof(DateTime);
         }

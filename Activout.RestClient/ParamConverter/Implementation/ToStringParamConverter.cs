@@ -5,7 +5,7 @@ namespace Activout.RestClient.ParamConverter.Implementation
 {
     public class ToStringParamConverter : IParamConverter
     {
-        public bool CanConvert(Type type, ParameterInfo parameterInfo = null)
+        public bool CanConvert(Type type, ParameterInfo parameterInfo)
         {
             return true;
         }

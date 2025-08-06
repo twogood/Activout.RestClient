@@ -13,10 +13,10 @@ namespace Activout.RestClient.Test
         {
             // Arrange
             var converter = new DateTimeIso8601ParamConverter();
+            var parameterInfo = new SyntheticParameterInfo(typeof(DateTime));
             
             // Act & Assert
-            Assert.True(converter.CanConvert(typeof(DateTime)));
-            Assert.True(converter.CanConvert(typeof(DateTime), null));
+            Assert.True(converter.CanConvert(typeof(DateTime), parameterInfo));
         }
 
         [Fact]
@@ -24,10 +24,10 @@ namespace Activout.RestClient.Test
         {
             // Arrange
             var converter = new DateTimeIso8601ParamConverter();
+            var parameterInfo = new SyntheticParameterInfo(typeof(string));
             
             // Act & Assert
-            Assert.False(converter.CanConvert(typeof(string)));
-            Assert.False(converter.CanConvert(typeof(string), null));
+            Assert.False(converter.CanConvert(typeof(string), parameterInfo));
         }
 
         [Fact]
@@ -35,12 +35,14 @@ namespace Activout.RestClient.Test
         {
             // Arrange
             var converter = new ToStringParamConverter();
+            var stringParameterInfo = new SyntheticParameterInfo(typeof(string));
+            var intParameterInfo = new SyntheticParameterInfo(typeof(int));
+            var dateTimeParameterInfo = new SyntheticParameterInfo(typeof(DateTime));
             
             // Act & Assert
-            Assert.True(converter.CanConvert(typeof(string)));
-            Assert.True(converter.CanConvert(typeof(int)));
-            Assert.True(converter.CanConvert(typeof(DateTime)));
-            Assert.True(converter.CanConvert(typeof(string), null));
+            Assert.True(converter.CanConvert(typeof(string), stringParameterInfo));
+            Assert.True(converter.CanConvert(typeof(int), intParameterInfo));
+            Assert.True(converter.CanConvert(typeof(DateTime), dateTimeParameterInfo));
         }
 
         [Fact]
