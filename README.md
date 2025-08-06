@@ -48,7 +48,7 @@ var restClientFactory = Services.CreateRestClientFactory();
 var movieReviewService = restClientFactory
             .CreateBuilder()
             .With(_httpClient)
-            .WithNewtonsoftJson()
+            .WithNewtonsoftJson() // or .WithSystemTextJson() for System.Text.Json
             .BaseUri(new Uri("https://example.com/movieReviewService"))
             .Build<IMovieReviewService>();
 
@@ -78,15 +78,30 @@ public static IServiceCollection AddRestClient(this IServiceCollection self)
   self.TryAddTransient<IDuckTyping, DuckTyping>();
   self.TryAddTransient<IParamConverterManager, ParamConverterManager>();
   self.TryAddTransient<IRestClientFactory, RestClientFactory>();
-  self.TryAddTransient<ITaskConverterFactory, TaskConverter2Factory>();
+  self.TryAddTransient<ITaskConverterFactory, TaskConverter3Factory>();
   return self;
 }
 ```
+## JSON serialization support
+
+Since version 5 Activout.RestClient does not depend on any specific JSON library. You must install either the
+`Activout.RestClient.Newtonsoft.Json` package (for Newtonsoft.Json support) or the `Activout.RestClient.Json` package (
+for System.Text.Json support) to enable JSON serialization and deserialization.
+
 ## Breaking changes in version 5
 
 - Replaced `[JsonProperty]` (`JsonPropertyAttribute`) in HTTP form data classes with `[FormKey]` (`FormKeyAttribute`) to
   avoid dependency on Newtonsoft.Json.
 - Extracted package `Activout.RestClient.Newtonsoft.Json` to make Activout.RestClient independent of Newtonsoft.Json.
+- Null values in HTTP form data, header and query parameters now means that no parameter is sent. To send a parameter
+  without a value, an empty string must be used.
+- `IDictionary` and `IDictionary<TKey, TValue>` values for parameters annotated with `[FormParam]`, `[HeaderParam]` or
+  `[QueryParam]` are no longer serialized using `IParamConverterManager` but instead each key-value pair in the
+  dictionary is sent as a separate parameter. Both key and value must be non-null values to be sent and
+  `IParamConverterManager` will be used to convert each value to a string.
+- `IParamConverter.CanConvert()` signature changed to take both `Type` and `ParameterInfo` since the `Type` is different
+  from the `ParameterInfo.ParameterType` for dictionary values.
+- Added a `GetConverter(Type type)` method to `IParamConverterManager` to get the converter for a type that is not `ParameterInfo`.
 
 ## Breaking changes in version 3
 
@@ -113,7 +128,6 @@ public static IServiceCollection AddRestClient(this IServiceCollection self)
 ## TODO
 
 - Support for cookie parameters, if someone need them
-- Maybe extract JSON serialization/deserialization to its own project so that Newtonsoft.Json dependency becomes optional
 
 ## Similar projects
 
