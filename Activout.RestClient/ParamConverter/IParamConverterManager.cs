@@ -5,8 +5,6 @@ namespace Activout.RestClient.ParamConverter
 {
     public interface IParamConverterManager
     {
-        IParamConverter GetConverter(ParameterInfo parameterInfo);
-        IParamConverter GetConverter(Type type);
         IParamConverter GetConverter(Type type, ParameterInfo parameterInfo);
     }
 }

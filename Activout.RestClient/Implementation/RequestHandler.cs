@@ -102,7 +102,7 @@ namespace Activout.RestClient.Implementation
             var paramConverters = new IParamConverter[_parameters.Length];
             for (var i = 0; i < _parameters.Length; i++)
             {
-                paramConverters[i] = paramConverterManager.GetConverter(_parameters[i]);
+                paramConverters[i] = paramConverterManager.GetConverter(_parameters[i].ParameterType, _parameters[i]);
             }
 
             return paramConverters;

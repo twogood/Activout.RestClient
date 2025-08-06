@@ -13,7 +13,8 @@ namespace Activout.RestClient.Test
         {
             // Arrange
             var converter = new DateTimeIso8601ParamConverter();
-            var parameterInfo = new SyntheticParameterInfo(typeof(DateTime));
+            var methodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithDateTimeParam), BindingFlags.NonPublic | BindingFlags.Instance);
+            var parameterInfo = methodInfo.GetParameters()[0];
             
             // Act & Assert
             Assert.True(converter.CanConvert(typeof(DateTime), parameterInfo));
@@ -24,7 +25,8 @@ namespace Activout.RestClient.Test
         {
             // Arrange
             var converter = new DateTimeIso8601ParamConverter();
-            var parameterInfo = new SyntheticParameterInfo(typeof(string));
+            var methodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithStringParam), BindingFlags.NonPublic | BindingFlags.Instance);
+            var parameterInfo = methodInfo.GetParameters()[0];
             
             // Act & Assert
             Assert.False(converter.CanConvert(typeof(string), parameterInfo));
@@ -35,9 +37,12 @@ namespace Activout.RestClient.Test
         {
             // Arrange
             var converter = new ToStringParamConverter();
-            var stringParameterInfo = new SyntheticParameterInfo(typeof(string));
-            var intParameterInfo = new SyntheticParameterInfo(typeof(int));
-            var dateTimeParameterInfo = new SyntheticParameterInfo(typeof(DateTime));
+            var stringMethodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithStringParam), BindingFlags.NonPublic | BindingFlags.Instance);
+            var stringParameterInfo = stringMethodInfo.GetParameters()[0];
+            var intMethodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithIntParam), BindingFlags.NonPublic | BindingFlags.Instance);
+            var intParameterInfo = intMethodInfo.GetParameters()[0];
+            var dateTimeMethodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithDateTimeParam), BindingFlags.NonPublic | BindingFlags.Instance);
+            var dateTimeParameterInfo = dateTimeMethodInfo.GetParameters()[0];
             
             // Act & Assert
             Assert.True(converter.CanConvert(typeof(string), stringParameterInfo));
@@ -46,7 +51,7 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public void ParamConverterManager_GetConverter_WithParameterInfo_UsesCorrectConverter()
+        public void ParamConverterManager_GetConverter_WithTypeAndParameterInfo_UsesCorrectConverter()
         {
             // Arrange
             var manager = new ParamConverterManager();
@@ -54,7 +59,7 @@ namespace Activout.RestClient.Test
             var parameterInfo = methodInfo.GetParameters()[0];
             
             // Act
-            var converter = manager.GetConverter(parameterInfo);
+            var converter = manager.GetConverter(typeof(DateTime), parameterInfo);
             
             // Assert
             Assert.NotNull(converter);
@@ -62,13 +67,15 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
-        public void ParamConverterManager_GetConverter_WithType_UsesCorrectConverter()
+        public void ParamConverterManager_GetConverter_WithTypeOnly_UsesCorrectConverter()
         {
             // Arrange
             var manager = new ParamConverterManager();
+            var methodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithDateTimeParam), BindingFlags.NonPublic | BindingFlags.Instance);
+            var parameterInfo = methodInfo.GetParameters()[0];
             
             // Act
-            var converter = manager.GetConverter(typeof(DateTime));
+            var converter = manager.GetConverter(typeof(DateTime), parameterInfo);
             
             // Assert
             Assert.NotNull(converter);
@@ -80,20 +87,28 @@ namespace Activout.RestClient.Test
         {
             // Arrange
             var converter = new TestCustomParamConverter();
-            var methodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithCustomAttribute), BindingFlags.NonPublic | BindingFlags.Instance);
-            var parameterInfo = methodInfo.GetParameters()[0];
+            var methodWithAttributeInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithCustomAttribute), BindingFlags.NonPublic | BindingFlags.Instance);
+            var parameterWithAttribute = methodWithAttributeInfo.GetParameters()[0];
+            var methodWithoutAttributeInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithStringParam), BindingFlags.NonPublic | BindingFlags.Instance);
+            var parameterWithoutAttribute = methodWithoutAttributeInfo.GetParameters()[0];
             
             // Act
-            var canConvertWithParameterInfo = converter.CanConvert(typeof(string), parameterInfo);
-            var canConvertWithoutParameterInfo = converter.CanConvert(typeof(string), null);
+            var canConvertWithAttribute = converter.CanConvert(typeof(string), parameterWithAttribute);
+            var canConvertWithoutAttribute = converter.CanConvert(typeof(string), parameterWithoutAttribute);
             
             // Assert
-            Assert.True(canConvertWithParameterInfo); // Should return true because parameter has TestAttribute
-            Assert.False(canConvertWithoutParameterInfo); // Should return false because no parameter info
+            Assert.True(canConvertWithAttribute); // Should return true because parameter has TestAttribute
+            Assert.False(canConvertWithoutAttribute); // Should return false because parameter doesn't have TestAttribute
         }
 
         // Test method used for reflection
         private void TestMethodWithDateTimeParam(DateTime date) { }
+
+        // Test method used for reflection
+        private void TestMethodWithStringParam(string value) { }
+
+        // Test method used for reflection
+        private void TestMethodWithIntParam(int value) { }
 
         // Test method used for reflection
         private void TestMethodWithCustomAttribute([TestAttribute] string value) { }
@@ -104,14 +119,10 @@ namespace Activout.RestClient.Test
         // Custom converter for testing
         private class TestCustomParamConverter : IParamConverter
         {
-            public bool CanConvert(Type type, ParameterInfo parameterInfo = null)
+            public bool CanConvert(Type type, ParameterInfo parameterInfo)
             {
                 // Only handle string types that have a TestAttribute
                 if (type != typeof(string))
-                    return false;
-
-                // If no parameter info, can't determine if it has the attribute
-                if (parameterInfo == null)
                     return false;
 
                 // Check if parameter has TestAttribute
