@@ -248,15 +248,14 @@ namespace Activout.RestClient.Implementation
         }
 
         private CancellationToken GetParams(
-            IReadOnlyList<object> args,
-            IDictionary<string, object> pathParams,
-            ICollection<string> queryParams,
-            ICollection<KeyValuePair<string, string>> formParams,
+            object[] args,
+            Dictionary<string, object> pathParams,
+            List<string> queryParams,
+            List<KeyValuePair<string, string>> formParams,
             List<KeyValuePair<string, object>> headers,
             List<Part<HttpContent>> parts)
         {
             var cancellationToken = CancellationToken.None;
-
 
             for (var i = 0; i < _parameters.Length; i++)
             {
@@ -300,12 +299,15 @@ namespace Activout.RestClient.Implementation
                         {
                             foreach (DictionaryEntry entry in dictionary)
                             {
-                                var key = entry.Key?.ToString() ?? string.Empty;
-                                var value = entry.Value?.ToString() ?? string.Empty;
-                                queryParams.Add(Uri.EscapeDataString(key) + "=" + Uri.EscapeDataString(value));
+                                var key = entry.Key?.ToString();
+                                var value = entry.Value?.ToString();
+                                if (key != null && value != null)
+                                {
+                                    queryParams.Add(Uri.EscapeDataString(key) + "=" + Uri.EscapeDataString(value));
+                                }
                             }
                         }
-                        else if (rawValue != null) // Skip null values
+                        else if (rawValue != null)
                         {
                             queryParams.Add(Uri.EscapeDataString(queryParamAttribute.Name ?? parameterName) + "=" +
                                             Uri.EscapeDataString(stringValue));
@@ -318,12 +320,15 @@ namespace Activout.RestClient.Implementation
                         {
                             foreach (DictionaryEntry entry in dictionary)
                             {
-                                var key = entry.Key?.ToString() ?? string.Empty;
-                                var value = entry.Value?.ToString() ?? string.Empty;
-                                formParams.Add(new KeyValuePair<string, string>(key, value));
+                                var key = entry.Key?.ToString();
+                                var value = entry.Value?.ToString();
+                                if (key != null && value != null)
+                                {
+                                    formParams.Add(new KeyValuePair<string, string>(key, value));
+                                }
                             }
                         }
-                        else if (rawValue != null) // Skip null values
+                        else if (rawValue != null)
                         {
                             formParams.Add(new KeyValuePair<string, string>(formParamAttribute.Name ?? parameterName,
                                 stringValue));
@@ -336,12 +341,15 @@ namespace Activout.RestClient.Implementation
                         {
                             foreach (DictionaryEntry entry in dictionary)
                             {
-                                var key = entry.Key?.ToString() ?? string.Empty;
-                                var value = entry.Value?.ToString() ?? string.Empty;
-                                headers.AddOrReplaceHeader(key, value, headerParamAttribute.Replace);
+                                var key = entry.Key?.ToString();
+                                var value = entry.Value?.ToString();
+                                if (key != null && value != null)
+                                {
+                                    headers.AddOrReplaceHeader(key, value, headerParamAttribute.Replace);
+                                }
                             }
                         }
-                        else if (rawValue != null) // Skip null values
+                        else if (rawValue != null)
                         {
                             headers.AddOrReplaceHeader(headerParamAttribute.Name ?? parameterName, stringValue,
                                 headerParamAttribute.Replace);
