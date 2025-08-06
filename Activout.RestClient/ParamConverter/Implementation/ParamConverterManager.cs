@@ -15,14 +15,22 @@ namespace Activout.RestClient.ParamConverter.Implementation
 
         public IParamConverter GetConverter(ParameterInfo parameterInfo)
         {
-            return GetConverter(parameterInfo.ParameterType);
+            foreach (var paramConverter in ParamConverters)
+            {
+                if (paramConverter.CanConvert(parameterInfo.ParameterType, parameterInfo))
+                {
+                    return paramConverter;
+                }
+            }
+
+            return null;
         }
 
         public IParamConverter GetConverter(Type type)
         {
             foreach (var paramConverter in ParamConverters)
             {
-                if (paramConverter.CanConvert(type))
+                if (paramConverter.CanConvert(type, null))
                 {
                     return paramConverter;
                 }
