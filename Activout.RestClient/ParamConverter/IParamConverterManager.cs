@@ -7,5 +7,6 @@ namespace Activout.RestClient.ParamConverter
     {
         IParamConverter GetConverter(ParameterInfo parameterInfo);
         IParamConverter GetConverter(Type type);
+        IParamConverter GetConverter(Type type, ParameterInfo parameterInfo);
     }
 }
