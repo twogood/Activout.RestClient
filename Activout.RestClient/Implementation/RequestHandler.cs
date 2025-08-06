@@ -247,6 +247,15 @@ namespace Activout.RestClient.Implementation
             headers.ForEach(p => request.Headers.Add(p.Key, p.Value.ToString()));
         }
 
+        private string ConvertValueToString(object value)
+        {
+            if (value == null)
+                return null;
+
+            var converter = _context.ParamConverterManager.GetConverter(value.GetType());
+            return converter?.ToString(value) ?? value.ToString();
+        }
+
         private CancellationToken GetParams(
             object[] args,
             Dictionary<string, object> pathParams,
@@ -300,7 +309,7 @@ namespace Activout.RestClient.Implementation
                             foreach (DictionaryEntry entry in dictionary)
                             {
                                 var key = entry.Key?.ToString();
-                                var value = entry.Value?.ToString();
+                                var value = ConvertValueToString(entry.Value);
                                 if (key != null && value != null)
                                 {
                                     queryParams.Add(Uri.EscapeDataString(key) + "=" + Uri.EscapeDataString(value));
@@ -321,7 +330,7 @@ namespace Activout.RestClient.Implementation
                             foreach (DictionaryEntry entry in dictionary)
                             {
                                 var key = entry.Key?.ToString();
-                                var value = entry.Value?.ToString();
+                                var value = ConvertValueToString(entry.Value);
                                 if (key != null && value != null)
                                 {
                                     formParams.Add(new KeyValuePair<string, string>(key, value));
@@ -342,7 +351,7 @@ namespace Activout.RestClient.Implementation
                             foreach (DictionaryEntry entry in dictionary)
                             {
                                 var key = entry.Key?.ToString();
-                                var value = entry.Value?.ToString();
+                                var value = ConvertValueToString(entry.Value);
                                 if (key != null && value != null)
                                 {
                                     headers.AddOrReplaceHeader(key, value, headerParamAttribute.Replace);
