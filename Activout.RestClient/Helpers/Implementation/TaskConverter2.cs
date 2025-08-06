@@ -9,6 +9,7 @@ namespace Activout.RestClient.Helpers.Implementation
      * 
      * Implemented by creating a TaskCompletionSource<T> and calling SetResult() using reflection.
      */
+    [Obsolete("This class is obsolete and will be removed in a future version. Use TaskConverter3Factory instead.")]
     public class TaskConverter2 : ITaskConverter
     {
         private readonly Type _type;
