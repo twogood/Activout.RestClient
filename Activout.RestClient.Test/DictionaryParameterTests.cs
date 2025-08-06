@@ -37,7 +37,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
 
         _mockHttp
             .When("https://example.com/api/test")
-            .WithQueryString("param1=value1&param2=value2")
+            .WithExactQueryString("param1=value1&param2=value2")
             .Respond("application/json", "{}");
 
         // act
@@ -108,7 +108,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
 
         _mockHttp
             .When("https://example.com/api/test")
-            .WithQueryString("param1=value1&param2=value2&singleParam=singleValue")
+            .WithExactQueryString("param1=value1&param2=value2&singleParam=singleValue")
             .Respond("application/json", "{}");
 
         // act
@@ -149,7 +149,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
 
         _mockHttp
             .When("https://example.com/api/test")
-            .WithQueryString("param1=value1&param2=")
+            .WithExactQueryString("param1=value1")
             .Respond("application/json", "{}");
 
         // act
@@ -167,7 +167,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
 
         _mockHttp
             .When("https://example.com/api/test")
-            .WithQueryString("regularParam=regularValue")
+            .WithExactQueryString("regularParam=regularValue")
             .Respond("application/json", "{}");
 
         // act
