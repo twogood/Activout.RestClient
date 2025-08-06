@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -34,7 +33,7 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
         // expect: empty string should still be added as parameter
         _mockHttp
             .When("https://example.com/api/test")
-            .WithQueryString("param=")
+            .WithExactQueryString("param=")
             .Respond("application/json", "{}");
 
         // act
@@ -53,7 +52,9 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
         // expect: empty string should still be added as form parameter
         _mockHttp
             .When(HttpMethod.Post, "https://example.com/api/test")
-            .WithFormData("param", "")
+            .WithExactFormData([
+                new KeyValuePair<string, string>("param", "")
+            ])
             .Respond("application/json", "{}");
 
         // act
@@ -91,7 +92,7 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
         // expect: only the valid parameter should be added, null param should be skipped
         _mockHttp
             .When("https://example.com/api/test")
-            .WithQueryString("validParam=validValue")
+            .WithExactQueryString("validParam=validValue")
             .Respond("application/json", "{}");
 
         // act
@@ -110,7 +111,9 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
         // expect: only the valid form parameter should be added, null param should be skipped
         _mockHttp
             .When(HttpMethod.Post, "https://example.com/api/test")
-            .WithFormData("validParam", "validValue")
+            .WithExactFormData([
+                new KeyValuePair<string, string>("validParam", "validValue")
+            ])
             .Respond("application/json", "{}");
 
         // act
@@ -130,6 +133,7 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
         _mockHttp
             .When("https://example.com/api/test")
             .WithHeaders("X-Valid-Header", "validValue")
+            .With(req => !req.Headers.Contains("X-Null-Header"))
             .Respond("application/json", "{}");
 
         // act
@@ -154,7 +158,7 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
         // Dictionary handling already works correctly - only non-null values are added
         _mockHttp
             .When("https://example.com/api/test")
-            .WithQueryString("param1=value1&param3=value3")
+            .WithExactQueryString("param1=value1&param3=value3")
             .Respond("application/json", "{}");
 
         // act
@@ -179,8 +183,10 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
         // Dictionary handling already works correctly - only non-null values are added
         _mockHttp
             .When(HttpMethod.Post, "https://example.com/api/test")
-            .WithFormData("field1", "value1")
-            .WithFormData("field3", "value3")
+            .WithExactFormData([
+                new KeyValuePair<string, string>("field1", "value1"),
+                new KeyValuePair<string, string>("field3", "value3")
+            ])
             .Respond("application/json", "{}");
 
         // act
@@ -207,6 +213,7 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
             .When("https://example.com/api/test")
             .WithHeaders("X-Header-1", "value1")
             .WithHeaders("X-Header-3", "value3")
+            .With(req => !req.Headers.Contains("X-Header-2"))
             .Respond("application/json", "{}");
 
         // act
