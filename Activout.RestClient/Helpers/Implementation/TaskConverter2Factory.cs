@@ -2,6 +2,7 @@
 
 namespace Activout.RestClient.Helpers.Implementation
 {
+    [Obsolete("This class is obsolete and will be removed in a future version. Use TaskConverter3Factory instead.")]
     public class TaskConverter2Factory : ITaskConverterFactory
     {
         public ITaskConverter CreateTaskConverter(Type actualReturnType)
