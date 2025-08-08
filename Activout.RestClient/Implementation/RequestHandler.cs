@@ -25,7 +25,7 @@ namespace Activout.RestClient.Implementation
         private static readonly MediaType DefaultPartContentType = MediaType.ValueOf("text/plain");
 
         private readonly Type _actualReturnType;
-        private readonly int _bodyArgumentIndex;
+        private readonly int _bodyArgumentIndex = -1;
         private readonly MediaType _contentType;
         private readonly RestClientContext _context;
         private readonly ITaskConverter _converter;
@@ -54,8 +54,6 @@ namespace Activout.RestClient.Implementation
             _errorResponseType = context.ErrorResponseType;
             _requestHeaders.AddRange(context.DefaultHeaders);
 
-            _bodyArgumentIndex = _parameters.Length - 1;
-
             var templateBuilder = new StringBuilder(context.BaseTemplate ?? "");
             foreach (var attribute in method.GetCustomAttributes(true))
                 switch (attribute)
@@ -83,12 +81,20 @@ namespace Activout.RestClient.Implementation
                         break;
                 }
 
-            // Adjust body argument index if last parameter is CancellationToken for body-supporting HTTP methods
-            if (_parameters.Length > 0 && 
-                _parameters[_parameters.Length - 1].ParameterType == typeof(CancellationToken) &&
-                (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put || _httpMethod == HttpMethod.Patch))
+            if (IsHttpMethodWithBody())
             {
-                _bodyArgumentIndex = _parameters.Length - 2;
+                _bodyArgumentIndex = _parameters.Length - 1;
+
+                if (_parameters.Length > 0 &&
+                    _parameters[_bodyArgumentIndex].ParameterType == typeof(CancellationToken))
+                {
+                    _bodyArgumentIndex--;
+                }
+
+                if (_bodyArgumentIndex < 0)
+                {
+                    throw new InvalidOperationException("No body argument found for method: " + method.Name);
+                }
             }
 
             _serializer = context.SerializationManager.GetSerializer(_contentType);
@@ -103,6 +109,11 @@ namespace Activout.RestClient.Implementation
 
             _template = templateBuilder.ToString();
             _context = context;
+        }
+
+        private bool IsHttpMethodWithBody()
+        {
+            return _httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put || _httpMethod == HttpMethod.Patch;
         }
 
         private IParamConverter[] GetParamConverters(IParamConverterManager paramConverterManager)
@@ -202,13 +213,13 @@ namespace Activout.RestClient.Implementation
 
             SetHeaders(request, headers);
 
-            if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put || _httpMethod == HttpMethod.Patch)
+            if (IsHttpMethodWithBody())
             {
                 if (partParams.Count != 0)
                 {
                     request.Content = CreateMultipartFormDataContent(partParams);
                 }
-                else if (formParams.Any())
+                else if (formParams.Count != 0)
                 {
                     request.Content = new FormUrlEncodedContent(formParams);
                 }
@@ -329,6 +340,7 @@ namespace Activout.RestClient.Implementation
                             queryParams.Add(Uri.EscapeDataString(queryParamAttribute.Name ?? parameterName) + "=" +
                                             Uri.EscapeDataString(stringValue));
                         }
+
                         handled = true;
                     }
                     else if (attribute is FormParamAttribute formParamAttribute)
@@ -350,6 +362,7 @@ namespace Activout.RestClient.Implementation
                             formParams.Add(new KeyValuePair<string, string>(formParamAttribute.Name ?? parameterName,
                                 stringValue));
                         }
+
                         handled = true;
                     }
                     else if (attribute is HeaderParamAttribute headerParamAttribute)
@@ -371,6 +384,7 @@ namespace Activout.RestClient.Implementation
                             headers.AddOrReplaceHeader(headerParamAttribute.Name ?? parameterName, stringValue,
                                 headerParamAttribute.Replace);
                         }
+
                         handled = true;
                     }
                 }
