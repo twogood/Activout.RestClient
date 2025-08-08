@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 
 namespace Activout.RestClient.ParamConverter.Implementation
@@ -13,16 +14,11 @@ namespace Activout.RestClient.ParamConverter.Implementation
             ParamConverters = new List<IParamConverter> { new DateTimeIso8601ParamConverter(), new ToStringParamConverter() };
         }
 
-        public IParamConverter GetConverter(ParameterInfo parameterInfo)
-        {
-            return GetConverter(parameterInfo.ParameterType);
-        }
-
-        public IParamConverter GetConverter(Type type)
+        public IParamConverter GetConverter(Type type, ParameterInfo parameterInfo)
         {
             foreach (var paramConverter in ParamConverters)
             {
-                if (paramConverter.CanConvert(type))
+                if (paramConverter.CanConvert(type, parameterInfo))
                 {
                     return paramConverter;
                 }
