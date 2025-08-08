@@ -18,5 +18,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Activout.RestClient\Activout.RestClient.csproj" />
+    <ProjectReference Include="..\Activout.RestClient.Json\Activout.RestClient.Json.csproj" />
   </ItemGroup>
 </Project>

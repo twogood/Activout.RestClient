@@ -83,6 +83,14 @@ namespace Activout.RestClient.Implementation
                         break;
                 }
 
+            // Adjust body argument index if last parameter is CancellationToken for body-supporting HTTP methods
+            if (_parameters.Length > 0 && 
+                _parameters[_parameters.Length - 1].ParameterType == typeof(CancellationToken) &&
+                (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put || _httpMethod == HttpMethod.Patch))
+            {
+                _bodyArgumentIndex = _parameters.Length - 2;
+            }
+
             _serializer = context.SerializationManager.GetSerializer(_contentType);
 
             if (context.UseDomainException)
