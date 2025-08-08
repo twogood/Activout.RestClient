@@ -3,31 +3,28 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Activout.RestClient.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
 
 namespace Activout.RestClient.Test;
 
-public class TestRequest
-{
-    public string Name { get; set; } = "TestValue";
-    public int Number { get; set; } = 42;
-}
-
 public interface ICancellationTokenBodyClient
 {
     [Post("/post-with-token")]
-    Task PostWithCancellationToken(TestRequest body, CancellationToken cancellationToken);
+    [ContentType("text/plain")]
+    Task PostWithCancellationToken(string body, CancellationToken cancellationToken);
 
     [Put("/put-with-token")]
-    Task PutWithCancellationToken(TestRequest body, CancellationToken cancellationToken);
+    [ContentType("text/plain")]
+    Task PutWithCancellationToken(string body, CancellationToken cancellationToken);
 
     [Patch("/patch-with-token")]
-    Task PatchWithCancellationToken(TestRequest body, CancellationToken cancellationToken);
+    [ContentType("text/plain")]
+    Task PatchWithCancellationToken(string body, CancellationToken cancellationToken);
 
     [Post("/post-without-token")]
-    Task PostWithoutCancellationToken(TestRequest body);
+    [ContentType("text/plain")]
+    Task PostWithoutCancellationToken(string body);
 }
 
 public class CancellationTokenBodyTest
@@ -53,7 +50,6 @@ public class CancellationTokenBodyTest
     private ICancellationTokenBodyClient CreateClient()
     {
         return CreateRestClientBuilder()
-            .WithSystemTextJson()
             .Build<ICancellationTokenBodyClient>();
     }
 
@@ -62,12 +58,12 @@ public class CancellationTokenBodyTest
     {
         // Arrange
         var client = CreateClient();
-        var body = new TestRequest { Name = "Test", Number = 123 };
+        var body = "test body content";
         var cancellationToken = new CancellationTokenSource().Token;
 
         _mockHttp
             .Expect(HttpMethod.Post, BaseUri + "post-with-token")
-            .WithContent("{\"Name\":\"Test\",\"Number\":123}")
+            .WithContent("test body content")
             .Respond(HttpStatusCode.OK);
 
         // Act
@@ -82,12 +78,12 @@ public class CancellationTokenBodyTest
     {
         // Arrange
         var client = CreateClient();
-        var body = new TestRequest { Name = "Test", Number = 123 };
+        var body = "test body content";
         var cancellationToken = new CancellationTokenSource().Token;
 
         _mockHttp
             .Expect(HttpMethod.Put, BaseUri + "put-with-token")
-            .WithContent("{\"Name\":\"Test\",\"Number\":123}")
+            .WithContent("test body content")
             .Respond(HttpStatusCode.OK);
 
         // Act
@@ -102,12 +98,12 @@ public class CancellationTokenBodyTest
     {
         // Arrange
         var client = CreateClient();
-        var body = new TestRequest { Name = "Test", Number = 123 };
+        var body = "test body content";
         var cancellationToken = new CancellationTokenSource().Token;
 
         _mockHttp
             .Expect(HttpMethod.Patch, BaseUri + "patch-with-token")
-            .WithContent("{\"Name\":\"Test\",\"Number\":123}")
+            .WithContent("test body content")
             .Respond(HttpStatusCode.OK);
 
         // Act
@@ -122,11 +118,11 @@ public class CancellationTokenBodyTest
     {
         // Arrange
         var client = CreateClient();
-        var body = new TestRequest { Name = "Test", Number = 123 };
+        var body = "test body content";
 
         _mockHttp
             .Expect(HttpMethod.Post, BaseUri + "post-without-token")
-            .WithContent("{\"Name\":\"Test\",\"Number\":123}")
+            .WithContent("test body content")
             .Respond(HttpStatusCode.OK);
 
         // Act
