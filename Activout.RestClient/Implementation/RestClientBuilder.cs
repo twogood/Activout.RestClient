@@ -58,7 +58,8 @@ namespace Activout.RestClient.Implementation
         {
             if (replace)
             {
-                _context.DefaultHeaders.RemoveAll(h => h.Key == name);
+                _context.DefaultHeaders.RemoveAll(
+                    h => string.Equals(h.Key, name, StringComparison.OrdinalIgnoreCase));
             }
 
             _context.DefaultHeaders.Add(new KeyValuePair<string, object>(name, value));
