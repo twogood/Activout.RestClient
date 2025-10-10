@@ -13,11 +13,14 @@ public class XmlTests(ITestOutputHelper outputHelper)
     private readonly MockHttpMessageHandler _mockHttp = new MockHttpMessageHandler();
     private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
 
-    [Fact]
-    public async Task TestGetSingleMovie()
+    [Theory]
+    [InlineData("application/xml")]
+    [InlineData("text/xml")]
+    [InlineData("text/xml; charset=utf-8")]
+    public async Task TestGetSingleMovie(string mediaType)
     {
         _mockHttp.When(HttpMethod.Get, $"{BaseUri}/movies/42")
-            .Respond("application/xml",
+            .Respond(mediaType,
                 """
                 <?xml version="1.0" encoding="UTF-8"?>
                 <movie>
