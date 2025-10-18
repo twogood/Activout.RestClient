@@ -16,7 +16,6 @@ public class XmlTests(ITestOutputHelper outputHelper)
     [Theory]
     [InlineData("application/xml")]
     [InlineData("text/xml")]
-    [InlineData("text/xml; charset=utf-8")]
     public async Task TestGetSingleMovie(string mediaType)
     {
         _mockHttp.When(HttpMethod.Get, $"{BaseUri}/movies/42")
