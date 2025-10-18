@@ -6,6 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Title>Activout Rest Client - System.Text.Json Support</Title>
+    <Description>System.Text.Json Support for Activout.RestClient.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/twogood/Activout.RestClient</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/twogood/Activout.RestClient.git</RepositoryUrl>
+    <PackageTags>rest;json;system.text.json;serialization;dotnet</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
