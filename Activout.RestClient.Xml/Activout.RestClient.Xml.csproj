@@ -5,6 +5,13 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <Title>Activout Rest Client - XML Support</Title>
+        <Description>XML Support for Activout.RestClient.</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/twogood/Activout.RestClient</PackageProjectUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/twogood/Activout.RestClient.git</RepositoryUrl>
+        <PackageTags>rest;xml;serialization;dotnet</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>
