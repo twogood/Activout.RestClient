@@ -19,6 +19,7 @@ namespace Activout.RestClient.Serialization.Implementation
         {
             var bytes = await content.ReadAsByteArrayAsync();
 
+            // If the byte array is empty, do not try to create an object
             if (bytes.Length == 0)
             {
                 return type == typeof(byte[]) ? bytes : null;
