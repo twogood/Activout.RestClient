@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -24,7 +25,7 @@ namespace Activout.RestClient.Implementation
         private static readonly MediaType DefaultPartContentType = MediaType.ValueOf("text/plain");
 
         private readonly Type _actualReturnType;
-        private readonly int _bodyArgumentIndex;
+        private readonly int _bodyArgumentIndex = -1;
         private readonly MediaType _contentType;
         private readonly RestClientContext _context;
         private readonly ITaskConverter _converter;
@@ -53,8 +54,6 @@ namespace Activout.RestClient.Implementation
             _errorResponseType = context.ErrorResponseType;
             _requestHeaders.AddRange(context.DefaultHeaders);
 
-            _bodyArgumentIndex = _parameters.Length - 1;
-
             var templateBuilder = new StringBuilder(context.BaseTemplate ?? "");
             foreach (var attribute in method.GetCustomAttributes(true))
                 switch (attribute)
@@ -82,6 +81,22 @@ namespace Activout.RestClient.Implementation
                         break;
                 }
 
+            if (IsHttpMethodWithBody())
+            {
+                _bodyArgumentIndex = _parameters.Length - 1;
+
+                if (_parameters.Length > 0 &&
+                    _parameters[_bodyArgumentIndex].ParameterType == typeof(CancellationToken))
+                {
+                    _bodyArgumentIndex--;
+                }
+
+                if (_bodyArgumentIndex < 0)
+                {
+                    throw new InvalidOperationException("No body argument found for method: " + method.Name);
+                }
+            }
+
             _serializer = context.SerializationManager.GetSerializer(_contentType);
 
             if (context.UseDomainException)
@@ -96,12 +111,17 @@ namespace Activout.RestClient.Implementation
             _context = context;
         }
 
+        private bool IsHttpMethodWithBody()
+        {
+            return _httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put || _httpMethod == HttpMethod.Patch;
+        }
+
         private IParamConverter[] GetParamConverters(IParamConverterManager paramConverterManager)
         {
             var paramConverters = new IParamConverter[_parameters.Length];
             for (var i = 0; i < _parameters.Length; i++)
             {
-                paramConverters[i] = paramConverterManager.GetConverter(_parameters[i]);
+                paramConverters[i] = paramConverterManager.GetConverter(_parameters[i].ParameterType, _parameters[i]);
             }
 
             return paramConverters;
@@ -193,13 +213,13 @@ namespace Activout.RestClient.Implementation
 
             SetHeaders(request, headers);
 
-            if (_httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put || _httpMethod == HttpMethod.Patch)
+            if (IsHttpMethodWithBody())
             {
                 if (partParams.Count != 0)
                 {
                     request.Content = CreateMultipartFormDataContent(partParams);
                 }
-                else if (formParams.Any())
+                else if (formParams.Count != 0)
                 {
                     request.Content = new FormUrlEncodedContent(formParams);
                 }
@@ -246,16 +266,24 @@ namespace Activout.RestClient.Implementation
             headers.ForEach(p => request.Headers.Add(p.Key, p.Value.ToString()));
         }
 
+        private string ConvertValueToString(object value, ParameterInfo parameterInfo)
+        {
+            if (value == null)
+                return null;
+
+            var converter = _context.ParamConverterManager.GetConverter(value.GetType(), parameterInfo);
+            return converter?.ToString(value) ?? value.ToString();
+        }
+
         private CancellationToken GetParams(
-            IReadOnlyList<object> args,
-            IDictionary<string, object> pathParams,
-            ICollection<string> queryParams,
-            ICollection<KeyValuePair<string, string>> formParams,
+            object[] args,
+            Dictionary<string, object> pathParams,
+            List<string> queryParams,
+            List<KeyValuePair<string, string>> formParams,
             List<KeyValuePair<string, object>> headers,
             List<Part<HttpContent>> parts)
         {
             var cancellationToken = CancellationToken.None;
-
 
             for (var i = 0; i < _parameters.Length; i++)
             {
@@ -295,20 +323,68 @@ namespace Activout.RestClient.Implementation
                     }
                     else if (attribute is QueryParamAttribute queryParamAttribute)
                     {
-                        queryParams.Add(Uri.EscapeDataString(queryParamAttribute.Name ?? parameterName) + "=" +
-                                        Uri.EscapeDataString(stringValue));
+                        if (rawValue is IDictionary dictionary)
+                        {
+                            foreach (DictionaryEntry entry in dictionary)
+                            {
+                                var key = entry.Key?.ToString();
+                                var value = ConvertValueToString(entry.Value, _parameters[i]);
+                                if (key != null && value != null)
+                                {
+                                    queryParams.Add(Uri.EscapeDataString(key) + "=" + Uri.EscapeDataString(value));
+                                }
+                            }
+                        }
+                        else if (rawValue != null)
+                        {
+                            queryParams.Add(Uri.EscapeDataString(queryParamAttribute.Name ?? parameterName) + "=" +
+                                            Uri.EscapeDataString(stringValue));
+                        }
+
                         handled = true;
                     }
                     else if (attribute is FormParamAttribute formParamAttribute)
                     {
-                        formParams.Add(new KeyValuePair<string, string>(formParamAttribute.Name ?? parameterName,
-                            stringValue));
+                        if (rawValue is IDictionary dictionary)
+                        {
+                            foreach (DictionaryEntry entry in dictionary)
+                            {
+                                var key = entry.Key?.ToString();
+                                var value = ConvertValueToString(entry.Value, _parameters[i]);
+                                if (key != null && value != null)
+                                {
+                                    formParams.Add(new KeyValuePair<string, string>(key, value));
+                                }
+                            }
+                        }
+                        else if (rawValue != null)
+                        {
+                            formParams.Add(new KeyValuePair<string, string>(formParamAttribute.Name ?? parameterName,
+                                stringValue));
+                        }
+
                         handled = true;
                     }
                     else if (attribute is HeaderParamAttribute headerParamAttribute)
                     {
-                        headers.AddOrReplaceHeader(headerParamAttribute.Name ?? parameterName, stringValue,
-                            headerParamAttribute.Replace);
+                        if (rawValue is IDictionary dictionary)
+                        {
+                            foreach (DictionaryEntry entry in dictionary)
+                            {
+                                var key = entry.Key?.ToString();
+                                var value = ConvertValueToString(entry.Value, _parameters[i]);
+                                if (key != null && value != null)
+                                {
+                                    headers.AddOrReplaceHeader(key, value, headerParamAttribute.Replace);
+                                }
+                            }
+                        }
+                        else if (rawValue != null)
+                        {
+                            headers.AddOrReplaceHeader(headerParamAttribute.Name ?? parameterName, stringValue,
+                                headerParamAttribute.Replace);
+                        }
+
                         handled = true;
                     }
                 }

@@ -5,9 +5,9 @@ namespace Activout.RestClient.ParamConverter.Implementation
 {
     public class DateTimeIso8601ParamConverter : IParamConverter
     {
-        public bool CanConvert(ParameterInfo parameterInfo)
+        public bool CanConvert(Type type, ParameterInfo parameterInfo)
         {
-            return parameterInfo.ParameterType == typeof(DateTime);
+            return type == typeof(DateTime);
         }
 
         public string ToString(object value)

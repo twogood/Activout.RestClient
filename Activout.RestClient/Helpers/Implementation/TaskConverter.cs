@@ -12,6 +12,7 @@ namespace Activout.RestClient.Helpers.Implementation
      * 
      * Implemented by executing Task<object>.ContinueWith<T>(x => (T)x.Result) using reflection.
      */
+    [Obsolete("This class is obsolete and will be removed in a future version. Use TaskConverter3Factory instead.")]
     internal class TaskConverter : ITaskConverter
     {
         private static readonly Type ObjectTaskType = typeof(Task<object>);
