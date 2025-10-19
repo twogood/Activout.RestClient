@@ -26,7 +26,7 @@ namespace Activout.RestClient.Serialization.Implementation
             if (type.IsValueType)
             {
                 throw new InvalidOperationException(
-                    $"Cannot deserialize empty application/octet-stream to value type '{type.FullName}'.");
+                    $"Cannot deserialize application/octet-stream to value type '{type.FullName}'.");
             }
 
             // If the byte array is empty, do not try to create an object
