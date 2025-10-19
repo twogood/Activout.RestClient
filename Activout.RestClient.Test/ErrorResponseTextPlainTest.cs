@@ -35,7 +35,7 @@ public class ErrorResponseTextPlainTest(ITestOutputHelper outputHelper)
     }
 
     [Fact]
-    public async Task TestErrorResponse_TextPlain_BadRequest_Async()
+    public async Task TestErrorResponse_TextPlain_BadRequest()
     {
         // arrange
         _mockHttp
@@ -45,7 +45,7 @@ public class ErrorResponseTextPlainTest(ITestOutputHelper outputHelper)
         var service = CreateTestService();
 
         // act
-        var exception = await Assert.ThrowsAsync<RestClientException>(() => service.GetResourceAsync());
+        var exception = await Assert.ThrowsAsync<RestClientException>(() => service.GetResource());
 
         // assert
         Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
@@ -56,7 +56,7 @@ public class ErrorResponseTextPlainTest(ITestOutputHelper outputHelper)
     }
 
     [Fact]
-    public async Task TestErrorResponse_TextPlain_BadRequest_CustomErrorMessage_Async()
+    public async Task TestErrorResponse_TextPlain_BadRequest_CustomErrorMessage()
     {
         // arrange
         _mockHttp
@@ -66,7 +66,7 @@ public class ErrorResponseTextPlainTest(ITestOutputHelper outputHelper)
         var service = CreateTestServiceWithCustomError();
 
         // act
-        var exception = await Assert.ThrowsAsync<RestClientException>(() => service.GetResourceAsync());
+        var exception = await Assert.ThrowsAsync<RestClientException>(() => service.GetResource());
 
         // assert
         Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
@@ -81,7 +81,7 @@ public class ErrorResponseTextPlainTest(ITestOutputHelper outputHelper)
     public interface ITestService
     {
         [Get]
-        Task GetResourceAsync();
+        Task GetResource();
     }
 
     [Path("resource")]
@@ -89,7 +89,7 @@ public class ErrorResponseTextPlainTest(ITestOutputHelper outputHelper)
     public interface ITestServiceWithCustomError
     {
         [Get]
-        Task GetResourceAsync();
+        Task GetResource();
     }
 
     public record CustomErrorMessage(string Message);

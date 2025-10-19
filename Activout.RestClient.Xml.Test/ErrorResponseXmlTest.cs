@@ -25,7 +25,7 @@ public class ErrorResponseXmlTest(ITestOutputHelper outputHelper)
     }
 
     [Fact]
-    public async Task TestErrorResponse_Xml_BadRequest_Async()
+    public async Task TestErrorResponse_Xml_BadRequest()
     {
         // arrange
         const string errorXml = """
@@ -42,7 +42,7 @@ public class ErrorResponseXmlTest(ITestOutputHelper outputHelper)
         var service = CreateTestService();
 
         // act
-        var exception = await Assert.ThrowsAsync<RestClientException>(() => service.GetResourceAsync());
+        var exception = await Assert.ThrowsAsync<RestClientException>(() => service.GetResource());
 
         // assert
         Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
@@ -58,7 +58,7 @@ public class ErrorResponseXmlTest(ITestOutputHelper outputHelper)
     public interface ITestService
     {
         [Get]
-        Task GetResourceAsync();
+        Task GetResource();
     }
 
     [XmlRoot("error")]
