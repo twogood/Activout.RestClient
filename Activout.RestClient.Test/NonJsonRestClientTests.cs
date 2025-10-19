@@ -230,6 +230,24 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
     }
 
     [Fact]
+    public async Task TestGetEmptyByteArray()
+    {
+        // arrange
+        _mockHttp
+            .When($"{BaseUri}/movies/bytes")
+            .Respond(new ByteArrayContent(new byte[0]));
+
+        var reviewSvc = CreateMovieReviewService();
+
+        // act
+        var bytes = await reviewSvc.GetByteArray();
+
+        // assert
+        Assert.NotNull(bytes);
+        Assert.Empty(bytes);
+    }
+
+    [Fact]
     public async Task TestGetByteArrayObject()
     {
         // arrange
@@ -244,6 +262,23 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
 
         // assert
         Assert.Equal(new byte[] { 42 }, byteArrayObject.Bytes);
+    }
+
+    [Fact]
+    public async Task TestGetByteArrayObjectWithEmptyArray()
+    {
+        // arrange
+        _mockHttp
+            .When($"{BaseUri}/movies/byte-object")
+            .Respond(new ByteArrayContent(new byte[0]));
+
+        var reviewSvc = CreateMovieReviewService();
+
+        // act
+        var byteArrayObject = await reviewSvc.GetByteArrayObject();
+
+        // assert
+        Assert.Null(byteArrayObject);
     }
 
     [Fact]

@@ -18,10 +18,19 @@ namespace Activout.RestClient.Serialization.Implementation
         public async Task<object> Deserialize(HttpContent content, Type type)
         {
             var bytes = await content.ReadAsByteArrayAsync();
+            if (type == typeof(byte[]))
+            {
+                return bytes;
+            }
 
-            return type == typeof(byte[])
-                ? bytes
-                : Activator.CreateInstance(type, bytes);
+            if (type.IsValueType)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot deserialize application/octet-stream to value type '{type.FullName}'.");
+            }
+
+            // If the byte array is empty, do not try to create an object
+            return bytes.Length == 0 ? null : Activator.CreateInstance(type, bytes);
         }
 
         public bool CanDeserialize(MediaType mediaType)
