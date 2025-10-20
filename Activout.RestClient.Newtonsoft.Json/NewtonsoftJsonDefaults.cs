@@ -17,7 +17,6 @@ public static class NewtonsoftJsonDefaults
     [
         new IsoDateTimeConverter(),
         new SimpleValueObjectConverter(),
-        new StringEnumConverter(),
     ];
 
     public static readonly DefaultContractResolver CamelCasePropertyNamesContractResolver = new DefaultContractResolver
@@ -27,12 +26,16 @@ public static class NewtonsoftJsonDefaults
 
     public static readonly JsonSerializerSettings DefaultJsonSerializerSettings = new()
     {
-        Converters = DefaultJsonConverters.ToList()
+        Converters = [new StringEnumConverter(), ..DefaultJsonConverters]
     };
 
     public static readonly JsonSerializerSettings CamelCaseSerializerSettings = new()
     {
-        Converters = DefaultJsonConverters.ToList(),
+        Converters =
+        [
+            new StringEnumConverter(CamelCasePropertyNamesContractResolver.NamingStrategy!),
+            ..DefaultJsonConverters
+        ],
         ContractResolver = CamelCasePropertyNamesContractResolver,
         NullValueHandling = NullValueHandling.Ignore
     };
