@@ -26,7 +26,8 @@ public static class NewtonsoftJsonDefaults
 
     public static readonly JsonSerializerSettings DefaultJsonSerializerSettings = new()
     {
-        Converters = [new StringEnumConverter(), ..DefaultJsonConverters]
+        Converters = [new StringEnumConverter(), ..DefaultJsonConverters],
+        NullValueHandling = NullValueHandling.Ignore
     };
 
     public static readonly JsonSerializerSettings CamelCaseSerializerSettings = new()
