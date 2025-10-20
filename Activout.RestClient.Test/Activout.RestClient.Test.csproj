@@ -3,6 +3,8 @@
     <IsPackable>false</IsPackable>
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>default</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsNotAsErrors>CS0618;CS0619</WarningsNotAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.6.0" />
