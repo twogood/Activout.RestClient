@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
 namespace Activout.RestClient.Newtonsoft.Json;
@@ -12,11 +13,16 @@ public static class NewtonsoftJsonDefaults
         MediaType.ValueOf("application/json")
     ];
 
-    public static readonly JsonConverter[] DefaultJsonConverters = [new SimpleValueObjectConverter()];
+    public static readonly JsonConverter[] DefaultJsonConverters =
+    [
+        new IsoDateTimeConverter(),
+        new SimpleValueObjectConverter(),
+        new StringEnumConverter(),
+    ];
 
     public static readonly DefaultContractResolver CamelCasePropertyNamesContractResolver = new DefaultContractResolver
     {
-        NamingStrategy = new CamelCaseNamingStrategy()
+        NamingStrategy = new CamelCaseNamingStrategy(false, false)
     };
 
     public static readonly JsonSerializerSettings DefaultJsonSerializerSettings = new()
@@ -28,5 +34,6 @@ public static class NewtonsoftJsonDefaults
     {
         Converters = DefaultJsonConverters.ToList(),
         ContractResolver = CamelCasePropertyNamesContractResolver,
+        NullValueHandling = NullValueHandling.Ignore
     };
 }
