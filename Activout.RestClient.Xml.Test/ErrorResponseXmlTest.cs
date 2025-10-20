@@ -24,8 +24,10 @@ public class ErrorResponseXmlTest(ITestOutputHelper outputHelper)
             .Build<ITestService>();
     }
 
-    [Fact]
-    public async Task TestErrorResponse_Xml_BadRequest()
+    [Theory]
+    [InlineData("application/xml")]
+    [InlineData("text/xml")]
+    public async Task TestErrorResponse_Xml_BadRequest(string mediaType)
     {
         // arrange
         const string errorXml = """
@@ -37,7 +39,7 @@ public class ErrorResponseXmlTest(ITestOutputHelper outputHelper)
             """;
         _mockHttp
             .When(HttpMethod.Get, $"{BaseUri}/resource")
-            .Respond(HttpStatusCode.BadRequest, "text/xml", errorXml);
+            .Respond(HttpStatusCode.BadRequest, mediaType, errorXml);
 
         var service = CreateTestService();
 
