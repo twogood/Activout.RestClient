@@ -7,7 +7,7 @@ public static class RestClientBuilderXmlExtensions
         return builder
             .With(new XmlSerializer())
             .With(new XmlDeserializer())
-            .Accept("text/xml")
-            .ContentType("text/xml");
+            .Accept(string.Join(", ", XmlHelper.SupportedMediaTypes.Select(type => type.Value)))
+            .ContentType("application/xml");
     }
 }
