@@ -1,6 +1,4 @@
 using Newtonsoft.Json;
-using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Activout.RestClient.Newtonsoft.Json;
 
