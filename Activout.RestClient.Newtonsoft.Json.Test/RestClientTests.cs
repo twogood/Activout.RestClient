@@ -197,7 +197,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
                 .Respond(request =>
                 {
                     var content = request.Content!.ReadAsStringAsync().Result;
-                    content = content.Replace("\"ReviewId\":null", "\"ReviewId\":\"*REVIEW_ID*\"");
+                    content = content.Replace("{", "{\"ReviewId\":\"*REVIEW_ID*\", ");
                     return new StringContent(content, Encoding.UTF8, "application/json");
                 });
 
