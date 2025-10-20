@@ -4,6 +4,8 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <WarningsNotAsErrors>CS0618;CS0619</WarningsNotAsErrors>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <Title>Activout Rest Client - XML Support</Title>
         <Description>XML Support for Activout.RestClient.</Description>
