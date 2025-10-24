@@ -11,7 +11,7 @@ namespace Activout.RestClient.Serialization.Implementation
     {
         public IReadOnlyCollection<MediaType> SupportedMediaTypes => new[]
         {
-            MediaType.ValueOf("application/octet-stream")
+            new MediaType("application/octet-stream")
         };
 
         public int Order { get; set; }

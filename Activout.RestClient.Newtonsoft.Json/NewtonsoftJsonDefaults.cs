@@ -10,7 +10,7 @@ public static class NewtonsoftJsonDefaults
 {
     public static readonly MediaType[] SupportedMediaTypes =
     [
-        MediaType.ValueOf("application/json")
+        new MediaType("application/json")
     ];
 
     public static readonly JsonConverter[] DefaultJsonConverters =
