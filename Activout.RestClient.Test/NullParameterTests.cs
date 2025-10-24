@@ -13,7 +13,7 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
 {
     private const string BaseUri = "https://example.com/api";
     
-    private readonly IRestClientFactory _restClientFactory = Services.CreateRestClientFactory();
+    private readonly IRestClientFactory _restClientFactory = new RestClientFactory();
     private readonly MockHttpMessageHandler _mockHttp = new MockHttpMessageHandler();
     private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
 
@@ -149,7 +149,7 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
     {
         // arrange
         var service = CreateRestClientBuilder().Build<ITestNullService>();
-        var queryParams = new Dictionary<string, string>
+        var queryParams = new Dictionary<string, string?>
         {
             ["param1"] = "value1",
             ["param2"] = null,  // This should be skipped (already working correctly)
@@ -174,7 +174,7 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
     {
         // arrange
         var service = CreateRestClientBuilder().Build<ITestNullService>();
-        var formParams = new Dictionary<string, string>
+        var formParams = new Dictionary<string, string?>
         {
             ["field1"] = "value1",
             ["field2"] = null,  // This should be skipped (already working correctly)
@@ -202,7 +202,7 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
     {
         // arrange
         var service = CreateRestClientBuilder().Build<ITestNullService>();
-        var headers = new Dictionary<string, string>
+        var headers = new Dictionary<string, string?>
         {
             ["X-Header-1"] = "value1",
             ["X-Header-2"] = null,  // This should be skipped (already working correctly)
@@ -237,20 +237,20 @@ public interface ITestNullService
     Task TestHeaderParam([HeaderParam("X-Custom-Header")] string param);
 
     [Get("test")]
-    Task TestMixedQueryParams([QueryParam("nullParam")] string nullParam, [QueryParam("validParam")] string validParam);
+    Task TestMixedQueryParams([QueryParam("nullParam")] string? nullParam, [QueryParam("validParam")] string validParam);
 
     [Post("test")]
-    Task TestMixedFormParams([FormParam("nullParam")] string nullParam, [FormParam("validParam")] string validParam);
+    Task TestMixedFormParams([FormParam("nullParam")] string? nullParam, [FormParam("validParam")] string validParam);
 
     [Get("test")]
-    Task TestMixedHeaderParams([HeaderParam("X-Null-Header")] string nullHeader, [HeaderParam("X-Valid-Header")] string validHeader);
+    Task TestMixedHeaderParams([HeaderParam("X-Null-Header")] string? nullHeader, [HeaderParam("X-Valid-Header")] string validHeader);
 
     [Get("test")]
-    Task TestNullDictionaryValues([QueryParam] Dictionary<string, string> queryParams);
+    Task TestNullDictionaryValues([QueryParam] Dictionary<string, string?> queryParams);
 
     [Post("test")]
-    Task TestNullFormDictionaryValues([FormParam] Dictionary<string, string> formParams);
+    Task TestNullFormDictionaryValues([FormParam] Dictionary<string, string?> formParams);
 
     [Get("test")]
-    Task TestNullHeaderDictionaryValues([HeaderParam] Dictionary<string, string> headers);
+    Task TestNullHeaderDictionaryValues([HeaderParam] Dictionary<string, string?> headers);
 }

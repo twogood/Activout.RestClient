@@ -17,7 +17,7 @@ namespace Activout.RestClient.Test
 
         public HttpStatusCodeTest()
         {
-            _restClientFactory = Services.CreateRestClientFactory();
+            _restClientFactory = new RestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
         }
 

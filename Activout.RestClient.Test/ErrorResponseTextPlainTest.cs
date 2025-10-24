@@ -13,7 +13,7 @@ public class ErrorResponseTextPlainTest(ITestOutputHelper outputHelper)
 {
     private const string BaseUri = "https://example.com/api";
 
-    private readonly IRestClientFactory _restClientFactory = Services.CreateRestClientFactory();
+    private readonly IRestClientFactory _restClientFactory = new RestClientFactory();
     private readonly MockHttpMessageHandler _mockHttp = new();
     private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
 
@@ -74,7 +74,7 @@ public class ErrorResponseTextPlainTest(ITestOutputHelper outputHelper)
         Assert.NotNull(exception.ErrorResponse);
         Assert.IsType<CustomErrorMessage>(exception.ErrorResponse);
         var customError = exception.GetErrorResponse<CustomErrorMessage>();
-        Assert.Equal("Invalid request parameter", customError.Message);
+        Assert.Equal("Invalid request parameter", customError?.Message);
     }
 
     [Path("resource")]

@@ -5,6 +5,6 @@ namespace Activout.RestClient.Test
 {
     public class HttpRequestMessageCollector
     {
-        public HttpRequestMessage Message { get; set; }
+        public HttpRequestMessage? Message { get; set; }
     }
 }

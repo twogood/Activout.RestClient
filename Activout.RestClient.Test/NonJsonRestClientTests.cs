@@ -21,7 +21,7 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
     private const string MovieId = "*MOVIE_ID*";
     private const string ReviewId = "*REVIEW_ID*";
 
-    private readonly IRestClientFactory _restClientFactory = Services.CreateRestClientFactory();
+    private readonly IRestClientFactory _restClientFactory = new RestClientFactory();
     private readonly MockHttpMessageHandler _mockHttp = new MockHttpMessageHandler();
     private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
 
@@ -48,7 +48,7 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
             .Respond(async () =>
             {
                 await Task.Delay(1000);
-                return null;
+                return new HttpResponseMessage();
             });
 
         var httpClient = _mockHttp.ToHttpClient();
@@ -69,13 +69,13 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
     {
         // arrange
         _mockHttp.When($"{BaseUri}/movies/string")
-            .Respond(_ => null);
+            .Respond(_ => new HttpResponseMessage());
 
         var reviewSvc = CreateMovieReviewService();
         var cancellationTokenSource = new CancellationTokenSource();
 
         // act
-        cancellationTokenSource.Cancel();
+        await cancellationTokenSource.CancelAsync();
         await Assert.ThrowsAsync<TaskCanceledException>(() =>
             reviewSvc.GetStringCancellable(cancellationTokenSource.Token));
 
@@ -128,7 +128,7 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
         // arrange
         _mockHttp
             .When(HttpMethod.Get, $"{BaseUri}/movies/fail")
-            .Respond(HttpStatusCode.BadRequest, request => new ByteArrayContent(new byte[0]));
+            .Respond(HttpStatusCode.BadRequest, _ => new ByteArrayContent(new byte[0]));
 
         var reviewSvc = CreateMovieReviewService();
 
@@ -141,7 +141,7 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
 
         Assert.NotNull(exception.ErrorResponse);
         Assert.IsType<byte[]>(exception.ErrorResponse);
-        Assert.Empty(exception.GetErrorResponse<byte[]>());
+        Assert.Empty(exception.GetErrorResponse<byte[]>()!);
     }
 
     [Fact]
@@ -351,19 +351,19 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
 
         // act
         var responseMessage1 = await reviewSvc.SendFooHeader("bar");
-        var requestHeaders1 = responseMessage1.RequestMessage.Headers;
+        var requestHeaders1 = responseMessage1.RequestMessage?.Headers;
 
         var responseMessage2 = await reviewSvc.SendFooHeader("bar");
-        var requestHeaders2 = responseMessage2.RequestMessage.Headers;
+        var requestHeaders2 = responseMessage2.RequestMessage?.Headers;
 
         // assert
-        Assert.NotNull(requestHeaders1.Authorization);
+        Assert.NotNull(requestHeaders1?.Authorization);
         Assert.Equal("Basic SECRET", requestHeaders1.Authorization.ToString());
         Assert.NotEmpty(requestHeaders1.GetValues("X-Tick"));
 
         Assert.NotEqual(
             requestHeaders1.GetValues("X-Tick").First(),
-            requestHeaders2.GetValues("X-Tick").First());
+            requestHeaders2?.GetValues("X-Tick").First());
     }
 }
 
