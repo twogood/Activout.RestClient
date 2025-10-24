@@ -1,3 +1,4 @@
+#nullable disable
 using System.Net.Http;
 
 namespace Activout.RestClient.Test
