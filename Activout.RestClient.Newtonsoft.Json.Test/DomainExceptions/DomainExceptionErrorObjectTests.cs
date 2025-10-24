@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Net;
 using System.Net.Http;
@@ -77,7 +76,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
         {
             _mockHttp = new MockHttpMessageHandler();
 
-            _myApiClient = new RestClientFactory()
+            _myApiClient = Services.CreateRestClientFactory()
                 .CreateBuilder()
                 .WithNewtonsoftJson()
                 .With(_mockHttp.ToHttpClient())

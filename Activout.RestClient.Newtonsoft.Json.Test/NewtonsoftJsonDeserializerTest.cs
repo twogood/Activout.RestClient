@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -27,7 +26,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
     {
         public NewtonsoftJsonDeserializerTest()
         {
-            _restClientFactory = new RestClientFactory();
+            _restClientFactory = Services.CreateRestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
         }
 
