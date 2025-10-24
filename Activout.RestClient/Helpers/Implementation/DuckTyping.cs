@@ -1,4 +1,5 @@
-﻿using ImpromptuInterface;
+#nullable disable
+using ImpromptuInterface;
 
 namespace Activout.RestClient.Helpers.Implementation
 {

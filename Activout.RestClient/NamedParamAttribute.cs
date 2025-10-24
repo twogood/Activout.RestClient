@@ -1,3 +1,4 @@
+#nullable disable
 using System;
 
 namespace Activout.RestClient

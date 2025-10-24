@@ -1,4 +1,5 @@
-﻿using Activout.RestClient.Helpers;
+#nullable disable
+using Activout.RestClient.Helpers;
 using Activout.RestClient.Helpers.Implementation;
 using Activout.RestClient.Implementation;
 using Activout.RestClient.ParamConverter;

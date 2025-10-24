@@ -1,4 +1,5 @@
-﻿using System;
+#nullable disable
+using System;
 using System.Net.Http;
 using Activout.RestClient.DomainExceptions;
 using Activout.RestClient.Helpers;
