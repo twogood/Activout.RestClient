@@ -1,4 +1,3 @@
-#nullable disable
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -13,7 +12,7 @@ public class ErrorResponseTextPlainTest(ITestOutputHelper outputHelper)
 {
     private const string BaseUri = "https://example.com/api";
 
-    private readonly RestClientFactory _restClientFactory = new RestClientFactory();
+    private readonly IRestClientFactory _restClientFactory = Services.CreateRestClientFactory();
     private readonly MockHttpMessageHandler _mockHttp = new();
     private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
 

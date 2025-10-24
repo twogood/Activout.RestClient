@@ -1,4 +1,3 @@
-#nullable disable
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 

@@ -1,4 +1,3 @@
-#nullable disable
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading;

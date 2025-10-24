@@ -1,4 +1,3 @@
-#nullable disable
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -13,7 +12,7 @@ public class NullParameterTests(ITestOutputHelper outputHelper)
 {
     private const string BaseUri = "https://example.com/api";
     
-    private readonly RestClientFactory _restClientFactory = new RestClientFactory();
+    private readonly IRestClientFactory _restClientFactory = Services.CreateRestClientFactory();
     private readonly MockHttpMessageHandler _mockHttp = new MockHttpMessageHandler();
     private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
 

@@ -1,4 +1,3 @@
-#nullable disable
 using System.Collections.Generic;
 
 namespace Activout.RestClient.Test.MovieReviews;

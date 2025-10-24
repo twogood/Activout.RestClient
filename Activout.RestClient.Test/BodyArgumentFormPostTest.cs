@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -40,7 +39,7 @@ namespace Activout.RestClient.Test
 
         public BodyArgumentFormPostTest()
         {
-            _restClientFactory = new RestClientFactory();
+            _restClientFactory = Services.CreateRestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
         }
 

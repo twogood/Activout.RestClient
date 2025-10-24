@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Net;
 using System.Net.Http;
@@ -38,7 +37,7 @@ public class CancellationTokenBodyTest
 
     public CancellationTokenBodyTest()
     {
-        _restClientFactory = new RestClientFactory();
+        _restClientFactory = Services.CreateRestClientFactory();
         _mockHttp = new MockHttpMessageHandler();
     }
 

@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Linq;
 using System.Net;
@@ -21,7 +20,7 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
     private const string MovieId = "*MOVIE_ID*";
     private const string ReviewId = "*REVIEW_ID*";
 
-    private readonly RestClientFactory _restClientFactory = new RestClientFactory();
+    private readonly IRestClientFactory _restClientFactory = Services.CreateRestClientFactory();
     private readonly MockHttpMessageHandler _mockHttp = new MockHttpMessageHandler();
     private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
 

@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Linq;
 using System.Net;
@@ -21,7 +20,7 @@ namespace Activout.RestClient.Test
 
         public MultipartFormDataContentTest(ITestOutputHelper outputHelper)
         {
-            _restClientFactory = new RestClientFactory();
+            _restClientFactory = Services.CreateRestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
             _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
         }
@@ -83,8 +82,16 @@ namespace Activout.RestClient.Test
                 MyString = "foobar"
             }, new[]
             {
-                new Part(Content: "foo", Name: null, FileName: "foo.txt"),
-                new Part(Content: "bar", Name: null, FileName: "bar.txt")
+                new Part<string>
+                {
+                    Content = "foo",
+                    FileName = "foo.txt"
+                },
+                new Part<string>
+                {
+                    Content = "bar",
+                    FileName = "bar.txt"
+                }
             });
 
             // Assert
