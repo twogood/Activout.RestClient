@@ -4,6 +4,6 @@ namespace Activout.RestClient.Helpers
 {
     public interface ITaskConverter
     {
-        object ConvertReturnType(Task<object> task);
+        object ConvertReturnType(Task<object?> task);
     }
 }

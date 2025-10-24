@@ -5,14 +5,14 @@ namespace Activout.RestClient
 {
     public class RestClientException : Exception
     {
-        public RestClientException(Uri requestUri, HttpStatusCode statusCode, object errorResponse) : base(errorResponse?.ToString())
+        public RestClientException(Uri requestUri, HttpStatusCode statusCode, object? errorResponse) : base(errorResponse?.ToString())
         {
             RequestUri = requestUri;
             StatusCode = statusCode;
             ErrorResponse = errorResponse;
         }
 
-        public RestClientException(Uri requestUri, HttpStatusCode statusCode, string errorResponse, Exception innerException) : base(
+        public RestClientException(Uri requestUri, HttpStatusCode statusCode, string? errorResponse, Exception innerException) : base(
             errorResponse, innerException)
         {
             RequestUri = requestUri;
@@ -23,11 +23,11 @@ namespace Activout.RestClient
         public Uri RequestUri { get; }
         public HttpStatusCode StatusCode { get; }
 
-        public object ErrorResponse { get; }
+        public object? ErrorResponse { get; }
 
-        public T GetErrorResponse<T>()
+        public T? GetErrorResponse<T>()
         {
-            return (T)ErrorResponse;
+            return (T?)ErrorResponse;
         }
 
         public override string ToString()

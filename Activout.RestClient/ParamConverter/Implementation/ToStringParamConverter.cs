@@ -10,9 +10,9 @@ namespace Activout.RestClient.ParamConverter.Implementation
             return true;
         }
 
-        public string ToString(object value)
+        public string ToString(object? value)
         {
-            return value == null ? "" : value.ToString();
+            return value?.ToString() ?? "";
         }
     }
 }

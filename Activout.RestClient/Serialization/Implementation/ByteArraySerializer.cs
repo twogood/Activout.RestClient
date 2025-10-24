@@ -8,7 +8,7 @@ namespace Activout.RestClient.Serialization.Implementation
     {
         public int Order { get; set; }
 
-        public HttpContent Serialize(object data, Encoding encoding, MediaType mediaType)
+        public HttpContent Serialize(object? data, Encoding encoding, MediaType mediaType)
         {
             var bytes = data switch
             {

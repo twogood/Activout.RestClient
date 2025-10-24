@@ -5,7 +5,7 @@ namespace Activout.RestClient
 {
     public sealed class MediaType
     {
-        public static MediaType ValueOf(string value)
+        public static MediaType? ValueOf(string? value)
         {
             return value == null ? null : new MediaType(value);
         }
@@ -31,14 +31,14 @@ namespace Activout.RestClient
             return Value == other.Value;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return ReferenceEquals(this, obj) || obj is MediaType other && Equals(other);
         }
 
         public override int GetHashCode()
         {
-            return (Value != null ? Value.GetHashCode() : 0);
+            return Value.GetHashCode();
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Activout.RestClient.Serialization
     public interface IDeserializer
     {
         int Order { get; set; }
-        Task<object> Deserialize(HttpContent content, Type type);
+        Task<object?> Deserialize(HttpContent content, Type type);
         bool CanDeserialize(MediaType mediaType);
     }
 }

@@ -10,7 +10,7 @@ public class ErrorResponseXmlTest(ITestOutputHelper outputHelper)
 {
     private const string BaseUri = "https://example.com/api";
 
-    private readonly IRestClientFactory _restClientFactory = Services.CreateRestClientFactory();
+    private readonly IRestClientFactory _restClientFactory = new RestClientFactory();
     private readonly MockHttpMessageHandler _mockHttp = new();
     private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
 
@@ -51,6 +51,7 @@ public class ErrorResponseXmlTest(ITestOutputHelper outputHelper)
         Assert.NotNull(exception.ErrorResponse);
         Assert.IsType<XmlErrorResponse>(exception.ErrorResponse);
         var errorResponse = exception.GetErrorResponse<XmlErrorResponse>();
+        Assert.NotNull(errorResponse);
         Assert.Equal(400, errorResponse.Code);
         Assert.Equal("Invalid request parameter", errorResponse.Message);
     }

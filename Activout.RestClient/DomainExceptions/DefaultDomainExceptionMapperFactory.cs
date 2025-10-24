@@ -8,6 +8,8 @@ namespace Activout.RestClient.DomainExceptions
 {
     public class DefaultDomainExceptionMapperFactory : IDomainExceptionMapperFactory
     {
+        public static DefaultDomainExceptionMapperFactory Instance { get; } = new();
+
         public virtual IDomainExceptionMapper CreateDomainExceptionMapper(
             MethodInfo method,
             Type errorResponseType,
@@ -25,11 +27,17 @@ namespace Activout.RestClient.DomainExceptions
             return new DefaultDomainExceptionMapper(exceptionType, errorType, httpErrorAttributes);
         }
 
-        private static IEnumerable<DomainHttpErrorAttribute> GetAllDomainHttpErrorAttributes(MemberInfo method,
+        private static List<DomainHttpErrorAttribute> GetAllDomainHttpErrorAttributes(MemberInfo method,
             Type errorType)
         {
             var attributes = GetDomainHttpErrorAttributes(method).ToList();
-            attributes.AddRange(GetDomainHttpErrorAttributes(method.DeclaringType));
+
+            var declaringType = method.DeclaringType;
+            if (declaringType != null)
+            {
+                attributes.AddRange(GetDomainHttpErrorAttributes(declaringType));
+            }
+
             CheckDomainHttpErrorAttributes(errorType, attributes);
             return attributes;
         }

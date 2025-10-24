@@ -23,7 +23,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
     {
         public MyDomainErrorEnum Error { get; }
 
-        public SomeDomainErrorObjectException(MyDomainErrorEnum error, Exception innerException = null) : base(
+        public SomeDomainErrorObjectException(MyDomainErrorEnum error, Exception? innerException = null) : base(
             error.ToString(), innerException)
         {
             Error = error;
@@ -41,7 +41,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
         {
             _mockHttp = new MockHttpMessageHandler();
 
-            _defaultMapperApiClient = Services.CreateRestClientFactory()
+            _defaultMapperApiClient = new RestClientFactory()
                 .CreateBuilder()
                 .WithNewtonsoftJson()
                 .With(_mockHttp.ToHttpClient())

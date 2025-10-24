@@ -4,48 +4,21 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
-using Activout.RestClient.DomainExceptions;
 
 namespace Activout.RestClient.Implementation
 {
-    internal class RestClient<T> : DynamicObject where T : class
+    internal class RestClient : DynamicObject
     {
         private readonly RestClientContext _context;
         private readonly Type _type;
+        private readonly ConcurrentDictionary<MethodInfo, RequestHandler> _requestHandlers = new();
+        //private readonly ISerializer? _defaultSerializer;
 
-        private readonly IDictionary<MethodInfo, RequestHandler> _requestHandlers =
-            new ConcurrentDictionary<MethodInfo, RequestHandler>();
-
-        public RestClient(RestClientContext context)
+        public RestClient(Type type, RestClientContext context)
         {
-            _type = typeof(T);
+            _type = type;
             _context = context;
-            HandleAttributes();
-            _context.DefaultSerializer = _context.SerializationManager.GetSerializer(_context.DefaultContentType);
-        }
-
-        private void HandleAttributes()
-        {
-            var attributes = _type.GetCustomAttributes();
-            foreach (var attribute in attributes)
-                switch (attribute)
-                {
-                    case ContentTypeAttribute contentTypeAttribute:
-                        _context.DefaultContentType = MediaType.ValueOf(contentTypeAttribute.ContentType);
-                        break;
-                    case DomainExceptionAttribute domainExceptionAttribute:
-                        _context.DomainExceptionType = domainExceptionAttribute.Type;
-                        break;
-                    case ErrorResponseAttribute errorResponseAttribute:
-                        _context.ErrorResponseType = errorResponseAttribute.Type;
-                        break;
-                    case HeaderAttribute headerAttribute:
-                        _context.DefaultHeaders.AddOrReplaceHeader(headerAttribute.Name, headerAttribute.Value, headerAttribute.Replace);
-                        break;
-                    case PathAttribute pathAttribute:
-                        _context.BaseTemplate = pathAttribute.Template;
-                        break;
-                }
+            //_defaultSerializer = _context.SerializationManager.GetSerializer(_context.DefaultContentType);
         }
 
         public override IEnumerable<string> GetDynamicMemberNames()
@@ -53,7 +26,7 @@ namespace Activout.RestClient.Implementation
             return _type.GetMembers().Select(x => x.Name);
         }
 
-        public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
+        public override bool TryInvokeMember(InvokeMemberBinder binder, object?[]? args, out object? result)
         {
             var method = _type.GetMethod(binder.Name);
             if (method == null)
@@ -68,7 +41,7 @@ namespace Activout.RestClient.Implementation
                 _requestHandlers[method] = requestHandler;
             }
 
-            result = requestHandler.Send(args);
+            result = requestHandler.Send(args ?? []);
             return true;
         }
     }

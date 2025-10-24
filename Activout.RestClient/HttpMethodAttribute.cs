@@ -8,7 +8,7 @@ namespace Activout.RestClient
     {
         public HttpMethod HttpMethod { get; }
 
-        protected HttpMethodAttribute(HttpMethod httpMethod, string template) : base(template)
+        protected HttpMethodAttribute(HttpMethod httpMethod, string? template) : base(template)
         {
             HttpMethod = httpMethod;
         }
@@ -16,14 +16,14 @@ namespace Activout.RestClient
 
     public class DeleteAttribute : HttpMethodAttribute
     {
-        public DeleteAttribute(string template = null) : base(HttpMethod.Delete, template)
+        public DeleteAttribute(string? template = null) : base(HttpMethod.Delete, template)
         {
         }
     }
 
     public class GetAttribute : HttpMethodAttribute
     {
-        public GetAttribute(string template = null) : base(HttpMethod.Get, template)
+        public GetAttribute(string? template = null) : base(HttpMethod.Get, template)
         {
         }
     }
@@ -31,7 +31,7 @@ namespace Activout.RestClient
 
     public class PostAttribute : HttpMethodAttribute
     {
-        public PostAttribute(string template = null) : base(HttpMethod.Post, template)
+        public PostAttribute(string? template = null) : base(HttpMethod.Post, template)
         {
         }
     }
@@ -39,14 +39,14 @@ namespace Activout.RestClient
 
     public class PutAttribute : HttpMethodAttribute
     {
-        public PutAttribute(string template = null) : base(HttpMethod.Put, template)
+        public PutAttribute(string? template = null) : base(HttpMethod.Put, template)
         {
         }
     }
 
     public class PatchAttribute : HttpMethodAttribute
     {
-        public PatchAttribute(string template = null) : base(HttpMethod.Patch, template)
+        public PatchAttribute(string? template = null) : base(HttpMethod.Patch, template)
         {
         }
     }

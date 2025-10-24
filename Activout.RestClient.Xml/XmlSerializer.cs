@@ -10,8 +10,13 @@ public class XmlSerializer : ISerializer
 
     public XmlWriterSettings? Settings { get; set; }
 
-    public HttpContent Serialize(object data, Encoding encoding, MediaType mediaType)
+    public HttpContent Serialize(object? data, Encoding encoding, MediaType mediaType)
     {
+        if (data == null)
+        {
+            return new StringContent("", encoding, mediaType.Value);
+        }
+
         var serializer = new System.Xml.Serialization.XmlSerializer(data.GetType());
         var stream = new MemoryStream();
         var writer = new StreamWriter(stream);

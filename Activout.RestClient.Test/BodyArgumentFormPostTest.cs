@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Activout.RestClient.Implementation;
 using RichardSzalay.MockHttp;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace Activout.RestClient.Test
     public class FormData
     {
         public string SomeString { get; set; } = "foo";
-        public string Unused { get; set; } = null;
+        public string? Unused { get; set; } = null;
         public int SomeNumber { get; set; } = 42;
         [FormKey("another")] public string AnotherString { get; set; } = "bar";
     }
@@ -23,7 +24,7 @@ namespace Activout.RestClient.Test
     {
         [ContentType("application/x-www-form-urlencoded")]
         [Post("/form")]
-        Task PostObject(FormData formData);
+        Task PostObject(FormData? formData);
 
         [Post("/form")]
         Task PostEnumerable(IEnumerable<KeyValuePair<string, string>> formData);
@@ -38,7 +39,7 @@ namespace Activout.RestClient.Test
 
         public BodyArgumentFormPostTest()
         {
-            _restClientFactory = Services.CreateRestClientFactory();
+            _restClientFactory = new RestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
         }
 

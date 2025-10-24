@@ -12,7 +12,7 @@ namespace Activout.RestClient
 
         public static IRestClientBuilder ContentType(this IRestClientBuilder self, string contentType)
         {
-            return self.ContentType(MediaType.ValueOf(contentType));
+            return self.ContentType(new MediaType(contentType));
         }
 
         public static IRestClientBuilder Accept(this IRestClientBuilder self, string accept)

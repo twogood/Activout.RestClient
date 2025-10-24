@@ -10,12 +10,12 @@ namespace Activout.RestClient.Serialization.Implementation
     {
         public IReadOnlyCollection<MediaType> SupportedMediaTypes => new[]
         {
-            MediaType.ValueOf("application/octet-stream")
+            new MediaType("application/octet-stream")
         };
 
         public int Order { get; set; }
 
-        public async Task<object> Deserialize(HttpContent content, Type type)
+        public async Task<object?> Deserialize(HttpContent content, Type type)
         {
             var bytes = await content.ReadAsByteArrayAsync();
             if (type == typeof(byte[]))

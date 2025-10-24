@@ -9,7 +9,7 @@ See the [Activout.RestClient README](https://github.com/twogood/Activout.RestCli
 ## Example usage
 
 ```C#
-var restClientFactory = Services.CreateRestClientFactory();
+var restClientFactory = new RestClientFactory();
 var movieReviewService = restClientFactory
             .CreateBuilder()
             .With(_httpClient)

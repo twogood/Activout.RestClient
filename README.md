@@ -44,7 +44,7 @@ public interface IMovieReviewService
 Now we can use this interface as a means to invoke the actual remote review service like this:
 
 ```C#
-var restClientFactory = Services.CreateRestClientFactory();
+var restClientFactory = new RestClientFactory();
 var movieReviewService = restClientFactory
             .CreateBuilder()
             .With(_httpClient)

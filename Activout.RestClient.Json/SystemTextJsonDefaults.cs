@@ -15,7 +15,7 @@ public static class SystemTextJsonDefaults
     /// </summary>
     public static readonly MediaType[] MediaTypes =
     [
-        MediaType.ValueOf("application/json")
+        new MediaType("application/json")
     ];
 
     /// <summary>

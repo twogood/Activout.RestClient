@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Activout.RestClient.Implementation;
 using RichardSzalay.MockHttp;
 using Xunit;
 
@@ -36,7 +37,7 @@ public class CancellationTokenBodyTest
 
     public CancellationTokenBodyTest()
     {
-        _restClientFactory = Services.CreateRestClientFactory();
+        _restClientFactory = new RestClientFactory();
         _mockHttp = new MockHttpMessageHandler();
     }
 

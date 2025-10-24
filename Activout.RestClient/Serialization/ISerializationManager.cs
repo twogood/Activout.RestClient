@@ -2,7 +2,7 @@
 {
     public interface ISerializationManager
     {
-        ISerializer GetSerializer(MediaType mediaType);
-        IDeserializer GetDeserializer(MediaType mediaType);
+        ISerializer? GetSerializer(MediaType mediaType);
+        IDeserializer? GetDeserializer(MediaType mediaType);
     }
 }

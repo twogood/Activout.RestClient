@@ -16,27 +16,30 @@ using Microsoft.Extensions.Logging;
 
 namespace Activout.RestClient.Implementation
 {
+    internal record HttpContentPart(HttpContent Content, string Name, string? FileName);
+
     internal class RequestHandler
     {
         // https://www.w3.org/Protocols/rfc2616/rfc2616-sec7.html#sec7.2.1
         private const string DefaultHttpContentType = "application/octet-stream";
+        private static readonly MediaType DefaultMediaType = new MediaType(DefaultHttpContentType);
 
         // https://tools.ietf.org/html/rfc7578#section-4.4
-        private static readonly MediaType DefaultPartContentType = MediaType.ValueOf("text/plain");
+        private static readonly MediaType DefaultPartContentType = new MediaType("text/plain");
 
         private readonly Type _actualReturnType;
         private readonly int _bodyArgumentIndex = -1;
         private readonly MediaType _contentType;
         private readonly RestClientContext _context;
-        private readonly ITaskConverter _converter;
+        private readonly ITaskConverter? _converter;
         private readonly Type _errorResponseType;
         private readonly HttpMethod _httpMethod = HttpMethod.Get;
         private readonly ParameterInfo[] _parameters;
         private readonly Type _returnType;
-        private readonly ISerializer _serializer;
+        private readonly ISerializer? _serializer;
         private readonly string _template;
         private readonly IParamConverter[] _paramConverters;
-        private readonly IDomainExceptionMapper _domainExceptionMapper;
+        private readonly IDomainExceptionMapper? _domainExceptionMapper;
         private readonly List<KeyValuePair<string, object>> _requestHeaders = new List<KeyValuePair<string, object>>();
 
         private bool DebugLoggingEnabled => _context.Logger.IsEnabled(LogLevel.Debug);
@@ -48,18 +51,18 @@ namespace Activout.RestClient.Implementation
             _parameters = method.GetParameters();
             _paramConverters = GetParamConverters(context.ParamConverterManager);
             _converter = CreateConverter(context);
-            _template = context.BaseTemplate ?? "";
+            _template = context.BaseTemplate;
             _serializer = context.DefaultSerializer;
-            _contentType = context.DefaultContentType;
-            _errorResponseType = context.ErrorResponseType;
+            _contentType = context.DefaultContentType ?? DefaultMediaType;
+            _errorResponseType = context.ErrorResponseType ?? typeof(string);
             _requestHeaders.AddRange(context.DefaultHeaders);
 
-            var templateBuilder = new StringBuilder(context.BaseTemplate ?? "");
+            var templateBuilder = new StringBuilder(context.BaseTemplate);
             foreach (var attribute in method.GetCustomAttributes(true))
                 switch (attribute)
                 {
                     case ContentTypeAttribute contentTypeAttribute:
-                        _contentType = MediaType.ValueOf(contentTypeAttribute.ContentType);
+                        _contentType = new MediaType(contentTypeAttribute.ContentType);
                         break;
 
                     case ErrorResponseAttribute errorResponseAttribute:
@@ -99,7 +102,7 @@ namespace Activout.RestClient.Implementation
 
             _serializer = context.SerializationManager.GetSerializer(_contentType);
 
-            if (context.UseDomainException)
+            if (context.DomainExceptionType != null)
             {
                 _domainExceptionMapper = context.DomainExceptionMapperFactory.CreateDomainExceptionMapper(
                     method,
@@ -121,7 +124,11 @@ namespace Activout.RestClient.Implementation
             var paramConverters = new IParamConverter[_parameters.Length];
             for (var i = 0; i < _parameters.Length; i++)
             {
-                paramConverters[i] = paramConverterManager.GetConverter(_parameters[i].ParameterType, _parameters[i]);
+                paramConverters[i] = paramConverterManager.GetConverter(_parameters[i].ParameterType, _parameters[i]) ??
+                                     throw new InvalidOperationException(
+                                         "No parameter converter found for parameter: " + _parameters[i].Name +
+                                         " of type: " +
+                                         _parameters[i].ParameterType);
             }
 
             return paramConverters;
@@ -132,7 +139,7 @@ namespace Activout.RestClient.Implementation
             return attribute.HttpMethod;
         }
 
-        private ITaskConverter CreateConverter(RestClientContext context)
+        private ITaskConverter? CreateConverter(RestClientContext context)
         {
             return context.TaskConverterFactory.CreateTaskConverter(_actualReturnType);
         }
@@ -169,7 +176,7 @@ namespace Activout.RestClient.Implementation
         private void PrepareRequestMessage(HttpRequestMessage request)
         {
             var baseUri = _context.BaseUri;
-            Uri requestUri = null;
+            Uri? requestUri = null;
             if (request.RequestUri == null && baseUri == null) throw new InvalidOperationException();
             if (request.RequestUri == null)
             {
@@ -190,7 +197,7 @@ namespace Activout.RestClient.Implementation
             if (requestUri != null) request.RequestUri = requestUri;
         }
 
-        public object Send(object[] args)
+        public object? Send(object?[] args)
         {
             var headers = new List<KeyValuePair<string, object>>();
             headers.AddRange(_requestHeaders);
@@ -198,7 +205,7 @@ namespace Activout.RestClient.Implementation
             var routeParams = new Dictionary<string, object>();
             var queryParams = new List<string>();
             var formParams = new List<KeyValuePair<string, string>>();
-            var partParams = new List<Part<HttpContent>>();
+            var partParams = new List<HttpContentPart>();
             var cancellationToken = GetParams(args, routeParams, queryParams, formParams, headers, partParams);
 
             var requestUriString = ExpandTemplate(routeParams);
@@ -234,12 +241,12 @@ namespace Activout.RestClient.Implementation
             if (IsVoidTask())
                 return task;
             if (_returnType.BaseType == typeof(Task) && _returnType.IsGenericType)
-                return _converter.ConvertReturnType(task);
+                return _converter!.ConvertReturnType(task);
             return task.Result;
         }
 
         private static MultipartFormDataContent CreateMultipartFormDataContent(
-            IEnumerable<Part<HttpContent>> partParams)
+            IEnumerable<HttpContentPart> partParams)
         {
             var content = new MultipartFormDataContent();
             foreach (var part in partParams)
@@ -266,7 +273,7 @@ namespace Activout.RestClient.Implementation
             headers.ForEach(p => request.Headers.Add(p.Key, p.Value.ToString()));
         }
 
-        private string ConvertValueToString(object value, ParameterInfo parameterInfo)
+        private string? ConvertValueToString(object? value, ParameterInfo parameterInfo)
         {
             if (value == null)
                 return null;
@@ -276,12 +283,12 @@ namespace Activout.RestClient.Implementation
         }
 
         private CancellationToken GetParams(
-            object[] args,
+            object?[] args,
             Dictionary<string, object> pathParams,
             List<string> queryParams,
             List<KeyValuePair<string, string>> formParams,
             List<KeyValuePair<string, object>> headers,
-            List<Part<HttpContent>> parts)
+            List<HttpContentPart> parts)
         {
             var cancellationToken = CancellationToken.None;
 
@@ -295,7 +302,7 @@ namespace Activout.RestClient.Implementation
                 }
 
                 var parameterAttributes = _parameters[i].GetCustomAttributes(false);
-                var parameterName = _parameters[i].Name;
+                var parameterName = _parameters[i].Name!;
                 var stringValue = _paramConverters[i].ToString(rawValue);
                 var handled = false;
 
@@ -305,9 +312,12 @@ namespace Activout.RestClient.Implementation
                     {
                         if (_parameters[i].ParameterType.IsArray)
                         {
-                            var items = (object[])rawValue;
-                            parts.AddRange(items.SelectMany(item =>
-                                GetPartNameAndHttpContent(partAttribute, parameterName, item)));
+                            var items = (object?[]?)rawValue;
+                            if (items != null)
+                            {
+                                parts.AddRange(items.SelectMany(item =>
+                                    GetPartNameAndHttpContent(partAttribute, parameterName, item)));
+                            }
                         }
                         else
                         {
@@ -327,7 +337,7 @@ namespace Activout.RestClient.Implementation
                         {
                             foreach (DictionaryEntry entry in dictionary)
                             {
-                                var key = entry.Key?.ToString();
+                                var key = entry.Key.ToString();
                                 var value = ConvertValueToString(entry.Value, _parameters[i]);
                                 if (key != null && value != null)
                                 {
@@ -349,7 +359,7 @@ namespace Activout.RestClient.Implementation
                         {
                             foreach (DictionaryEntry entry in dictionary)
                             {
-                                var key = entry.Key?.ToString();
+                                var key = entry.Key.ToString();
                                 var value = ConvertValueToString(entry.Value, _parameters[i]);
                                 if (key != null && value != null)
                                 {
@@ -371,7 +381,7 @@ namespace Activout.RestClient.Implementation
                         {
                             foreach (DictionaryEntry entry in dictionary)
                             {
-                                var key = entry.Key?.ToString();
+                                var key = entry.Key.ToString();
                                 var value = ConvertValueToString(entry.Value, _parameters[i]);
                                 if (key != null && value != null)
                                 {
@@ -398,28 +408,26 @@ namespace Activout.RestClient.Implementation
             return cancellationToken;
         }
 
-        private IEnumerable<Part<HttpContent>> GetPartNameAndHttpContent(PartParamAttribute partAttribute,
+        private IEnumerable<HttpContentPart> GetPartNameAndHttpContent(PartParamAttribute partAttribute,
             string parameterName,
-            object rawValue)
+            object? rawValue)
         {
-            string fileName = null;
-            string partName = null;
+            string? fileName = null;
+            string? partName = null;
 
             if (rawValue is Part part)
             {
-                rawValue = part.InternalContent;
+                rawValue = part.Content;
                 partName = part.Name;
                 fileName = part.FileName;
             }
 
-            if (rawValue is { })
+            if (rawValue is not null)
             {
-                yield return new Part<HttpContent>
-                {
-                    Content = GetPartHttpContent(partAttribute, rawValue),
-                    Name = partName ?? partAttribute.Name ?? parameterName,
-                    FileName = fileName ?? partAttribute.FileName
-                };
+                yield return new HttpContentPart(
+                    Content: GetPartHttpContent(partAttribute, rawValue),
+                    Name: partName ?? partAttribute.Name ?? parameterName,
+                    FileName: fileName ?? partAttribute.FileName);
             }
         }
 
@@ -432,7 +440,7 @@ namespace Activout.RestClient.Implementation
             return GetHttpContent(serializer, value, contentType);
         }
 
-        private static HttpContent GetHttpContent(ISerializer serializer, object value, MediaType contentType)
+        private static HttpContent GetHttpContent(ISerializer? serializer, object? value, MediaType contentType)
         {
             if (value is HttpContent httpContent)
             {
@@ -448,7 +456,7 @@ namespace Activout.RestClient.Implementation
         }
 
 
-        private async Task<object> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        private async Task<object?> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             PrepareRequestMessage(request);
 
@@ -460,7 +468,7 @@ namespace Activout.RestClient.Implementation
                 {
                     await request.Content.LoadIntoBufferAsync();
                     _context.Logger.LogDebug("{RequestContent}",
-                        (await request.Content.ReadAsStringAsync()).SafeSubstring(0, 1000));
+                        (await request.Content.ReadAsStringAsync(cancellationToken)).SafeSubstring(0, 1000));
                 }
             }
 
@@ -474,12 +482,10 @@ namespace Activout.RestClient.Implementation
             {
                 _context.Logger.LogDebug("{Response}", response);
 
-                if (response.Content != null)
-                {
-                    await response.Content.LoadIntoBufferAsync();
-                    _context.Logger.LogDebug("{ResponseContent}",
-                        (await response.Content.ReadAsStringAsync()).SafeSubstring(0, 1000));
-                }
+                await response.Content.LoadIntoBufferAsync();
+                _context.Logger.LogDebug("{ResponseContent}",
+                    (await response.Content.ReadAsStringAsync(cancellationToken))
+                    .SafeSubstring(0, 1000));
             }
 
             if (_actualReturnType == typeof(HttpStatusCode))
@@ -501,17 +507,17 @@ namespace Activout.RestClient.Implementation
 
             if (_context.UseDomainException)
             {
-                throw await _domainExceptionMapper.CreateExceptionAsync(response, data);
+                throw await _domainExceptionMapper!.CreateExceptionAsync(response, data);
             }
 
-            throw new RestClientException(request.RequestUri, response.StatusCode, data);
+            throw new RestClientException(request.RequestUri!, response.StatusCode, data);
         }
 
-        private async Task<object> GetResponseData(HttpRequestMessage request, HttpResponseMessage response)
+        private async Task<object?> GetResponseData(HttpRequestMessage request, HttpResponseMessage response)
         {
             var type = response.IsSuccessStatusCode ? _actualReturnType : _errorResponseType;
 
-            if (type == typeof(void) || response.Content == null)
+            if (type == typeof(void))
             {
                 return null;
             }
@@ -522,7 +528,7 @@ namespace Activout.RestClient.Implementation
                 return response.Content;
             }
 
-            var contentTypeMediaType = response.Content.Headers?.ContentType?.MediaType ?? DefaultHttpContentType;
+            var contentTypeMediaType = response.Content.Headers.ContentType?.MediaType ?? DefaultHttpContentType;
             var deserializer = _context.SerializationManager.GetDeserializer(new MediaType(contentTypeMediaType));
             if (deserializer == null)
             {
@@ -547,21 +553,21 @@ namespace Activout.RestClient.Implementation
         private async Task<Exception> CreateDeserializationException(HttpRequestMessage request,
             HttpResponseMessage response, Exception e)
         {
-            var errorResponse = response.Content == null ? null : await response.Content.ReadAsStringAsync();
+            var errorResponse = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode || !_context.UseDomainException)
             {
-                return new RestClientException(request.RequestUri, response.StatusCode, errorResponse, e);
+                return new RestClientException(request.RequestUri!, response.StatusCode, errorResponse, e);
             }
 
-            return await _domainExceptionMapper.CreateExceptionAsync(response, errorResponse, e);
+            return await _domainExceptionMapper!.CreateExceptionAsync(response, errorResponse, e);
         }
 
         private async Task<Exception> CreateNoDeserializerFoundException(HttpRequestMessage request,
             HttpResponseMessage response,
             string contentTypeMediaType)
         {
-            var exception = (Exception)new RestClientException(request.RequestUri, response.StatusCode,
+            var exception = new RestClientException(request.RequestUri!, response.StatusCode,
                 "No deserializer found for " + contentTypeMediaType);
 
             if (response.IsSuccessStatusCode || !_context.UseDomainException)
@@ -569,7 +575,7 @@ namespace Activout.RestClient.Implementation
                 return exception;
             }
 
-            return await _domainExceptionMapper.CreateExceptionAsync(response, null, exception);
+            return await _domainExceptionMapper!.CreateExceptionAsync(response, null, exception);
         }
     }
 }

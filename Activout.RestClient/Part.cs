@@ -1,18 +1,3 @@
-namespace Activout.RestClient
-{
-    public class Part
-    {
-        internal object InternalContent { get; set; }
-        public string Name { get; set; }
-        public string FileName { get; set; }
-    }
+namespace Activout.RestClient;
 
-    public class Part<T> : Part
-    {
-        public T Content
-        {
-            get => (T)InternalContent;
-            set => InternalContent = value;
-        }
-    }
-}
+public record Part(object Content, string Name, string? FileName = null);

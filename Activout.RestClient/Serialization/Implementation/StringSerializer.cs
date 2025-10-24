@@ -7,9 +7,9 @@ namespace Activout.RestClient.Serialization.Implementation
     {
         public int Order { get; set; } = 1000;
 
-        public HttpContent Serialize(object data, Encoding encoding, MediaType mediaType)
+        public HttpContent Serialize(object? data, Encoding encoding, MediaType mediaType)
         {
-            return new StringContent(data.ToString(), encoding, mediaType.Value);
+            return new StringContent(data?.ToString() ?? "", encoding, mediaType.Value);
         }
 
         public bool CanSerialize(MediaType mediaType)

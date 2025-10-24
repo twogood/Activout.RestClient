@@ -8,9 +8,9 @@
             Text = text;
         }
 
-        public string MovieId { get; set; }
-        public string ReviewId { get; set; }
-        public int Stars { get; set; }
-        public string Text { get; set; }
+        public string? MovieId { get; init; }
+        public string? ReviewId { get; init; }
+        public int Stars { get; init; }
+        public string Text { get; init; }
     }
 }

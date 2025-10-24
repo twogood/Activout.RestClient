@@ -32,7 +32,7 @@ public class RestClientTests(ITestOutputHelper outputHelper)
     private const string MovieId = "*MOVIE_ID*";
     private const string ReviewId = "*REVIEW_ID*";
 
-    private readonly IRestClientFactory _restClientFactory = Services.CreateRestClientFactory();
+    private readonly IRestClientFactory _restClientFactory = new RestClientFactory();
     private readonly MockHttpMessageHandler _mockHttp = new();
     private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
 
@@ -96,39 +96,6 @@ public class RestClientTests(ITestOutputHelper outputHelper)
     [Theory]
     [InlineData(JsonImplementation.SystemTextJson)]
     [InlineData(JsonImplementation.NewtonsoftJson)]
-    public async Task TestErrorAsyncWithOldTaskConverter(JsonImplementation jsonImplementation)
-    {
-        // arrange
-        ExpectGetAllReviewsAndReturnError();
-
-        var reviewSvc = CreateRestClientBuilder(jsonImplementation)
-            .Accept("application/json")
-            .ContentType("application/json")
-            .With(new TaskConverterFactory())
-            .With(_loggerFactory.CreateLogger<RestClientTests>())
-            .With(_mockHttp.ToHttpClient())
-            .BaseUri(BaseUri)
-            .Build<IMovieReviewService>();
-
-        // act
-        var aggregateException =
-            await Assert.ThrowsAsync<AggregateException>(() => reviewSvc.GetAllReviews(MovieId));
-
-        // assert
-        _mockHttp.VerifyNoOutstandingExpectation();
-
-        Assert.IsType<RestClientException>(aggregateException.InnerException);
-        var exception = (RestClientException)aggregateException.InnerException!;
-
-        Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
-        var error = exception.GetErrorResponse<ErrorResponse>();
-        Assert.Equal(34, error.Errors[0].Code);
-        Assert.Equal("Sorry, that page does not exist", error.Errors[0].Message);
-    }
-
-    [Theory]
-    [InlineData(JsonImplementation.SystemTextJson)]
-    [InlineData(JsonImplementation.NewtonsoftJson)]
     public async Task TestErrorAsync(JsonImplementation jsonImplementation)
     {
         // arrange
@@ -145,6 +112,7 @@ public class RestClientTests(ITestOutputHelper outputHelper)
 
         Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
         var error = exception.GetErrorResponse<ErrorResponse>();
+        Assert.NotNull(error);
         Assert.Equal(34, error.Errors[0].Code);
         Assert.Equal("Sorry, that page does not exist", error.Errors[0].Message);
     }
@@ -198,6 +166,7 @@ public class RestClientTests(ITestOutputHelper outputHelper)
         Assert.Equal("Sorry, that page does not exist", message);
 
         var error = exception.GetErrorResponse<ErrorResponse>();
+        Assert.NotNull(error);
         Assert.Equal(34, error.Errors[0].Code);
         Assert.Equal("Sorry, that page does not exist", error.Errors[0].Message);
     }

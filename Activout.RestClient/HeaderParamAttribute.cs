@@ -7,7 +7,7 @@ namespace Activout.RestClient
     {
         public bool Replace { get; }
 
-        public HeaderParamAttribute(string name = null, bool replace = true) : base(name)
+        public HeaderParamAttribute(string? name = null, bool replace = true) : base(name)
         {
             Replace = replace;
         }

@@ -8,7 +8,7 @@ namespace Activout.RestClient.Serialization.Implementation
     {
         public int Order { get; set; } = 1000;
 
-        public async Task<object> Deserialize(HttpContent content, Type type)
+        public async Task<object?> Deserialize(HttpContent content, Type type)
         {
             var stringData = await content.ReadAsStringAsync();
             return type == typeof(string)

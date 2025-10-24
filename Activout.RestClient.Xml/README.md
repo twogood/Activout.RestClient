@@ -9,7 +9,7 @@ It provides support for XML serialization and deserialization.
 ### Add XML support from this package
 
 ```C#
-var restClientFactory = Services.CreateRestClientFactory();
+var restClientFactory = new RestClientFactory();
 var xmlClient = restClientFactory
     .CreateBuilder()
     .WithXml()  // Add XML support

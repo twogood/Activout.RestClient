@@ -19,7 +19,7 @@ namespace Activout.RestClient.ParamConverter.Implementation
             return type == typeof(DateTime);
         }
 
-        public string ToString(object value)
+        public string ToString(object? value)
         {
             return value == null ? "" : ((DateTime)value).ToUnixTime().ToString();
         }

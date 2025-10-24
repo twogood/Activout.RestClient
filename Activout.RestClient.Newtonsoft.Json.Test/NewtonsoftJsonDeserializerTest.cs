@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using Activout.RestClient.Newtonsoft.Json;
 using Activout.RestClient.Serialization.Implementation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -15,7 +14,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
     [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
     public class Data
     {
-        public string Value { get; set; }
+        public string? Value { get; init; }
     }
 
     public interface IClient
@@ -27,7 +26,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
     {
         public NewtonsoftJsonDeserializerTest()
         {
-            _restClientFactory = Services.CreateRestClientFactory();
+            _restClientFactory = new RestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
         }
 
