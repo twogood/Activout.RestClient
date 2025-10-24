@@ -2,31 +2,30 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Activout.RestClient.ParamConverter.Implementation
+namespace Activout.RestClient.ParamConverter.Implementation;
+
+public class ParamConverterManager : IParamConverterManager
 {
-    public class ParamConverterManager : IParamConverterManager
+    public static IParamConverterManager Instance { get; } = new ParamConverterManager();
+
+    public List<IParamConverter> ParamConverters { get; }
+
+    public ParamConverterManager()
     {
-        public static IParamConverterManager Instance { get; } = new ParamConverterManager();
+        ParamConverters = new List<IParamConverter>
+            { new DateTimeIso8601ParamConverter(), new ToStringParamConverter() };
+    }
 
-        public List<IParamConverter> ParamConverters { get; }
-
-        public ParamConverterManager()
+    public IParamConverter? GetConverter(Type type, ParameterInfo parameterInfo)
+    {
+        foreach (var paramConverter in ParamConverters)
         {
-            ParamConverters = new List<IParamConverter>
-                { new DateTimeIso8601ParamConverter(), new ToStringParamConverter() };
-        }
-
-        public IParamConverter? GetConverter(Type type, ParameterInfo parameterInfo)
-        {
-            foreach (var paramConverter in ParamConverters)
+            if (paramConverter.CanConvert(type, parameterInfo))
             {
-                if (paramConverter.CanConvert(type, parameterInfo))
-                {
-                    return paramConverter;
-                }
+                return paramConverter;
             }
-
-            return null;
         }
+
+        return null;
     }
 }
