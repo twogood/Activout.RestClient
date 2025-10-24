@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Net;
 using System.Net.Http;
@@ -22,9 +21,9 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
 
     public class Stuff
     {
-        public MySimpleValueObject FooBar { get; set; }
+        public MySimpleValueObject? FooBar { get; init; }
 
-        public int? NullableInteger { get; set; }
+        public int? NullableInteger { get; init; }
     }
 
     public interface IValueObjectClient
@@ -37,16 +36,10 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
 
     public class SimpleValueObjectTest
     {
-        public SimpleValueObjectTest()
-        {
-            _restClientFactory = Services.CreateRestClientFactory();
-            _mockHttp = new MockHttpMessageHandler();
-        }
-
         private const string BaseUri = "https://example.com/api/";
 
-        private readonly IRestClientFactory _restClientFactory;
-        private readonly MockHttpMessageHandler _mockHttp;
+        private readonly IRestClientFactory _restClientFactory = Services.CreateRestClientFactory();
+        private readonly MockHttpMessageHandler _mockHttp = new();
 
         [Fact]
         public async Task TestSimpleValueObjectSerialization()
@@ -97,7 +90,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
 
             // Assert
             _mockHttp.VerifyNoOutstandingExpectation();
-            Assert.Equal("foobar", result.FooBar.Value);
+            Assert.Equal("foobar", result.FooBar?.Value);
         }
 
         [Fact]
@@ -108,7 +101,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
                 .Expect(BaseUri)
                 .Respond(new StringContent(JsonConvert.SerializeObject(new
                 {
-                    FooBar = (string)null,
+                    FooBar = (string?)null,
                     NullableInteger = (int?)null
                 }),
                     Encoding.UTF8,

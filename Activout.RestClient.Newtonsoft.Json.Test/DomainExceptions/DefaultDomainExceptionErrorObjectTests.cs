@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Net;
 using System.Net.Http;
@@ -24,7 +23,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
     {
         public MyDomainErrorEnum Error { get; }
 
-        public SomeDomainErrorObjectException(MyDomainErrorEnum error, Exception innerException = null) : base(
+        public SomeDomainErrorObjectException(MyDomainErrorEnum error, Exception? innerException = null) : base(
             error.ToString(), innerException)
         {
             Error = error;

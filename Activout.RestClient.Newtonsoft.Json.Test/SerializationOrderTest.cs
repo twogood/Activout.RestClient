@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Net.Http;
 using System.Text;
@@ -53,7 +52,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
 
         public class SerializationOrderModel
         {
-            public string MyValue { get; set; }
+            public string? MyValue { get; init; }
         }
 
         public interface ISerializationOrderClient
