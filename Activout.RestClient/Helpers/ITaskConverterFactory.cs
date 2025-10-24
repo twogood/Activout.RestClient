@@ -1,10 +1,8 @@
-#nullable disable
 using System;
 
-namespace Activout.RestClient.Helpers
+namespace Activout.RestClient.Helpers;
+
+public interface ITaskConverterFactory
 {
-    public interface ITaskConverterFactory
-    {
-        ITaskConverter CreateTaskConverter(Type actualReturnType);
-    }
+    ITaskConverter? CreateTaskConverter(Type actualReturnType);
 }
