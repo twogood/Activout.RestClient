@@ -4,7 +4,9 @@ using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using System.Net;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Activout.RestClient.Test.Json;
 
@@ -24,11 +26,12 @@ public interface IValueObjectClient
     Task SetData(ApiData wrapper);
 }
 
-public class SimpleValueObjectTest
+public class SimpleValueObjectTest(ITestOutputHelper outputHelper)
 {
     private const string BaseUri = "https://example.com/api/";
 
-    private readonly IRestClientFactory _restClientFactory = new RestClientFactory();
+    private readonly RestClientFactory _restClientFactory = new RestClientFactory();
+    private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
     private readonly MockHttpMessageHandler _mockHttp = new();
 
     [Theory]
@@ -119,6 +122,7 @@ public class SimpleValueObjectTest
     {
         var builder = _restClientFactory.CreateBuilder()
             .With(_mockHttp.ToHttpClient())
+            .With(_loggerFactory.CreateLogger<SimpleValueObjectTest>())
             .BaseUri(new Uri(BaseUri));
 
         return jsonImplementation switch

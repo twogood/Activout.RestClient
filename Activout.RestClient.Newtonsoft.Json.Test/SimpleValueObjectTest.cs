@@ -36,16 +36,10 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
 
     public class SimpleValueObjectTest
     {
-        public SimpleValueObjectTest()
-        {
-            _restClientFactory = new RestClientFactory();
-            _mockHttp = new MockHttpMessageHandler();
-        }
-
         private const string BaseUri = "https://example.com/api/";
 
-        private readonly IRestClientFactory _restClientFactory;
-        private readonly MockHttpMessageHandler _mockHttp;
+        private readonly IRestClientFactory _restClientFactory = new RestClientFactory();
+        private readonly MockHttpMessageHandler _mockHttp = new();
 
         [Fact]
         public async Task TestSimpleValueObjectSerialization()

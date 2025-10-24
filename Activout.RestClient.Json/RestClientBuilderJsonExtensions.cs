@@ -21,6 +21,8 @@ public static class RestClientBuilderJsonExtensions
         // Register the serializer and deserializer
         builder.With(new SystemTextJsonSerializer(jsonSerializerOptions, supportedMediaTypes));
         builder.With(new SystemTextJsonDeserializer(jsonSerializerOptions, supportedMediaTypes));
+        builder.Accept(string.Join(", ", SystemTextJsonDefaults.MediaTypes.Select(type => type.Value)));
+        builder.ContentType("application/json");
 
         return builder;
     }

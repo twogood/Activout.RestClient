@@ -21,7 +21,7 @@ public class SystemTextJsonDeserializerTest
 {
     private const string BaseUri = "https://example.com/api/";
 
-    private readonly IRestClientFactory _restClientFactory = new RestClientFactory();
+    private readonly RestClientFactory _restClientFactory = new RestClientFactory();
     private readonly MockHttpMessageHandler _mockHttp = new();
 
     [Fact]

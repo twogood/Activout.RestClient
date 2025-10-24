@@ -82,8 +82,8 @@ namespace Activout.RestClient.Test
                 MyString = "foobar"
             }, new[]
             {
-                new Part(Content: "foo", Name: "foo", FileName: "foo.txt"),
-                new Part(Content: "bar", Name: "bar", FileName: "bar.txt")
+                new Part(Content: "foo", Name: null, FileName: "foo.txt"),
+                new Part(Content: "bar", Name: null, FileName: "bar.txt")
             });
 
             // Assert

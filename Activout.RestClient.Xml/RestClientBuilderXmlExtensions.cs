@@ -1,3 +1,5 @@
+using static Activout.RestClient.Xml.XmlHelper;
+
 namespace Activout.RestClient.Xml;
 
 public static class RestClientBuilderXmlExtensions
@@ -7,7 +9,7 @@ public static class RestClientBuilderXmlExtensions
         return builder
             .With(new XmlSerializer())
             .With(new XmlDeserializer())
-            .Accept(string.Join(", ", XmlHelper.SupportedMediaTypes.Select(type => type.Value)))
-            .ContentType("application/xml");
+            .Accept(string.Join(", ", SupportedMediaTypes.Select(type => type.Value)))
+            .ContentType(SupportedMediaTypes.First());
     }
 }

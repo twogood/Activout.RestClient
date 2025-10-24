@@ -32,7 +32,7 @@ public class RestClientTests(ITestOutputHelper outputHelper)
     private const string MovieId = "*MOVIE_ID*";
     private const string ReviewId = "*REVIEW_ID*";
 
-    private readonly IRestClientFactory _restClientFactory = new RestClientFactory();
+    private readonly RestClientFactory _restClientFactory = new RestClientFactory();
     private readonly MockHttpMessageHandler _mockHttp = new();
     private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
 

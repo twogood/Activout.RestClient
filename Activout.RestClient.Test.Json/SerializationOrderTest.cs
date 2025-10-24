@@ -16,7 +16,7 @@ public class SerializationOrderTest
     private const int OrderFirst = -1000;
     private const int OrderLast = 1000;
 
-    private readonly IRestClientFactory _restClientFactory = new RestClientFactory();
+    private readonly RestClientFactory _restClientFactory = new RestClientFactory();
     private readonly MockHttpMessageHandler _mockHttp = new();
 
     [Theory]
