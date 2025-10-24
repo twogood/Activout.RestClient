@@ -4,8 +4,5 @@ namespace Activout.RestClient;
 
 public class RestClientFactory : IRestClientFactory
 {
-    public IRestClientBuilder CreateBuilder()
-    {
-        return new RestClientBuilder();
-    }
+    public IRestClientBuilder CreateBuilder() => new RestClientBuilder();
 }
