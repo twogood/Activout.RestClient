@@ -1,54 +1,20 @@
-#nullable disable
 using System;
 using System.Net.Http;
 
-namespace Activout.RestClient
+namespace Activout.RestClient;
+
+[AttributeUsage(AttributeTargets.Method)]
+public abstract class HttpMethodAttribute(HttpMethod httpMethod, string? template) : TemplateAttribute(template)
 {
-    [AttributeUsage(AttributeTargets.Method)]
-    public abstract class HttpMethodAttribute : TemplateAttribute
-    {
-        public HttpMethod HttpMethod { get; }
-
-        protected HttpMethodAttribute(HttpMethod httpMethod, string template) : base(template)
-        {
-            HttpMethod = httpMethod;
-        }
-    }
-
-    public class DeleteAttribute : HttpMethodAttribute
-    {
-        public DeleteAttribute(string template = null) : base(HttpMethod.Delete, template)
-        {
-        }
-    }
-
-    public class GetAttribute : HttpMethodAttribute
-    {
-        public GetAttribute(string template = null) : base(HttpMethod.Get, template)
-        {
-        }
-    }
-
-
-    public class PostAttribute : HttpMethodAttribute
-    {
-        public PostAttribute(string template = null) : base(HttpMethod.Post, template)
-        {
-        }
-    }
-
-
-    public class PutAttribute : HttpMethodAttribute
-    {
-        public PutAttribute(string template = null) : base(HttpMethod.Put, template)
-        {
-        }
-    }
-
-    public class PatchAttribute : HttpMethodAttribute
-    {
-        public PatchAttribute(string template = null) : base(HttpMethod.Patch, template)
-        {
-        }
-    }
+    public HttpMethod HttpMethod { get; } = httpMethod;
 }
+
+public class DeleteAttribute(string? template = null) : HttpMethodAttribute(HttpMethod.Delete, template);
+
+public class GetAttribute(string? template = null) : HttpMethodAttribute(HttpMethod.Get, template);
+
+public class PostAttribute(string? template = null) : HttpMethodAttribute(HttpMethod.Post, template);
+
+public class PutAttribute(string? template = null) : HttpMethodAttribute(HttpMethod.Put, template);
+
+public class PatchAttribute(string? template = null) : HttpMethodAttribute(HttpMethod.Patch, template);

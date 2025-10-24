@@ -1,10 +1,3 @@
-#nullable disable
-namespace Activout.RestClient
-{
-    public class PathParamAttribute : NamedParamAttribute
-    {
-        public PathParamAttribute(string name = null) : base(name)
-        {
-        }
-    }
-}
+﻿namespace Activout.RestClient;
+
+public class PathParamAttribute(string? name = null) : NamedParamAttribute(name);
