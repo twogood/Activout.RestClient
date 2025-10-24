@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Net.Http;
 using System.Text;
@@ -21,7 +20,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
 
         public SerializationOrderTest()
         {
-            _restClientFactory = new RestClientFactory();
+            _restClientFactory = Services.CreateRestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
         }
 

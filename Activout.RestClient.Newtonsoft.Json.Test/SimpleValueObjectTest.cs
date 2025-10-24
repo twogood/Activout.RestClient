@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Net;
 using System.Net.Http;
@@ -39,7 +38,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
     {
         private const string BaseUri = "https://example.com/api/";
 
-        private readonly IRestClientFactory _restClientFactory = new RestClientFactory();
+        private readonly IRestClientFactory _restClientFactory = Services.CreateRestClientFactory();
         private readonly MockHttpMessageHandler _mockHttp = new();
 
         [Fact]

@@ -1,4 +1,3 @@
-#nullable disable
 namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
 {
     public class MyApiErrorResponse
