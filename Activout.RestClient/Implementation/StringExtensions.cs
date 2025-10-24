@@ -1,4 +1,3 @@
-#nullable disable
 namespace Activout.RestClient.Implementation
 {
     public static class StringExtensions
