@@ -23,7 +23,7 @@ namespace Activout.RestClient.Implementation
         private const string DefaultHttpContentType = "application/octet-stream";
 
         // https://tools.ietf.org/html/rfc7578#section-4.4
-        private static readonly MediaType DefaultPartContentType = MediaType.ValueOf("text/plain");
+        private static readonly MediaType DefaultPartContentType = new MediaType("text/plain");
 
         private readonly Type _actualReturnType;
         private readonly int _bodyArgumentIndex = -1;

@@ -11,7 +11,7 @@ namespace Activout.RestClient.Serialization.Implementation
     {
         public IReadOnlyCollection<MediaType> SupportedMediaTypes => new[]
         {
-            MediaType.ValueOf("application/x-www-form-urlencoded")
+            new MediaType("application/x-www-form-urlencoded")
         };
 
         public int Order { get; set; }

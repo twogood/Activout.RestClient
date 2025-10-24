@@ -17,7 +17,7 @@ namespace Activout.RestClient.Implementation
     {
         private static readonly Collection<MediaType> JsonMediaTypeCollection = new Collection<MediaType>
         {
-            MediaType.ValueOf("application/json")
+            new MediaType("application/json")
         };
 
         public RestClientContext()
