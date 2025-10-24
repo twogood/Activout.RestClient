@@ -17,7 +17,7 @@ namespace Activout.RestClient.Newtonsoft.Json
 
         public int Order { get; set; }
 
-        public HttpContent Serialize(object data, Encoding encoding, MediaType mediaType)
+        public HttpContent Serialize(object? data, Encoding encoding, MediaType mediaType)
         {
             return new StringContent(
                 JsonConvert.SerializeObject(data, _jsonSerializerSettings),

@@ -6,7 +6,7 @@ public class XmlDeserializer : IDeserializer
 {
     public int Order { get; set; } = 0;
 
-    public async Task<object> Deserialize(HttpContent content, Type type)
+    public async Task<object?> Deserialize(HttpContent content, Type type)
     {
         var serializer = new System.Xml.Serialization.XmlSerializer(type);
         await using var stream = await content.ReadAsStreamAsync();
