@@ -1,3 +1,4 @@
+#nullable disable
 using System.Net;
 using Activout.RestClient.DomainExceptions;
 

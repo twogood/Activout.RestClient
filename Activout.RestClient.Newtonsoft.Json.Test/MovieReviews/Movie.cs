@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+#nullable disable
+using System.Diagnostics.CodeAnalysis;
 
 namespace Activout.RestClient.Newtonsoft.Json.Test.MovieReviews
 {
