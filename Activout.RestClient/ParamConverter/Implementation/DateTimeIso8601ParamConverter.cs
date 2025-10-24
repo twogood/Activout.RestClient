@@ -1,4 +1,5 @@
-﻿using System;
+#nullable disable
+using System;
 using System.Reflection;
 
 namespace Activout.RestClient.ParamConverter.Implementation

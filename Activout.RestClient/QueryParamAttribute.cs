@@ -1,4 +1,5 @@
-﻿namespace Activout.RestClient
+#nullable disable
+namespace Activout.RestClient
 {
     public class QueryParamAttribute : NamedParamAttribute
     {

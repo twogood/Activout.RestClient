@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+#nullable disable
+using System.Net.Http;
 using System.Text;
 
 namespace Activout.RestClient.Serialization.Implementation

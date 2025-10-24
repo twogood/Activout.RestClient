@@ -1,4 +1,5 @@
-﻿namespace Activout.RestClient.Serialization
+#nullable disable
+namespace Activout.RestClient.Serialization
 {
     public interface ISerializationManager
     {
