@@ -1,4 +1,5 @@
-﻿using System;
+#nullable disable
+using System;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
