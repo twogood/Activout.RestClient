@@ -5,7 +5,9 @@ using System.Linq;
 using System.Net.Http;
 using Activout.RestClient.DomainExceptions;
 using Activout.RestClient.Helpers;
+using Activout.RestClient.Helpers.Implementation;
 using Activout.RestClient.ParamConverter;
+using Activout.RestClient.ParamConverter.Implementation;
 using Activout.RestClient.Serialization;
 using Activout.RestClient.Serialization.Implementation;
 using Microsoft.Extensions.Logging;
@@ -14,27 +16,15 @@ namespace Activout.RestClient.Implementation
 {
     internal class RestClientBuilder : IRestClientBuilder
     {
-        private readonly IDuckTyping _duckTyping;
-        private readonly RestClientContext _context;
+        private IDuckTyping _duckTyping = DuckTyping.Instance;
+
+        private readonly RestClientContext _context = new RestClientContext()
+        {
+            ParamConverterManager = ParamConverterManager.Instance,
+            TaskConverterFactory = TaskConverter3Factory.Instance
+        };
         private readonly List<ISerializer> _serializers = SerializationManager.DefaultSerializers.ToList();
         private readonly List<IDeserializer> _deserializers = SerializationManager.DefaultDeserializers.ToList();
-
-        public RestClientBuilder(
-            IDuckTyping duckTyping,
-            IParamConverterManager paramConverterManager,
-            ITaskConverterFactory taskConverterFactory)
-        {
-            _duckTyping = duckTyping ?? throw new ArgumentNullException(nameof(duckTyping));
-
-            _context = new RestClientContext
-            {
-                TaskConverterFactory = taskConverterFactory ??
-                                       throw new ArgumentNullException(nameof(taskConverterFactory)),
-                ParamConverterManager = paramConverterManager ??
-                                        throw new ArgumentNullException(nameof(paramConverterManager))
-            };
-        }
-
 
         public IRestClientBuilder BaseUri(Uri apiUri)
         {
@@ -51,6 +41,12 @@ namespace Activout.RestClient.Implementation
         public IRestClientBuilder Header(string name, object value)
         {
             _context.DefaultHeaders.Add(new KeyValuePair<string, object>(name, value));
+            return this;
+        }
+
+        public IRestClientBuilder With(IDuckTyping duckTyping)
+        {
+            _duckTyping = duckTyping;
             return this;
         }
 

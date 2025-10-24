@@ -1,11 +1,9 @@
-#nullable disable
 using System;
 using System.Reflection;
 
-namespace Activout.RestClient.ParamConverter
+namespace Activout.RestClient.ParamConverter;
+
+public interface IParamConverterManager
 {
-    public interface IParamConverterManager
-    {
-        IParamConverter GetConverter(Type type, ParameterInfo parameterInfo);
-    }
+    IParamConverter? GetConverter(Type type, ParameterInfo parameterInfo);
 }

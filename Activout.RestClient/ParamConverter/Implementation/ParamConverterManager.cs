@@ -1,31 +1,31 @@
-#nullable disable
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Reflection;
 
-namespace Activout.RestClient.ParamConverter.Implementation
+namespace Activout.RestClient.ParamConverter.Implementation;
+
+public class ParamConverterManager : IParamConverterManager
 {
-    public class ParamConverterManager : IParamConverterManager
+    public static IParamConverterManager Instance { get; } = new ParamConverterManager();
+
+    public List<IParamConverter> ParamConverters { get; }
+
+    public ParamConverterManager()
     {
-        public List<IParamConverter> ParamConverters { get; }
+        ParamConverters = new List<IParamConverter>
+            { new DateTimeIso8601ParamConverter(), new ToStringParamConverter() };
+    }
 
-        public ParamConverterManager()
+    public IParamConverter? GetConverter(Type type, ParameterInfo parameterInfo)
+    {
+        foreach (var paramConverter in ParamConverters)
         {
-            ParamConverters = new List<IParamConverter> { new DateTimeIso8601ParamConverter(), new ToStringParamConverter() };
-        }
-
-        public IParamConverter GetConverter(Type type, ParameterInfo parameterInfo)
-        {
-            foreach (var paramConverter in ParamConverters)
+            if (paramConverter.CanConvert(type, parameterInfo))
             {
-                if (paramConverter.CanConvert(type, parameterInfo))
-                {
-                    return paramConverter;
-                }
+                return paramConverter;
             }
-
-            return null;
         }
+
+        return null;
     }
 }
