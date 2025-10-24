@@ -1,4 +1,3 @@
-#nullable disable
 namespace Activout.RestClient
 {
     public class AcceptAttribute : HeaderAttribute
