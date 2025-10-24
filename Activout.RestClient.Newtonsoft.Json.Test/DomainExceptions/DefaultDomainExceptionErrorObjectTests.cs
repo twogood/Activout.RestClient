@@ -41,7 +41,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
         {
             _mockHttp = new MockHttpMessageHandler();
 
-            _defaultMapperApiClient = Services.CreateRestClientFactory()
+            _defaultMapperApiClient = new RestClientFactory()
                 .CreateBuilder()
                 .WithNewtonsoftJson()
                 .With(_mockHttp.ToHttpClient())

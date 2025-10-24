@@ -18,7 +18,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
     {
         public RestClientTests(ITestOutputHelper outputHelper)
         {
-            _restClientFactory = Services.CreateRestClientFactory();
+            _restClientFactory = new RestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
             _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
         }

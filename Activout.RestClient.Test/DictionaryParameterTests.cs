@@ -14,7 +14,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
 {
     private const string BaseUri = "https://example.com/api";
     
-    private readonly IRestClientFactory _restClientFactory = Services.CreateRestClientFactory();
+    private readonly IRestClientFactory _restClientFactory = new RestClientFactory();
     private readonly MockHttpMessageHandler _mockHttp = new MockHttpMessageHandler();
     private readonly ILoggerFactory _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
 

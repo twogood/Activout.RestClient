@@ -20,7 +20,7 @@ namespace Activout.RestClient.Test
 
         public MultipartFormDataContentTest(ITestOutputHelper outputHelper)
         {
-            _restClientFactory = Services.CreateRestClientFactory();
+            _restClientFactory = new RestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
             _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
         }

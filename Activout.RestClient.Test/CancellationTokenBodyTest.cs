@@ -37,7 +37,7 @@ public class CancellationTokenBodyTest
 
     public CancellationTokenBodyTest()
     {
-        _restClientFactory = Services.CreateRestClientFactory();
+        _restClientFactory = new RestClientFactory();
         _mockHttp = new MockHttpMessageHandler();
     }
 
