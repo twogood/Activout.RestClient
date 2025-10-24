@@ -1,9 +1,8 @@
-#nullable disable
-namespace Activout.RestClient.Serialization
+﻿namespace Activout.RestClient.Serialization
 {
     public interface ISerializationManager
     {
-        ISerializer GetSerializer(MediaType mediaType);
-        IDeserializer GetDeserializer(MediaType mediaType);
+        ISerializer? GetSerializer(MediaType mediaType);
+        IDeserializer? GetDeserializer(MediaType mediaType);
     }
 }
