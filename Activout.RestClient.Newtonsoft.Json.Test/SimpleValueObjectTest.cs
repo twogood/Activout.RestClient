@@ -22,9 +22,9 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
 
     public class Stuff
     {
-        public MySimpleValueObject FooBar { get; set; }
+        public MySimpleValueObject? FooBar { get; init; }
 
-        public int? NullableInteger { get; set; }
+        public int? NullableInteger { get; init; }
     }
 
     public interface IValueObjectClient
@@ -39,7 +39,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
     {
         public SimpleValueObjectTest()
         {
-            _restClientFactory = Services.CreateRestClientFactory();
+            _restClientFactory = new RestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
         }
 
@@ -97,7 +97,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
 
             // Assert
             _mockHttp.VerifyNoOutstandingExpectation();
-            Assert.Equal("foobar", result.FooBar.Value);
+            Assert.Equal("foobar", result.FooBar?.Value);
         }
 
         [Fact]
@@ -108,7 +108,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
                 .Expect(BaseUri)
                 .Respond(new StringContent(JsonConvert.SerializeObject(new
                 {
-                    FooBar = (string)null,
+                    FooBar = (string?)null,
                     NullableInteger = (int?)null
                 }),
                     Encoding.UTF8,
