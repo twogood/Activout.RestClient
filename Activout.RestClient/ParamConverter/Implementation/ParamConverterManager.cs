@@ -6,7 +6,7 @@ namespace Activout.RestClient.ParamConverter.Implementation
 {
     public class ParamConverterManager : IParamConverterManager
     {
-        public static ParamConverterManager Instance { get; } = new();
+        public static IParamConverterManager Instance { get; } = new ParamConverterManager();
 
         public List<IParamConverter> ParamConverters { get; }
 
