@@ -5,12 +5,12 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.MovieReviews
 {
     public class ErrorResponse
     {
-        public List<Error> Errors { get; set; }
+        public List<Error> Errors { get; init; } = [];
 
         public class Error
         {
-            public string Message { get; set; }
-            public int Code { get; set; }
+            public string? Message { get; init; }
+            public int Code { get; init; }
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
 
         public SerializationOrderTest()
         {
-            _restClientFactory = Services.CreateRestClientFactory();
+            _restClientFactory = new RestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
         }
 
@@ -53,7 +53,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
 
         public class SerializationOrderModel
         {
-            public string MyValue { get; set; }
+            public string? MyValue { get; init; }
         }
 
         public interface ISerializationOrderClient

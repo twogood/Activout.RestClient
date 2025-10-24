@@ -26,7 +26,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
     {
         public MyDomainErrorObject Error { get; }
 
-        public MyDomainErrorObjectException(MyDomainErrorObject error, Exception innerException = null) : base(
+        public MyDomainErrorObjectException(MyDomainErrorObject error, Exception? innerException = null) : base(
             error.ToString(), innerException)
         {
             Error = error;
@@ -42,8 +42,8 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
 
     internal class MyDomainExceptionObjectMapper : AbstractDomainExceptionMapper
     {
-        protected override Exception CreateException(HttpResponseMessage httpResponseMessage, object data,
-            Exception innerException)
+        protected override Exception CreateException(HttpResponseMessage httpResponseMessage, object? data,
+            Exception? innerException)
         {
             var domainError = data is MyApiErrorResponse errorResponse && errorResponse.Code == MyApiError.Bar
                 ? new MyDomainErrorObject(MyDomainErrorEnum.DomainBar)
@@ -77,7 +77,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
         {
             _mockHttp = new MockHttpMessageHandler();
 
-            _myApiClient = Services.CreateRestClientFactory()
+            _myApiClient = new RestClientFactory()
                 .CreateBuilder()
                 .WithNewtonsoftJson()
                 .With(_mockHttp.ToHttpClient())

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Activout.RestClient.Helpers.Implementation;
 using Activout.RestClient.Newtonsoft.Json.Test.MovieReviews;
@@ -20,7 +19,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
     {
         public RestClientTests(ITestOutputHelper outputHelper)
         {
-            _restClientFactory = Services.CreateRestClientFactory();
+            _restClientFactory = new RestClientFactory();
             _mockHttp = new MockHttpMessageHandler();
             _loggerFactory = LoggerFactoryHelpers.CreateLoggerFactory(outputHelper);
         }
@@ -51,32 +50,6 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
         }
 
         [Fact]
-        public async Task TestErrorAsyncWithOldTaskConverter()
-        {
-            // arrange
-            ExpectGetAllReviewsAndReturnError();
-
-            var reviewSvc = CreateRestClientBuilder()
-                .With(new TaskConverterFactory())
-                .Build<IMovieReviewService>();
-
-            // act
-            var aggregateException =
-                await Assert.ThrowsAsync<AggregateException>(() => reviewSvc.GetAllReviews(MovieId));
-
-            // assert
-            _mockHttp.VerifyNoOutstandingExpectation();
-
-            Assert.IsType<RestClientException>(aggregateException.InnerException);
-            var exception = (RestClientException)aggregateException.InnerException;
-
-            Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
-            var error = exception.GetErrorResponse<ErrorResponse>();
-            Assert.Equal(34, error.Errors[0].Code);
-            Assert.Equal("Sorry, that page does not exist", error.Errors[0].Message);
-        }
-
-        [Fact]
         public async Task TestErrorAsync()
         {
             // arrange
@@ -93,6 +66,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
 
             Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
             var error = exception.GetErrorResponse<ErrorResponse>();
+            Assert.NotNull(error);
             Assert.Equal(34, error.Errors[0].Code);
             Assert.Equal("Sorry, that page does not exist", error.Errors[0].Message);
         }
@@ -101,7 +75,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
         {
             _mockHttp
                 .Expect(HttpMethod.Get, $"{BaseUri}/movies/{movieId}/reviews")
-                .Respond(HttpStatusCode.NotFound, request => new StringContent(JsonConvert.SerializeObject(new
+                .Respond(HttpStatusCode.NotFound, _ => new StringContent(JsonConvert.SerializeObject(new
                 {
                     Errors = new object[]
                         {
@@ -137,6 +111,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
             var exception = (RestClientException)aggregateException.GetBaseException();
             Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
 
+            Assert.NotNull(exception.ErrorResponse);
             dynamic dynamicError = exception.ErrorResponse;
             string message = dynamicError.Errors[0].Message;
             int code = dynamicError.Errors[0].Code;
@@ -144,6 +119,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
             Assert.Equal("Sorry, that page does not exist", message);
 
             var error = exception.GetErrorResponse<ErrorResponse>();
+            Assert.NotNull(error);
             Assert.Equal(34, error.Errors[0].Code);
             Assert.Equal("Sorry, that page does not exist", error.Errors[0].Message);
         }
@@ -222,7 +198,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
             var reviewId = "*REVIEW_ID*";
             _mockHttp
                 .When(HttpMethod.Put, $"{BaseUri}/movies/{movieId}/reviews/{reviewId}")
-                .Respond(request => request.Content);
+                .Respond(request => request.Content!);
 
             var reviewSvc = CreateMovieReviewService();
 
@@ -251,7 +227,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
             var reviewId = "*REVIEW_ID*";
             _mockHttp
                 .When(HttpMethod.Patch, $"{BaseUri}/movies/{movieId}/reviews/{reviewId}")
-                .Respond(request => request.Content);
+                .Respond(request => request.Content!);
 
             var reviewSvc = CreateMovieReviewService();
 
