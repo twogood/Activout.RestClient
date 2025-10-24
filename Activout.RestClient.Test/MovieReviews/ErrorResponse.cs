@@ -1,15 +1,14 @@
-#nullable disable
 using System.Collections.Generic;
 
 namespace Activout.RestClient.Test.MovieReviews;
 
 public class ErrorResponse
 {
-    public List<Error> Errors { get; set; }
+    public List<Error> Errors { get; set; } = new List<Error>();
 
     public class Error
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
         public int Code { get; set; }
     }
 }

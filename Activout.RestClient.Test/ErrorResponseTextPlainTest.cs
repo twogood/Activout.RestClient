@@ -1,4 +1,3 @@
-#nullable disable
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -74,7 +73,7 @@ public class ErrorResponseTextPlainTest(ITestOutputHelper outputHelper)
         Assert.NotNull(exception.ErrorResponse);
         Assert.IsType<CustomErrorMessage>(exception.ErrorResponse);
         var customError = exception.GetErrorResponse<CustomErrorMessage>();
-        Assert.Equal("Invalid request parameter", customError.Message);
+        Assert.Equal("Invalid request parameter", customError?.Message);
     }
 
     [Path("resource")]

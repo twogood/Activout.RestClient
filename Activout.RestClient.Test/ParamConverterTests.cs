@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Reflection;
 using Activout.RestClient.ParamConverter;
@@ -15,7 +14,7 @@ namespace Activout.RestClient.Test
             // Arrange
             var converter = new DateTimeIso8601ParamConverter();
             var methodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithDateTimeParam), BindingFlags.NonPublic | BindingFlags.Instance);
-            var parameterInfo = methodInfo.GetParameters()[0];
+            var parameterInfo = methodInfo!.GetParameters()[0];
             
             // Act & Assert
             Assert.True(converter.CanConvert(typeof(DateTime), parameterInfo));
@@ -27,7 +26,7 @@ namespace Activout.RestClient.Test
             // Arrange
             var converter = new DateTimeIso8601ParamConverter();
             var methodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithStringParam), BindingFlags.NonPublic | BindingFlags.Instance);
-            var parameterInfo = methodInfo.GetParameters()[0];
+            var parameterInfo = methodInfo!.GetParameters()[0];
             
             // Act & Assert
             Assert.False(converter.CanConvert(typeof(string), parameterInfo));
@@ -39,11 +38,11 @@ namespace Activout.RestClient.Test
             // Arrange
             var converter = new ToStringParamConverter();
             var stringMethodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithStringParam), BindingFlags.NonPublic | BindingFlags.Instance);
-            var stringParameterInfo = stringMethodInfo.GetParameters()[0];
+            var stringParameterInfo = stringMethodInfo!.GetParameters()[0];
             var intMethodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithIntParam), BindingFlags.NonPublic | BindingFlags.Instance);
-            var intParameterInfo = intMethodInfo.GetParameters()[0];
+            var intParameterInfo = intMethodInfo!.GetParameters()[0];
             var dateTimeMethodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithDateTimeParam), BindingFlags.NonPublic | BindingFlags.Instance);
-            var dateTimeParameterInfo = dateTimeMethodInfo.GetParameters()[0];
+            var dateTimeParameterInfo = dateTimeMethodInfo!.GetParameters()[0];
             
             // Act & Assert
             Assert.True(converter.CanConvert(typeof(string), stringParameterInfo));
@@ -57,7 +56,7 @@ namespace Activout.RestClient.Test
             // Arrange
             var manager = new ParamConverterManager();
             var methodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithDateTimeParam), BindingFlags.NonPublic | BindingFlags.Instance);
-            var parameterInfo = methodInfo.GetParameters()[0];
+            var parameterInfo = methodInfo!.GetParameters()[0];
             
             // Act
             var converter = manager.GetConverter(typeof(DateTime), parameterInfo);
@@ -73,7 +72,7 @@ namespace Activout.RestClient.Test
             // Arrange
             var manager = new ParamConverterManager();
             var methodInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithDateTimeParam), BindingFlags.NonPublic | BindingFlags.Instance);
-            var parameterInfo = methodInfo.GetParameters()[0];
+            var parameterInfo = methodInfo!.GetParameters()[0];
             
             // Act
             var converter = manager.GetConverter(typeof(DateTime), parameterInfo);
@@ -89,9 +88,9 @@ namespace Activout.RestClient.Test
             // Arrange
             var converter = new TestCustomParamConverter();
             var methodWithAttributeInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithCustomAttribute), BindingFlags.NonPublic | BindingFlags.Instance);
-            var parameterWithAttribute = methodWithAttributeInfo.GetParameters()[0];
+            var parameterWithAttribute = methodWithAttributeInfo!.GetParameters()[0];
             var methodWithoutAttributeInfo = typeof(ParamConverterTests).GetMethod(nameof(TestMethodWithStringParam), BindingFlags.NonPublic | BindingFlags.Instance);
-            var parameterWithoutAttribute = methodWithoutAttributeInfo.GetParameters()[0];
+            var parameterWithoutAttribute = methodWithoutAttributeInfo!.GetParameters()[0];
             
             // Act
             var canConvertWithAttribute = converter.CanConvert(typeof(string), parameterWithAttribute);
@@ -130,7 +129,7 @@ namespace Activout.RestClient.Test
                 return parameterInfo.GetCustomAttribute<TestAttribute>() != null;
             }
 
-            public string ToString(object value)
+            public string ToString(object? value)
             {
                 return value?.ToString() ?? "";
             }

@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,7 +31,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
     {
         // arrange
         var service = CreateRestClientBuilder().Build<ITestService>();
-        var queryParams = new Dictionary<string, string>
+        var queryParams = new Dictionary<string, string?>
         {
             ["param1"] = "value1",
             ["param2"] = "value2"
@@ -126,7 +125,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
     {
         // arrange
         var service = CreateRestClientBuilder().Build<ITestService>();
-        var emptyParams = new Dictionary<string, string>();
+        var emptyParams = new Dictionary<string, string?>();
 
         _mockHttp
             .When("https://example.com/api/test")
@@ -144,7 +143,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
     {
         // arrange
         var service = CreateRestClientBuilder().Build<ITestService>();
-        var paramsWithNull = new Dictionary<string, string>
+        var paramsWithNull = new Dictionary<string, string?>
         {
             ["param1"] = "value1",
             ["param2"] = null
@@ -312,7 +311,7 @@ public class DictionaryParameterTests(ITestOutputHelper outputHelper)
 public interface ITestService
 {
     [Get("test")]
-    Task TestQueryParamDictionary([QueryParam] Dictionary<string, string> queryParams);
+    Task TestQueryParamDictionary([QueryParam] Dictionary<string, string?> queryParams);
 
     [Post("test")]
     Task TestFormParamDictionary([FormParam] Dictionary<string, string> formParams);
