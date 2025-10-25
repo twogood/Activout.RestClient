@@ -1,8 +1,9 @@
-using System;
+﻿using System;
 
-namespace Activout.RestClient.Helpers;
-
-public interface ITaskConverterFactory
+namespace Activout.RestClient.Helpers
 {
-    ITaskConverter? CreateTaskConverter(Type actualReturnType);
+    public interface ITaskConverterFactory
+    {
+        ITaskConverter? CreateTaskConverter(Type actualReturnType);
+    }
 }
