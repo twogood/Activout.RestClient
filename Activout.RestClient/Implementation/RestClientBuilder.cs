@@ -91,6 +91,7 @@ internal class RestClientBuilder : IRestClientBuilder
             throw new InvalidOperationException(
                 "Cannot add custom deserializers when a custom SerializationManager has been set.");
         }
+
         _deserializers.Add(deserializer);
         return this;
     }
@@ -102,6 +103,7 @@ internal class RestClientBuilder : IRestClientBuilder
             throw new InvalidOperationException(
                 "Cannot add custom serializers when a custom SerializationManager has been set.");
         }
+
         _serializers.Add(serializer);
         return this;
     }
@@ -145,7 +147,9 @@ internal class RestClientBuilder : IRestClientBuilder
         _serializationManager ??= new SerializationManager(
             _serializers.Concat(SerializationManager.DefaultSerializers).ToList(),
             _deserializers.Concat(SerializationManager.DefaultDeserializers).ToList());
-        _defaultSerializer ??= _serializationManager.GetSerializer(_defaultContentType) ?? StringSerializer.Instance;
+        _defaultSerializer ??= _serializationManager.GetSerializer(_defaultContentType) ??
+                               throw new InvalidOperationException(
+                                   $"No serializer found for default content type {_defaultContentType}");
 
         var context = new RestClientContext(
             BaseUri: _baseUri ?? throw new InvalidOperationException("BaseUri is not set."),
@@ -193,6 +197,7 @@ internal class RestClientBuilder : IRestClientBuilder
                     {
                         _baseTemplate = pathAttribute.Template;
                     }
+
                     break;
             }
     }
