@@ -41,9 +41,9 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
             // Arrange
             _mockHttp.Expect(BaseUri)
                 .Respond(new StringContent(JsonConvert.SerializeObject(new
-                {
-                    Value = "PascalCase"
-                }),
+                    {
+                        Value = "PascalCase"
+                    }),
                     Encoding.UTF8,
                     "application/json"));
 
@@ -62,9 +62,9 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
         {
             _mockHttp.Expect(BaseUri)
                 .Respond(new StringContent(JsonConvert.SerializeObject(new
-                {
-                    value = "CamelCase"
-                }),
+                    {
+                        value = "CamelCase"
+                    }),
                     Encoding.UTF8,
                     "application/json"));
         }
@@ -91,20 +91,12 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
         }
 
         [Fact]
-        public void TestCamelCaseWithSerializationManager()
+        public void TestCamelCaseSerializerSettings()
         {
             // Arrange
             MockCamelCaseResponse();
 
-            var deserializers = SerializationManager.DefaultDeserializers.ToList();
-            deserializers.Add(new NewtonsoftJsonDeserializer(new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            }));
-            var serializationManager = new SerializationManager(deserializers: deserializers);
-
-            var client = CreateRestClientBuilder()
-                .With(serializationManager)
+            var client = CreateRestClientBuilder(NewtonsoftJsonDefaults.CamelCaseSerializerSettings)
                 .Build<IClient>();
 
             // Act
@@ -115,10 +107,10 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
             Assert.Equal("CamelCase", data.Value);
         }
 
-        private IRestClientBuilder CreateRestClientBuilder()
+        private IRestClientBuilder CreateRestClientBuilder(JsonSerializerSettings? jsonSerializerSettings = null)
         {
             return _restClientFactory.CreateBuilder()
-                .WithNewtonsoftJson()
+                .WithNewtonsoftJson(jsonSerializerSettings)
                 .With(_mockHttp.ToHttpClient())
                 .BaseUri(new Uri(BaseUri));
         }

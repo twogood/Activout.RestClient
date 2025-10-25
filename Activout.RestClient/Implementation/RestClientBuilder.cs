@@ -20,8 +20,13 @@ internal class RestClientBuilder : IRestClientBuilder
     private static readonly MediaType DefaultContentType = new MediaType("text/plain");
 
     private IDuckTyping _duckTyping = DuckTyping.Instance;
-    private readonly List<ISerializer> _serializers = SerializationManager.DefaultSerializers.ToList();
-    private readonly List<IDeserializer> _deserializers = SerializationManager.DefaultDeserializers.ToList();
+
+    private readonly List<ISerializer>
+        _serializers = new List<ISerializer>(); // SerializationManager.DefaultSerializers.ToList();
+
+    private readonly List<IDeserializer>
+        _deserializers = new List<IDeserializer>(); // SerializationManager.DefaultDeserializers.ToList();
+
     private ILogger? _logger;
     private Uri? _baseUri;
     private string _baseTemplate = "";
@@ -49,7 +54,7 @@ internal class RestClientBuilder : IRestClientBuilder
         return this;
     }
 
-    public IRestClientBuilder Header(string name, object value, bool isReplace = false)
+    public IRestClientBuilder Header(string name, object value, bool isReplace = true)
     {
         _defaultHeaders.AddOrReplaceHeader(name, value, isReplace);
         return this;
@@ -81,18 +86,34 @@ internal class RestClientBuilder : IRestClientBuilder
 
     public IRestClientBuilder With(IDeserializer deserializer)
     {
+        if (_serializationManager != null)
+        {
+            throw new InvalidOperationException(
+                "Cannot add custom deserializers when a custom SerializationManager has been set.");
+        }
         _deserializers.Add(deserializer);
         return this;
     }
 
     public IRestClientBuilder With(ISerializer serializer)
     {
+        if (_serializationManager != null)
+        {
+            throw new InvalidOperationException(
+                "Cannot add custom serializers when a custom SerializationManager has been set.");
+        }
         _serializers.Add(serializer);
         return this;
     }
 
     public IRestClientBuilder With(ISerializationManager serializationManager)
     {
+        if (_serializers.Count > 0 || _deserializers.Count > 0)
+        {
+            throw new InvalidOperationException(
+                "Cannot set a custom SerializationManager when custom serializers or deserializers have been added.");
+        }
+
         _serializationManager = serializationManager;
         return this;
     }
@@ -121,7 +142,9 @@ internal class RestClientBuilder : IRestClientBuilder
         HandleAttributes(type);
 
         _defaultContentType ??= DefaultContentType;
-        _serializationManager ??= new SerializationManager(_serializers, _deserializers);
+        _serializationManager ??= new SerializationManager(
+            _serializers.Concat(SerializationManager.DefaultSerializers).ToList(),
+            _deserializers.Concat(SerializationManager.DefaultDeserializers).ToList());
         _defaultSerializer ??= _serializationManager.GetSerializer(_defaultContentType) ?? StringSerializer.Instance;
 
         var context = new RestClientContext(
@@ -166,7 +189,10 @@ internal class RestClientBuilder : IRestClientBuilder
                         headerAttribute.Replace);
                     break;
                 case PathAttribute pathAttribute:
-                    _baseTemplate = pathAttribute.Template!;
+                    if (pathAttribute.Template != null)
+                    {
+                        _baseTemplate = pathAttribute.Template;
+                    }
                     break;
             }
     }
