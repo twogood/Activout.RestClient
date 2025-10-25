@@ -29,7 +29,7 @@ public class SystemTextJsonSerializer(
     /// <param name="encoding">The encoding to use.</param>
     /// <param name="mediaType">The media type.</param>
     /// <returns>The serialized data as <see cref="HttpContent"/>.</returns>
-    public HttpContent Serialize(object data, Encoding encoding, MediaType mediaType)
+    public HttpContent Serialize(object? data, Encoding encoding, MediaType mediaType)
     {
         return new StringContent(
             JsonSerializer.Serialize(data, _serializerOptions),

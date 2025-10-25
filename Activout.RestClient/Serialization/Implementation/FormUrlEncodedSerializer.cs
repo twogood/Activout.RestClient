@@ -1,4 +1,3 @@
-#nullable disable
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -16,7 +15,7 @@ namespace Activout.RestClient.Serialization.Implementation
 
         public int Order { get; set; }
 
-        public HttpContent Serialize(object data, Encoding encoding, MediaType mediaType)
+        public HttpContent Serialize(object? data, Encoding encoding, MediaType mediaType)
         {
             if (data == null)
             {
@@ -35,7 +34,7 @@ namespace Activout.RestClient.Serialization.Implementation
                 properties
                     .Select(p => new { Property = p, Value = p.GetValue(data) })
                     .Where(x => x.Value != null)
-                    .Select(x => new KeyValuePair<string, string>(GetKey(x.Property), SerializeValue(x.Value)))
+                    .Select(x => new KeyValuePair<string, string>(GetKey(x.Property), SerializeValue(x.Value!)))
             );
         }
 
@@ -46,7 +45,7 @@ namespace Activout.RestClient.Serialization.Implementation
 
         private static string SerializeValue(object value)
         {
-            return value.ToString();
+            return value.ToString() ?? "";
         }
 
         private static string GetKey(MemberInfo property)
