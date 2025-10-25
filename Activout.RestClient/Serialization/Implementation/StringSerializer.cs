@@ -1,20 +1,18 @@
+using System;
 using System.Net.Http;
 using System.Text;
 
-namespace Activout.RestClient.Serialization.Implementation
+namespace Activout.RestClient.Serialization.Implementation;
+
+public sealed class StringSerializer : ISerializer
 {
-    internal class StringSerializer : ISerializer
-    {
-        public int Order { get; set; } = 1000;
+    public static ISerializer Instance { get; } = new StringSerializer();
 
-        public HttpContent Serialize(object? data, Encoding encoding, MediaType mediaType)
-        {
-            return new StringContent(data?.ToString() ?? "", encoding, mediaType.Value);
-        }
+    public int Order { get; init; } = 1000;
 
-        public bool CanSerialize(MediaType mediaType)
-        {
-            return mediaType.Value.StartsWith("text/");
-        }
-    }
+    public HttpContent Serialize(object? data, Encoding encoding, MediaType mediaType) =>
+        new StringContent(data?.ToString() ?? "", encoding, mediaType.Value);
+
+    public bool CanSerialize(MediaType mediaType) =>
+        mediaType.Value.StartsWith("text/", StringComparison.OrdinalIgnoreCase);
 }
