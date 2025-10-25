@@ -1,10 +1,8 @@
-#nullable disable
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace Activout.RestClient.Helpers
+namespace Activout.RestClient.Helpers;
+
+public interface ITaskConverter
 {
-    public interface ITaskConverter
-    {
-        object ConvertReturnType(Task<object> task);
-    }
+    object ConvertReturnType(Task<object?> task);
 }

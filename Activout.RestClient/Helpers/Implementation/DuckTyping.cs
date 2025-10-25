@@ -1,4 +1,4 @@
-using ImpromptuInterface;
+﻿using ImpromptuInterface;
 
 namespace Activout.RestClient.Helpers.Implementation;
 

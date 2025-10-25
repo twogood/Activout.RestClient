@@ -1,5 +1,4 @@
-#nullable disable
-namespace Activout.RestClient.Helpers
+﻿namespace Activout.RestClient.Helpers
 {
     public interface IDuckTyping
     {
