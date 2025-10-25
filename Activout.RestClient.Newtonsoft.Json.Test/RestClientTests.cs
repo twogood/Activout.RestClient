@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Activout.RestClient.Helpers.Implementation;
 using Activout.RestClient.Newtonsoft.Json.Test.MovieReviews;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -91,7 +90,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
             // arrange
             _mockHttp
                 .When(HttpMethod.Get, $"{BaseUri}/movies/{MovieId}/reviews/{ReviewId}")
-                .Respond(HttpStatusCode.NotFound, request => new StringContent(JsonConvert.SerializeObject(new
+                .Respond(HttpStatusCode.NotFound, _ => new StringContent(JsonConvert.SerializeObject(new
                 {
                     Errors = new object[]
                         {

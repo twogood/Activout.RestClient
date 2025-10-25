@@ -1,8 +1,8 @@
-#nullable disable
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using Activout.RestClient.DomainExceptions;
 using Activout.RestClient.Helpers;
 using Activout.RestClient.Helpers.Implementation;
@@ -11,124 +11,175 @@ using Activout.RestClient.ParamConverter.Implementation;
 using Activout.RestClient.Serialization;
 using Activout.RestClient.Serialization.Implementation;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Activout.RestClient.Implementation
+namespace Activout.RestClient.Implementation;
+
+internal class RestClientBuilder : IRestClientBuilder
 {
-    internal class RestClientBuilder : IRestClientBuilder
+    private static readonly MediaType DefaultContentType = new MediaType("text/plain");
+
+    private IDuckTyping _duckTyping = DuckTyping.Instance;
+    private readonly List<ISerializer> _serializers = SerializationManager.DefaultSerializers.ToList();
+    private readonly List<IDeserializer> _deserializers = SerializationManager.DefaultDeserializers.ToList();
+    private ILogger? _logger;
+    private Uri? _baseUri;
+    private string _baseTemplate = "";
+    private ISerializer? _defaultSerializer;
+    private ISerializationManager? _serializationManager;
+    private HttpClient? _httpClient;
+    private ITaskConverterFactory? _taskConverterFactory;
+    private Type? _errorResponseType;
+    private MediaType? _defaultContentType;
+    private IParamConverterManager? _paramConverterManager = null;
+    private List<KeyValuePair<string, object>> _defaultHeaders = new List<KeyValuePair<string, object>>();
+    private IRequestLogger? _requestLogger;
+    private Type? _domainExceptionType;
+    private IDomainExceptionMapperFactory? _domainExceptionMapperFactory;
+
+    public IRestClientBuilder BaseUri(Uri apiUri)
     {
-        private IDuckTyping _duckTyping = DuckTyping.Instance;
+        _baseUri = AddTrailingSlash(apiUri);
+        return this;
+    }
 
-        private readonly RestClientContext _context = new RestClientContext()
-        {
-            ParamConverterManager = ParamConverterManager.Instance,
-            TaskConverterFactory = TaskConverter3Factory.Instance
-        };
-        private readonly List<ISerializer> _serializers = SerializationManager.DefaultSerializers.ToList();
-        private readonly List<IDeserializer> _deserializers = SerializationManager.DefaultDeserializers.ToList();
+    public IRestClientBuilder ContentType(MediaType contentType)
+    {
+        _defaultContentType = contentType;
+        return this;
+    }
 
-        public IRestClientBuilder BaseUri(Uri apiUri)
-        {
-            _context.BaseUri = AddTrailingSlash(apiUri);
-            return this;
-        }
+    public IRestClientBuilder Header(string name, object value)
+    {
+        _defaultHeaders.Add(new KeyValuePair<string, object>(name, value));
+        return this;
+    }
 
-        public IRestClientBuilder ContentType(MediaType contentType)
-        {
-            _context.DefaultContentType = contentType;
-            return this;
-        }
+    public IRestClientBuilder With(IDuckTyping duckTyping)
+    {
+        _duckTyping = duckTyping;
+        return this;
+    }
 
-        public IRestClientBuilder Header(string name, object value)
-        {
-            _context.DefaultHeaders.Add(new KeyValuePair<string, object>(name, value));
-            return this;
-        }
+    public IRestClientBuilder With(ILogger logger)
+    {
+        _logger = logger;
+        return this;
+    }
 
-        public IRestClientBuilder With(IDuckTyping duckTyping)
-        {
-            _duckTyping = duckTyping;
-            return this;
-        }
+    public IRestClientBuilder With(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
+        return this;
+    }
 
-        public IRestClientBuilder With(ILogger logger)
-        {
-            _context.Logger = logger;
-            return this;
-        }
+    public IRestClientBuilder With(IRequestLogger requestLogger)
+    {
+        _requestLogger = requestLogger;
+        return this;
+    }
 
-        public IRestClientBuilder With(HttpClient httpClient)
-        {
-            _context.HttpClient = httpClient;
-            return this;
-        }
+    public IRestClientBuilder With(IDeserializer deserializer)
+    {
+        _deserializers.Add(deserializer);
+        return this;
+    }
 
-        public IRestClientBuilder With(IRequestLogger requestLogger)
-        {
-            _context.RequestLogger = requestLogger;
-            return this;
-        }
+    public IRestClientBuilder With(ISerializer serializer)
+    {
+        _serializers.Add(serializer);
+        return this;
+    }
 
-        public IRestClientBuilder With(IDeserializer deserializer)
-        {
-            _deserializers.Add(deserializer);
-            return this;
-        }
+    public IRestClientBuilder With(ISerializationManager serializationManager)
+    {
+        _serializationManager = serializationManager;
+        return this;
+    }
 
-        public IRestClientBuilder With(ISerializer serializer)
-        {
-            _serializers.Add(serializer);
-            return this;
-        }
+    public IRestClientBuilder With(ITaskConverterFactory taskConverterFactory)
+    {
+        _taskConverterFactory = taskConverterFactory;
+        return this;
+    }
 
-        public IRestClientBuilder With(ISerializationManager serializationManager)
-        {
-            _context.SerializationManager = serializationManager;
-            return this;
-        }
+    public IRestClientBuilder With(IDomainExceptionMapperFactory domainExceptionMapperFactory)
+    {
+        _domainExceptionMapperFactory = domainExceptionMapperFactory;
+        return this;
+    }
 
-        public IRestClientBuilder With(ITaskConverterFactory taskConverterFactory)
-        {
-            _context.TaskConverterFactory = taskConverterFactory;
-            return this;
-        }
+    public IRestClientBuilder With(IParamConverterManager paramConverterManager)
+    {
+        _paramConverterManager = paramConverterManager;
+        return this;
+    }
 
-        public IRestClientBuilder With(IDomainExceptionMapperFactory domainExceptionMapperFactory)
-        {
-            _context.DomainExceptionMapperFactory = domainExceptionMapperFactory;
-            return this;
-        }
+    public T Build<T>() where T : class
+    {
+        var type = typeof(T);
+        HandleAttributes(type);
 
-        public T Build<T>() where T : class
-        {
-            if (_context.HttpClient == null)
+        _defaultContentType ??= DefaultContentType;
+        _serializationManager ??= new SerializationManager(_serializers, _deserializers);
+        _defaultSerializer ??= _serializationManager.GetSerializer(_defaultContentType) ?? StringSerializer.Instance;
+
+        var context = new RestClientContext(
+            BaseUri: _baseUri ?? throw new InvalidOperationException("BaseUri is not set."),
+            BaseTemplate: _baseTemplate,
+            DefaultSerializer: _defaultSerializer,
+            SerializationManager: _serializationManager,
+            HttpClient: _httpClient ?? new HttpClient(),
+            TaskConverterFactory: _taskConverterFactory ?? TaskConverter3Factory.Instance,
+            ErrorResponseType: _errorResponseType,
+            DefaultContentType: _defaultContentType,
+            ParamConverterManager: _paramConverterManager ?? ParamConverterManager.Instance,
+            DomainExceptionType: _domainExceptionType,
+            DomainExceptionMapperFactory: _domainExceptionMapperFactory ??
+                                          new DefaultDomainExceptionMapperFactory(),
+            DefaultHeaders: _defaultHeaders,
+            Logger: _logger ?? NullLogger.Instance,
+            RequestLogger: _requestLogger ?? DummyRequestLogger.Instance
+        );
+
+        var client = new RestClient(type, context);
+        return _duckTyping.DuckType<T>(client);
+    }
+
+    private void HandleAttributes(Type type)
+    {
+        var attributes = type.GetCustomAttributes();
+        foreach (var attribute in attributes)
+            switch (attribute)
             {
-                _context.HttpClient = new HttpClient();
+                case ContentTypeAttribute contentTypeAttribute:
+                    _defaultContentType = MediaType.ValueOf(contentTypeAttribute.ContentType);
+                    break;
+                case DomainExceptionAttribute domainExceptionAttribute:
+                    _domainExceptionType = domainExceptionAttribute.Type;
+                    break;
+                case ErrorResponseAttribute errorResponseAttribute:
+                    _errorResponseType = errorResponseAttribute.Type;
+                    break;
+                case HeaderAttribute headerAttribute:
+                    _defaultHeaders.AddOrReplaceHeader(headerAttribute.Name, headerAttribute.Value,
+                        headerAttribute.Replace);
+                    break;
+                case PathAttribute pathAttribute:
+                    _baseTemplate = pathAttribute.Template!;
+                    break;
             }
+    }
 
-            if (_context.SerializationManager == null)
-            {
-                _context.SerializationManager = new SerializationManager(_serializers, _deserializers);
-            }
-
-            if (_context.DomainExceptionMapperFactory == null)
-            {
-                _context.DomainExceptionMapperFactory = new DefaultDomainExceptionMapperFactory();
-            }
-
-            var client = new RestClient<T>(_context);
-            return _duckTyping.DuckType<T>(client);
-        }
-
-        private static Uri AddTrailingSlash(Uri apiUri)
+    private static Uri AddTrailingSlash(Uri apiUri)
+    {
+        var uriBuilder = new UriBuilder(apiUri ?? throw new ArgumentNullException(nameof(apiUri)));
+        if (uriBuilder.Path.EndsWith("/"))
         {
-            var uriBuilder = new UriBuilder(apiUri ?? throw new ArgumentNullException(nameof(apiUri)));
-            if (uriBuilder.Path.EndsWith("/"))
-            {
-                return apiUri;
-            }
-
-            uriBuilder.Path = uriBuilder.Path + "/";
-            return uriBuilder.Uri;
+            return apiUri;
         }
+
+        uriBuilder.Path = uriBuilder.Path + "/";
+        return uriBuilder.Uri;
     }
 }
