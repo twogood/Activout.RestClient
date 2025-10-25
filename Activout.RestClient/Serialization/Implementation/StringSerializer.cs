@@ -8,7 +8,7 @@ public sealed class StringSerializer : ISerializer
 {
     public static ISerializer Instance { get; } = new StringSerializer();
 
-    public int Order { get; set; } = 1000;
+    public int Order { get; init; } = 1000;
 
     public HttpContent Serialize(object? data, Encoding encoding, MediaType mediaType) =>
         new StringContent(data?.ToString() ?? "", encoding, mediaType.Value);
