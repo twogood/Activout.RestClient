@@ -31,8 +31,8 @@ internal class RestClientBuilder : IRestClientBuilder
     private ITaskConverterFactory? _taskConverterFactory;
     private Type? _errorResponseType;
     private MediaType? _defaultContentType;
-    private IParamConverterManager? _paramConverterManager = null;
-    private List<KeyValuePair<string, object>> _defaultHeaders = new List<KeyValuePair<string, object>>();
+    private IParamConverterManager? _paramConverterManager;
+    private readonly List<KeyValuePair<string, object>> _defaultHeaders = new List<KeyValuePair<string, object>>();
     private IRequestLogger? _requestLogger;
     private Type? _domainExceptionType;
     private IDomainExceptionMapperFactory? _domainExceptionMapperFactory;
@@ -49,9 +49,9 @@ internal class RestClientBuilder : IRestClientBuilder
         return this;
     }
 
-    public IRestClientBuilder Header(string name, object value)
+    public IRestClientBuilder Header(string name, object value, bool isReplace = false)
     {
-        _defaultHeaders.Add(new KeyValuePair<string, object>(name, value));
+        _defaultHeaders.AddOrReplaceHeader(name, value, isReplace);
         return this;
     }
 
@@ -137,7 +137,7 @@ internal class RestClientBuilder : IRestClientBuilder
             DomainExceptionType: _domainExceptionType,
             DomainExceptionMapperFactory: _domainExceptionMapperFactory ??
                                           new DefaultDomainExceptionMapperFactory(),
-            DefaultHeaders: _defaultHeaders,
+            DefaultHeaders: new List<KeyValuePair<string, object>>(_defaultHeaders),
             Logger: _logger ?? NullLogger.Instance,
             RequestLogger: _requestLogger ?? DummyRequestLogger.Instance
         );
@@ -174,12 +174,12 @@ internal class RestClientBuilder : IRestClientBuilder
     private static Uri AddTrailingSlash(Uri apiUri)
     {
         var uriBuilder = new UriBuilder(apiUri ?? throw new ArgumentNullException(nameof(apiUri)));
-        if (uriBuilder.Path.EndsWith("/"))
+        if (uriBuilder.Path.EndsWith('/'))
         {
             return apiUri;
         }
 
-        uriBuilder.Path = uriBuilder.Path + "/";
+        uriBuilder.Path += "/";
         return uriBuilder.Uri;
     }
 }

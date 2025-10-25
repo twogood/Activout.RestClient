@@ -21,9 +21,9 @@ internal record RestClientContext(
     IParamConverterManager ParamConverterManager,
     Type? DomainExceptionType,
     IDomainExceptionMapperFactory DomainExceptionMapperFactory,
-    List<KeyValuePair<string, object>> DefaultHeaders,
+    IReadOnlyList<KeyValuePair<string, object>> DefaultHeaders,
     ILogger Logger,
     IRequestLogger RequestLogger)
 {
-    public bool UseDomainException { get; } = DomainExceptionType != null;
+    public bool UseDomainException => DomainExceptionType != null;
 }
