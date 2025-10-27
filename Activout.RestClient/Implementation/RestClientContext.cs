@@ -17,7 +17,7 @@ internal record RestClientContext(
     HttpClient HttpClient,
     ITaskConverterFactory TaskConverterFactory,
     Type? ErrorResponseType,
-    MediaType? DefaultContentType,
+    MediaType DefaultContentType,
     IParamConverterManager ParamConverterManager,
     Type? DomainExceptionType,
     IDomainExceptionMapperFactory DomainExceptionMapperFactory,

@@ -110,11 +110,11 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
                 .Respond(_ => HtmlHttpResponseMessage(HttpStatusCode.BadRequest));
 
             // Act
-            var exception = await Assert.ThrowsAsync<MyDomainErrorObjectException>(() =>
+            var exception = await Assert.ThrowsAsync<RestClientException>(() =>
                 _myApiClient.Api());
 
             // Assert
-            Assert.Equal(MyDomainErrorEnum.Unknown, exception.Error.ErrorEnum);
+            Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
             Assert.IsType<MissingMethodException>(exception.InnerException);
         }
 
