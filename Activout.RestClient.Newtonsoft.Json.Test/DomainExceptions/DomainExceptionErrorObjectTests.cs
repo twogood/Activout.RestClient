@@ -102,7 +102,7 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
         }
 
         [Fact]
-        public async Task TestNoDeserializerFound()
+        public async Task TestErrorResponseNotCompatibleWithHtml()
         {
             // Arrange
             _mockHttp
