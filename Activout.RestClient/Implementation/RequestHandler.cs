@@ -326,11 +326,12 @@ internal class RequestHandler
                 {
                     if (_parameters[i].ParameterType.IsArray)
                     {
-                        var items = (object?[]?)rawValue;
-                        if (items != null)
+                        if (rawValue is IEnumerable items)
                         {
-                            parts.AddRange(items.SelectMany(item =>
-                                GetPartNameAndHttpContent(partAttribute, parameterName, item)));
+                            foreach (var item in items)
+                            {
+                                parts.AddRange(GetPartNameAndHttpContent(partAttribute, parameterName, item));
+                            }
                         }
                     }
                     else
