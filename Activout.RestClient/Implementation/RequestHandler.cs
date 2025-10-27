@@ -39,7 +39,7 @@ internal class RequestHandler
     private readonly IDomainExceptionMapper? _domainExceptionMapper;
     private readonly List<KeyValuePair<string, object>> _requestHeaders = new List<KeyValuePair<string, object>>();
 
-    private bool DebugLoggingEnabled => _context.Logger.IsEnabled(LogLevel.Debug);
+    private bool IsDebugLoggingEnabled => _context.Logger.IsEnabled(LogLevel.Debug);
 
     public RequestHandler(MethodInfo method, RestClientContext context)
     {
@@ -212,7 +212,7 @@ internal class RequestHandler
         var cancellationToken = GetParams(args, routeParams, queryParams, formParams, headers, partParams);
 
         var requestUriString = ExpandTemplate(routeParams);
-        if (queryParams.Any())
+        if (queryParams.Count != 0)
         {
             requestUriString = requestUriString + "?" + string.Join("&", queryParams);
         }
@@ -239,7 +239,7 @@ internal class RequestHandler
             }
         }
 
-        var task = SendAsync(request, cancellationToken);
+        var task = SendRequestAndHandleResponse(request, cancellationToken);
 
         if (IsVoidTask())
             return task;
@@ -307,6 +307,11 @@ internal class RequestHandler
             if (rawValue is CancellationToken ct)
             {
                 cancellationToken = ct;
+                continue;
+            }
+
+            if (rawValue == null)
+            {
                 continue;
             }
 
@@ -473,11 +478,17 @@ internal class RequestHandler
     }
 
 
-    private async Task<object?> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    private async Task<object?> SendRequestAndHandleResponse(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        var response = await SendRequest(request, cancellationToken);
+        return await HandleResponse(request, response);
+    }
+
+    private async Task<HttpResponseMessage> SendRequest(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         PrepareRequestMessage(request);
 
-        if (DebugLoggingEnabled)
+        if (IsDebugLoggingEnabled)
         {
             _context.Logger.LogDebug("{Request}", request);
 
@@ -495,7 +506,7 @@ internal class RequestHandler
             response = await _context.HttpClient.SendAsync(request, cancellationToken);
         }
 
-        if (DebugLoggingEnabled)
+        if (IsDebugLoggingEnabled)
         {
             _context.Logger.LogDebug("{Response}", response);
 
@@ -504,46 +515,64 @@ internal class RequestHandler
                 (await response.Content.ReadAsStringAsync(cancellationToken)).SafeSubstring(0, 1000));
         }
 
-        if (_actualReturnType == typeof(HttpStatusCode))
-        {
-            return response.StatusCode;
-        }
+        return response;
+    }
 
+    private async Task<object?> HandleResponse(HttpRequestMessage request, HttpResponseMessage response)
+    {
         if (_actualReturnType == typeof(HttpResponseMessage))
         {
             return response;
         }
 
-        var data = await GetResponseData(request, response);
-
-        if (response.IsSuccessStatusCode)
+        var shouldDisposeResponse = true;
+        try
         {
-            return data;
-        }
+            if (_actualReturnType == typeof(HttpStatusCode))
+            {
+                return response.StatusCode;
+            }
 
-        if (_context.UseDomainException && _domainExceptionMapper != null)
+            object? data;
+            var type = response.IsSuccessStatusCode ? _actualReturnType : _errorResponseType;
+
+            if (type == typeof(void))
+            {
+                data = null;
+            }
+            else if (type.IsInstanceOfType(response.Content)) // HttpContent or a subclass like MultipartFormDataContent
+            {
+                shouldDisposeResponse = false;
+                data = response.Content;
+            }
+            else
+            {
+                data = await Deserialize(request, response, type);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                return data;
+            }
+
+            if (_context.UseDomainException && _domainExceptionMapper != null)
+            {
+                throw await _domainExceptionMapper.CreateExceptionAsync(response, data);
+            }
+
+            throw new RestClientException(request.RequestUri, response.StatusCode, data);
+        }
+        finally
         {
-            throw await _domainExceptionMapper.CreateExceptionAsync(response, data);
+            if (shouldDisposeResponse)
+            {
+                response.Dispose();
+            }
         }
-
-        throw new RestClientException(request.RequestUri, response.StatusCode, data);
     }
 
-    private async Task<object?> GetResponseData(HttpRequestMessage request, HttpResponseMessage response)
+    private async Task<object?> Deserialize(HttpRequestMessage request, HttpResponseMessage response, Type type)
     {
-        var type = response.IsSuccessStatusCode ? _actualReturnType : _errorResponseType;
-
-        if (type == typeof(void))
-        {
-            return null;
-        }
-
-        // HttpContent or a subclass like MultipartFormDataContent
-        if (type.IsInstanceOfType(response.Content))
-        {
-            return response.Content;
-        }
-
         var contentTypeMediaType = response.Content.Headers.ContentType?.MediaType ?? DefaultHttpContentType;
         var deserializer = _context.SerializationManager.GetDeserializer(new MediaType(contentTypeMediaType)) ??
                            throw new RestClientException(request.RequestUri, response.StatusCode,
@@ -560,14 +589,8 @@ internal class RequestHandler
                 throw;
             }
 
-            throw await CreateDeserializationException(request, response, e);
+            var errorResponse = await response.Content.ReadAsStringAsync();
+            throw new RestClientException(request.RequestUri, response.StatusCode, errorResponse, e);
         }
-    }
-
-    private async Task<Exception> CreateDeserializationException(HttpRequestMessage request,
-        HttpResponseMessage response, Exception e)
-    {
-        var errorResponse = await response.Content.ReadAsStringAsync();
-        return new RestClientException(request.RequestUri, response.StatusCode, errorResponse, e);
     }
 }
