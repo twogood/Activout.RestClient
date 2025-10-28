@@ -66,9 +66,9 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
         }
 
         [Theory]
-        [InlineData(HttpStatusCode.BadRequest, MyDomainErrorEnum.ClientError)]
-        [InlineData(HttpStatusCode.BadGateway, MyDomainErrorEnum.ServerError)]
-        public async Task TestDeserializerException(HttpStatusCode httpStatusCode, MyDomainErrorEnum error)
+        [InlineData(HttpStatusCode.BadRequest)]
+        [InlineData(HttpStatusCode.BadGateway)]
+        public async Task TestDeserializerException(HttpStatusCode httpStatusCode)
         {
             // Arrange
             _mockHttp
@@ -76,18 +76,18 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
                 .Respond(_ => HtmlHttpResponseMessage(httpStatusCode));
 
             // Act
-            var exception = await Assert.ThrowsAsync<SomeDomainErrorObjectException>(() =>
+            var exception = await Assert.ThrowsAsync<RestClientException>(() =>
                 _defaultMapperApiClient.Api());
 
             // Assert
-            Assert.Equal(error, exception.Error);
+            Assert.Equal(httpStatusCode, exception.StatusCode);
             Assert.IsType<MissingMethodException>(exception.InnerException);
         }
 
         [Theory]
-        [InlineData(HttpStatusCode.BadRequest, MyDomainErrorEnum.ClientError)]
-        [InlineData(HttpStatusCode.BadGateway, MyDomainErrorEnum.ServerError)]
-        public async Task TestNoDeserializerFound(HttpStatusCode httpStatusCode, MyDomainErrorEnum error)
+        [InlineData(HttpStatusCode.BadRequest)]
+        [InlineData(HttpStatusCode.BadGateway)]
+        public async Task TestNoDeserializerFound(HttpStatusCode httpStatusCode)
         {
             // Arrange
             _mockHttp
@@ -95,12 +95,11 @@ namespace Activout.RestClient.Newtonsoft.Json.Test.DomainExceptions
                 .Respond(_ => FoobarHttpResponseMessage(httpStatusCode));
 
             // Act
-            var exception = await Assert.ThrowsAsync<SomeDomainErrorObjectException>(() =>
+            var exception = await Assert.ThrowsAsync<RestClientException>(() =>
                 _defaultMapperApiClient.Api());
 
             // Assert
-            Assert.Equal(error, exception.Error);
-            Assert.IsType<RestClientException>(exception.InnerException);
+            Assert.Equal(httpStatusCode, exception.StatusCode);
         }
 
         private static HttpResponseMessage JsonHttpResponseMessage(HttpStatusCode httpStatusCode, MyApiError myApiError)

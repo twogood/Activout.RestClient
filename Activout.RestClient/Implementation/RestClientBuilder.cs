@@ -56,6 +56,10 @@ internal class RestClientBuilder : IRestClientBuilder
 
     public IRestClientBuilder Header(string name, object value, bool isReplace = true)
     {
+        if (string.Equals("content-type", name, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Use ContentType method to set default content type.");
+        }
         _defaultHeaders.AddOrReplaceHeader(name, value, isReplace);
         return this;
     }
@@ -159,7 +163,7 @@ internal class RestClientBuilder : IRestClientBuilder
             HttpClient: _httpClient ?? new HttpClient(),
             TaskConverterFactory: _taskConverterFactory ?? TaskConverter3Factory.Instance,
             ErrorResponseType: _errorResponseType,
-            DefaultContentType: _defaultContentType,
+            DefaultContentType: _defaultContentType ?? throw new InvalidOperationException("DefaultContentType is not set."),
             ParamConverterManager: _paramConverterManager ?? ParamConverterManager.Instance,
             DomainExceptionType: _domainExceptionType,
             DomainExceptionMapperFactory: _domainExceptionMapperFactory ??
