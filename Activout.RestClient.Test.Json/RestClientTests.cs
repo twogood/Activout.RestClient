@@ -112,6 +112,7 @@ public class RestClientTests(ITestOutputHelper outputHelper)
 
         Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
         var error = exception.GetErrorResponse<ErrorResponse>();
+        Assert.NotNull(error);
         Assert.Equal(34, error.Errors[0].Code);
         Assert.Equal("Sorry, that page does not exist", error.Errors[0].Message);
     }
@@ -165,6 +166,7 @@ public class RestClientTests(ITestOutputHelper outputHelper)
         Assert.Equal("Sorry, that page does not exist", message);
 
         var error = exception.GetErrorResponse<ErrorResponse>();
+        Assert.NotNull(error);
         Assert.Equal(34, error.Errors[0].Code);
         Assert.Equal("Sorry, that page does not exist", error.Errors[0].Message);
     }
