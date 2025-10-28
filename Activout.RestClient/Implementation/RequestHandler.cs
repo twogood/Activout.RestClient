@@ -326,7 +326,7 @@ internal class RequestHandler
                 {
                     if (_parameters[i].ParameterType.IsArray)
                     {
-                        if (rawValue is IEnumerable items)
+                        if (rawValue is IEnumerable items and not string)
                         {
                             foreach (var item in items)
                             {
