@@ -170,7 +170,9 @@ internal class RequestHandler
     {
         var expanded = _template;
         foreach (var entry in routeParams)
+        {
             expanded = expanded.Replace("{" + entry.Key + "}", entry.Value.ToString());
+        }
 
         return expanded;
     }
