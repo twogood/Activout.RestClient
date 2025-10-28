@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
@@ -15,6 +14,8 @@ using Activout.RestClient.Serialization;
 using Microsoft.Extensions.Logging;
 
 namespace Activout.RestClient.Implementation;
+
+internal record HttpContentPart(HttpContent Content, string Name, string? FileName);
 
 internal class RequestHandler
 {
@@ -210,7 +211,7 @@ internal class RequestHandler
         var routeParams = new Dictionary<string, object>();
         var queryParams = new List<string>();
         var formParams = new List<KeyValuePair<string, string>>();
-        var partParams = new List<Part<HttpContent>>();
+        var partParams = new List<HttpContentPart>();
         var cancellationToken = GetParams(args, routeParams, queryParams, formParams, headers, partParams);
 
         var requestUriString = ExpandTemplate(routeParams);
@@ -251,7 +252,7 @@ internal class RequestHandler
     }
 
     private static MultipartFormDataContent CreateMultipartFormDataContent(
-        IEnumerable<Part<HttpContent>> partParams)
+        IEnumerable<HttpContentPart> partParams)
     {
         var content = new MultipartFormDataContent();
         foreach (var part in partParams)
@@ -293,7 +294,7 @@ internal class RequestHandler
         List<string> queryParams,
         List<KeyValuePair<string, string>> formParams,
         List<KeyValuePair<string, object>> headers,
-        List<Part<HttpContent>> parts)
+        List<HttpContentPart> parts)
     {
         var cancellationToken = CancellationToken.None;
 
@@ -430,7 +431,7 @@ internal class RequestHandler
         return cancellationToken;
     }
 
-    private IEnumerable<Part<HttpContent>> GetPartNameAndHttpContent(PartParamAttribute partAttribute,
+    private IEnumerable<HttpContentPart> GetPartNameAndHttpContent(PartParamAttribute partAttribute,
         string parameterName,
         object? rawValue)
     {
@@ -439,19 +440,17 @@ internal class RequestHandler
 
         if (rawValue is Part part)
         {
-            rawValue = part.InternalContent;
+            rawValue = part.Content;
             partName = part.Name;
             fileName = part.FileName;
         }
 
-        if (rawValue is { })
+        if (rawValue is not null)
         {
-            yield return new Part<HttpContent>
-            {
-                Content = GetPartHttpContent(partAttribute, rawValue),
-                Name = partName ?? partAttribute.Name ?? parameterName,
-                FileName = fileName ?? partAttribute.FileName
-            };
+            yield return new HttpContentPart(
+                Content: GetPartHttpContent(partAttribute, rawValue),
+                Name: partName ?? partAttribute.Name ?? parameterName,
+                FileName: fileName ?? partAttribute.FileName);
         }
     }
 
@@ -481,7 +480,8 @@ internal class RequestHandler
     }
 
 
-    private async Task<object?> SendRequestAndHandleResponse(HttpRequestMessage request, CancellationToken cancellationToken)
+    private async Task<object?> SendRequestAndHandleResponse(HttpRequestMessage request,
+        CancellationToken cancellationToken)
     {
         var response = await SendRequest(request, cancellationToken);
         return await HandleResponse(request, response);
