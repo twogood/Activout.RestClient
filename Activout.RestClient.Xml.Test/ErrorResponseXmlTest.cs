@@ -51,6 +51,7 @@ public class ErrorResponseXmlTest(ITestOutputHelper outputHelper)
         Assert.NotNull(exception.ErrorResponse);
         Assert.IsType<XmlErrorResponse>(exception.ErrorResponse);
         var errorResponse = exception.GetErrorResponse<XmlErrorResponse>();
+        Assert.NotNull(errorResponse);
         Assert.Equal(400, errorResponse.Code);
         Assert.Equal("Invalid request parameter", errorResponse.Message);
     }
