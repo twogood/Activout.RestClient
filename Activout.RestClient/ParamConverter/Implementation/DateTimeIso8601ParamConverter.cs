@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Reflection;
 
@@ -11,7 +10,7 @@ namespace Activout.RestClient.ParamConverter.Implementation
             return type == typeof(DateTime);
         }
 
-        public string ToString(object value)
+        public string ToString(object? value)
         {
             return value == null ? "" : ((DateTime)value).ToString("o");
         }
