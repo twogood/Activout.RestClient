@@ -34,7 +34,7 @@ public interface IMovieReviewService
 {
     // GET /movies
     [Get]
-    Task<List<Movie>> GetAllMovies();
+    Task<IEnumerable<Movie>> GetAllMovies();
 
     // GET /movies/{movieId}/reviews
     [Get("/{movieId}/reviews")]
@@ -58,7 +58,7 @@ public interface IMovieReviewService
 
     // GET /movies?begin=...&end=...
     [Get]
-    Task<List<Movie>> QueryMoviesByDate(
+    Task<IEnumerable<Movie>> QueryMoviesByDate(
         [QueryParam] DateTime begin,
         [QueryParam] DateTime end);
 }
