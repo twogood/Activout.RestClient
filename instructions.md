@@ -26,37 +26,37 @@ Create an interface that describes your REST API endpoints. Use attributes to sp
 ```csharp
 using Activout.RestClient;
 
-[Path("api/movies")]
+[Path("movies")]
 [ErrorResponse(typeof(ErrorResponse))]
 [Accept("application/json")]
 [ContentType("application/json")]
 public interface IMovieReviewService
 {
-    // GET /api/movies
+    // GET /movies
     [Get]
     Task<List<Movie>> GetAllMovies();
 
-    // GET /api/movies/{movieId}/reviews
+    // GET /movies/{movieId}/reviews
     [Get("/{movieId}/reviews")]
     Task<IEnumerable<Review>> GetAllReviews(string movieId);
 
-    // GET /api/movies/{movieId}/reviews/{reviewId}
+    // GET /movies/{movieId}/reviews/{reviewId}
     [Get("/{movieId}/reviews/{reviewId}")]
     Task<Review> GetReview(string movieId, string reviewId);
 
-    // POST /api/movies/{movieId}/reviews
+    // POST /movies/{movieId}/reviews
     [Post("/{movieId}/reviews")]
     Task<Review> SubmitReview(string movieId, Review review);
 
-    // PUT /api/movies/{movieId}/reviews/{reviewId}
+    // PUT /movies/{movieId}/reviews/{reviewId}
     [Put("/{movieId}/reviews/{reviewId}")]
     Task<Review> UpdateReview(string movieId, string reviewId, Review review);
 
-    // DELETE /api/movies/{movieId}/reviews/{reviewId}
+    // DELETE /movies/{movieId}/reviews/{reviewId}
     [Delete("/{movieId}/reviews/{reviewId}")]
     Task DeleteReview(string movieId, string reviewId);
 
-    // GET /api/movies?begin=...&end=...
+    // GET /movies?begin=...&end=...
     [Get]
     Task<List<Movie>> QueryMoviesByDate(
         [QueryParam] DateTime begin,
@@ -91,7 +91,6 @@ Define your request and response models as regular C# classes or records:
 public class Movie
 {
     public string? Title { get; init; }
-    public int? Year { get; init; }
 }
 
 public class Review
@@ -110,13 +109,13 @@ public class Review
 
 public class ErrorResponse
 {
-    public List<ErrorDetail>? Errors { get; init; }
-}
+    public List<Error> Errors { get; init; } = [];
 
-public class ErrorDetail
-{
-    public int Code { get; init; }
-    public string? Message { get; init; }
+    public class Error
+    {
+        public int Code { get; init; }
+        public string? Message { get; init; }
+    }
 }
 ```
 
@@ -161,31 +160,36 @@ var movies = await movieService.GetAllMovies();
 
 ### Using with Dependency Injection
 
-Add the required services to your `IServiceCollection`:
+You can register the required RestClient services and your API clients in your DI container. Here's an example using ASP.NET Core's `IServiceCollection`:
 
 ```csharp
 using Activout.RestClient;
 using Activout.RestClient.Helpers.Implementation;
 using Activout.RestClient.ParamConverter;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
-public static IServiceCollection AddRestClient(this IServiceCollection services)
+public static class ServiceCollectionExtensions
 {
-    services.TryAddTransient<IDuckTyping, DuckTyping>();
-    services.TryAddTransient<IParamConverterManager, ParamConverterManager>();
-    services.TryAddTransient<IRestClientFactory, RestClientFactory>();
-    services.TryAddTransient<ITaskConverterFactory, TaskConverter3Factory>();
-    return services;
+    public static IServiceCollection AddRestClient(this IServiceCollection services)
+    {
+        services.TryAddTransient<IDuckTyping, DuckTyping>();
+        services.TryAddTransient<IParamConverterManager, ParamConverterManager>();
+        services.TryAddTransient<IRestClientFactory, RestClientFactory>();
+        services.TryAddTransient<ITaskConverterFactory, TaskConverter3Factory>();
+        return services;
+    }
 }
 
-// In your Startup.cs or Program.cs
+// In your Program.cs or Startup.cs
 services.AddRestClient();
 services.AddHttpClient();
 
 // Register your specific API client
 services.AddSingleton<IMovieReviewService>(provider =>
 {
-    var httpClient = provider.GetRequiredService<IHttpClientFactory>().CreateClient();
+    var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+    var httpClient = httpClientFactory.CreateClient();
     var restClientFactory = provider.GetRequiredService<IRestClientFactory>();
     
     return restClientFactory.CreateBuilder()
@@ -195,6 +199,8 @@ services.AddSingleton<IMovieReviewService>(provider =>
         .Build<IMovieReviewService>();
 });
 ```
+
+**Note:** The core Activout.RestClient library doesn't include built-in DI extensions. The above code demonstrates how to create your own extension methods to register the necessary services.
 
 ## Step 4: Unit Testing with MockHttp
 
@@ -239,9 +245,9 @@ public async Task GetAllMovies_ReturnsMovieList()
 {
     // Arrange
     _mockHttp
-        .When($"{BaseUri}/api/movies")
+        .When($"{BaseUri}/movies")
         .WithHeaders("Accept", "application/json")
-        .Respond("application/json", "[{\"Title\":\"Inception\",\"Year\":2010}]");
+        .Respond("application/json", "[{\"Title\":\"Inception\"}]");
 
     var service = CreateMovieReviewService();
 
@@ -252,7 +258,6 @@ public async Task GetAllMovies_ReturnsMovieList()
     var movieList = movies.ToList();
     Assert.Single(movieList);
     Assert.Equal("Inception", movieList[0].Title);
-    Assert.Equal(2010, movieList[0].Year);
 }
 
 [Fact]
@@ -260,7 +265,7 @@ public async Task GetAllMovies_ReturnsEmptyList_WhenNoMovies()
 {
     // Arrange
     _mockHttp
-        .When($"{BaseUri}/api/movies")
+        .When($"{BaseUri}/movies")
         .Respond("application/json", "[]");
 
     var service = CreateMovieReviewService();
@@ -282,7 +287,7 @@ public async Task SubmitReview_CreatesNewReview()
     // Arrange
     var movieId = "movie-123";
     _mockHttp
-        .When(HttpMethod.Post, $"{BaseUri}/api/movies/{movieId}/reviews")
+        .When(HttpMethod.Post, $"{BaseUri}/movies/{movieId}/reviews")
         .WithHeaders("Content-Type", "application/json; charset=utf-8")
         .Respond(request =>
         {
@@ -315,7 +320,7 @@ public async Task UpdateReview_ModifiesExistingReview()
     var movieId = "movie-123";
     var reviewId = "review-456";
     _mockHttp
-        .When(HttpMethod.Put, $"{BaseUri}/api/movies/{movieId}/reviews/{reviewId}")
+        .When(HttpMethod.Put, $"{BaseUri}/movies/{movieId}/reviews/{reviewId}")
         .Respond(request => request.Content!);  // Echo back the request
 
     var service = CreateMovieReviewService();
@@ -341,8 +346,8 @@ public async Task QueryMoviesByDate_UsesQueryParameters()
     var end = new DateTime(2020, 12, 31, 0, 0, 0, DateTimeKind.Utc);
     
     _mockHttp
-        .When($"{BaseUri}/api/movies?begin=2020-01-01T00%3A00%3A00.0000000Z&end=2020-12-31T00%3A00%3A00.0000000Z")
-        .Respond("application/json", "[{\"Title\":\"Tenet\",\"Year\":2020}]");
+        .When($"{BaseUri}/movies?begin=2020-01-01T00%3A00%3A00.0000000Z&end=2020-12-31T00%3A00%3A00.0000000Z")
+        .Respond("application/json", "[{\"Title\":\"Tenet\"}]");
 
     var service = CreateMovieReviewService();
 
@@ -367,7 +372,7 @@ public async Task GetReview_ThrowsRestClientException_WhenNotFound()
     var reviewId = "invalid-review";
     
     _mockHttp
-        .Expect(HttpMethod.Get, $"{BaseUri}/api/movies/{movieId}/reviews/{reviewId}")
+        .Expect(HttpMethod.Get, $"{BaseUri}/movies/{movieId}/reviews/{reviewId}")
         .Respond(HttpStatusCode.NotFound, _ => new StringContent(
             JsonConvert.SerializeObject(new
             {
@@ -389,7 +394,7 @@ public async Task GetReview_ThrowsRestClientException_WhenNotFound()
     
     var error = exception.GetErrorResponse<ErrorResponse>();
     Assert.NotNull(error);
-    Assert.Equal(404, error.Errors![0].Code);
+    Assert.Equal(404, error.Errors[0].Code);
     Assert.Equal("Review not found", error.Errors[0].Message);
     
     // Verify the expected call was made
@@ -403,13 +408,13 @@ MockHttp provides two ways to set up expectations:
 
 **`When()`** - Matches any number of requests:
 ```csharp
-_mockHttp.When($"{BaseUri}/api/movies")
+_mockHttp.When($"{BaseUri}/movies")
     .Respond("application/json", "[]");
 ```
 
 **`Expect()`** - Expects exactly one request:
 ```csharp
-_mockHttp.Expect($"{BaseUri}/api/movies")
+_mockHttp.Expect($"{BaseUri}/movies")
     .Respond("application/json", "[]");
 
 // Verify all expectations were met
@@ -493,7 +498,7 @@ public class MovieReviewServiceTests
     public async Task GetAllMovies_Success()
     {
         _mockHttp
-            .When($"{BaseUri}/api/movies")
+            .When($"{BaseUri}/movies")
             .Respond("application/json", "[{\"Title\":\"Inception\"}]");
 
         var service = CreateService();
@@ -506,7 +511,7 @@ public class MovieReviewServiceTests
     public async Task SubmitReview_Success()
     {
         _mockHttp
-            .When(HttpMethod.Post, $"{BaseUri}/api/movies/123/reviews")
+            .When(HttpMethod.Post, $"{BaseUri}/movies/123/reviews")
             .Respond(request =>
             {
                 var content = request.Content!.ReadAsStringAsync().Result;
@@ -526,7 +531,7 @@ public class MovieReviewServiceTests
     public async Task GetReview_NotFound_ThrowsException()
     {
         _mockHttp
-            .When(HttpMethod.Get, $"{BaseUri}/api/movies/123/reviews/999")
+            .When(HttpMethod.Get, $"{BaseUri}/movies/123/reviews/999")
             .Respond(HttpStatusCode.NotFound, _ => new StringContent(
                 JsonConvert.SerializeObject(new
                 {
@@ -542,7 +547,7 @@ public class MovieReviewServiceTests
 
         Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
         var error = exception.GetErrorResponse<ErrorResponse>();
-        Assert.Equal(404, error!.Errors![0].Code);
+        Assert.Equal(404, error!.Errors[0].Code);
     }
 }
 ```
