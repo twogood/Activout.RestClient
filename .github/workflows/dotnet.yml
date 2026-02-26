@@ -66,8 +66,7 @@ jobs:
         with:
           name: nuget-packages-pr${{ github.event.pull_request.number }}-run${{ github.run_number }}
           path: |
-            **/*.nupkg
-            **/*.snupkg
+            **/*.symbols.nupkg
 #      - name: Archive test results
 #        uses: actions/upload-artifact@v4
 #        if: always()

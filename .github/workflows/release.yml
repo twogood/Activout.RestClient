@@ -84,13 +84,13 @@ jobs:
       - name: Upload packages to release
         uses: softprops/action-gh-release@v2
         with:
-          files: ./nupkgs/*.nupkg
+          files: ./nupkgs/*.symbols.nupkg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push to NuGet.org
         run: |
-          dotnet nuget push ./nupkgs/*.nupkg \
+          dotnet nuget push ./nupkgs/*.symbols.nupkg \
             --api-key ${{ secrets.NUGET_API_KEY }} \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
