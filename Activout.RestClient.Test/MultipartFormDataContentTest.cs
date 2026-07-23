@@ -112,6 +112,49 @@ namespace Activout.RestClient.Test
         }
 
         [Fact]
+        public async Task TestSendFormInFormWithTypedPart()
+        {
+            // Arrange
+            var client = CreateClient();
+            var collector = new HttpRequestMessageCollector();
+
+            _mockHttp
+                .Expect(HttpMethod.Post, BaseUri + "multiparttyped")
+                .With(message =>
+                {
+                    collector.Message = message;
+                    return message.Content?.Headers.ContentType?.MediaType == "multipart/form-data";
+                })
+                .Respond(HttpStatusCode.OK);
+
+            // Act
+            await client.SendTypedParts(new[]
+            {
+                new Part<string>(Content: "foo", FileName: "foo.txt"),
+                new Part<string>(Content: "bar", FileName: "bar.txt")
+            });
+
+            // Assert
+            _mockHttp.VerifyNoOutstandingExpectation();
+
+            var multipartFormDataContent = collector.Message?.Content as MultipartFormDataContent;
+            Assert.NotNull(multipartFormDataContent);
+
+            var content = multipartFormDataContent.ToArray();
+            Assert.Equal(2, content.Length);
+
+            var attachment1 = content[0];
+            Assert.Equal("foo", await attachment1.ReadAsStringAsync());
+            Assert.Equal("attachment", attachment1.Headers.ContentDisposition?.Name);
+            Assert.Equal("foo.txt", attachment1.Headers.ContentDisposition?.FileName);
+
+            var attachment2 = content[1];
+            Assert.Equal("bar", await attachment2.ReadAsStringAsync());
+            Assert.Equal("attachment", attachment2.Headers.ContentDisposition?.Name);
+            Assert.Equal("bar.txt", attachment2.Headers.ContentDisposition?.FileName);
+        }
+
+        [Fact]
         public async Task TestSendMultipartFormDataContent()
         {
             // Arrange
@@ -186,6 +229,12 @@ namespace Activout.RestClient.Test
                 [PartParam("attachment", contentType: "application/octet-stream")]
                 Part[] parts);
 
+            [Path("typed")]
+            [Post]
+            Task SendTypedParts(
+                [PartParam("attachment", contentType: "application/octet-stream")]
+                Part<string>[] parts);
+
 
             [Post]
             Task SendParts(
@@ -214,4 +263,3 @@ namespace Activout.RestClient.Test
         }
     }
 }
-

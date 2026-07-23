@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
@@ -26,10 +29,44 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build --configuration=Release --no-restore
       - name: Test
         timeout-minutes: 2
-        run: dotnet test --no-build
+        run: dotnet test --configuration=Release --no-build
+      - name: Pack NuGet packages (PR validation)
+        if: matrix.dotnet-version == '8.0.x'
+        run: |
+          dotnet pack Activout.RestClient/Activout.RestClient.csproj \
+            -p:PackageVersion=1.0.0-pr${{ github.event.pull_request.number }}.${{ github.run_number }} \
+            --configuration=Release \
+            --no-build \
+            --include-symbols \
+            --include-source
+          dotnet pack Activout.RestClient.Json/Activout.RestClient.Json.csproj \
+            -p:PackageVersion=1.0.0-pr${{ github.event.pull_request.number }}.${{ github.run_number }} \
+            --configuration=Release \
+            --no-build \
+            --include-symbols \
+            --include-source
+          dotnet pack Activout.RestClient.Newtonsoft.Json/Activout.RestClient.Newtonsoft.Json.csproj \
+            -p:PackageVersion=1.0.0-pr${{ github.event.pull_request.number }}.${{ github.run_number }} \
+            --configuration=Release \
+            --no-build \
+            --include-symbols \
+            --include-source
+          dotnet pack Activout.RestClient.Xml/Activout.RestClient.Xml.csproj \
+            -p:PackageVersion=1.0.0-pr${{ github.event.pull_request.number }}.${{ github.run_number }} \
+            --configuration=Release \
+            --no-build \
+            --include-symbols \
+            --include-source
+      - name: Upload NuGet packages
+        if: matrix.dotnet-version == '8.0.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages-pr${{ github.event.pull_request.number }}-run${{ github.run_number }}
+          path: |
+            **/*.symbols.nupkg
 #      - name: Archive test results
 #        uses: actions/upload-artifact@v4
 #        if: always()

@@ -1,0 +1,96 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          # Remove 'v' prefix if present (e.g., v1.2.3 -> 1.2.3)
+          VERSION=${GITHUB_REF#refs/tags/}
+          VERSION=${VERSION#v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration=Release --no-restore
+
+      - name: Test
+        timeout-minutes: 2
+        run: dotnet test --configuration=Release --no-build
+
+      - name: Pack Activout.RestClient
+        run: |
+          dotnet pack Activout.RestClient/Activout.RestClient.csproj \
+            -p:PackageVersion=${{ steps.get_version.outputs.VERSION }} \
+            --configuration=Release \
+            --no-build \
+            --include-symbols \
+            --include-source \
+            --output ./nupkgs
+
+      - name: Pack Activout.RestClient.Json
+        run: |
+          dotnet pack Activout.RestClient.Json/Activout.RestClient.Json.csproj \
+            -p:PackageVersion=${{ steps.get_version.outputs.VERSION }} \
+            --configuration=Release \
+            --no-build \
+            --include-symbols \
+            --include-source \
+            --output ./nupkgs
+
+      - name: Pack Activout.RestClient.Newtonsoft.Json
+        run: |
+          dotnet pack Activout.RestClient.Newtonsoft.Json/Activout.RestClient.Newtonsoft.Json.csproj \
+            -p:PackageVersion=${{ steps.get_version.outputs.VERSION }} \
+            --configuration=Release \
+            --no-build \
+            --include-symbols \
+            --include-source \
+            --output ./nupkgs
+
+      - name: Pack Activout.RestClient.Xml
+        run: |
+          dotnet pack Activout.RestClient.Xml/Activout.RestClient.Xml.csproj \
+            -p:PackageVersion=${{ steps.get_version.outputs.VERSION }} \
+            --configuration=Release \
+            --no-build \
+            --include-symbols \
+            --include-source \
+            --output ./nupkgs
+
+      - name: List generated packages
+        run: ls -lh ./nupkgs/
+
+      - name: Upload packages to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./nupkgs/*.symbols.nupkg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push to NuGet.org
+        run: |
+          dotnet nuget push ./nupkgs/*.symbols.nupkg \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
