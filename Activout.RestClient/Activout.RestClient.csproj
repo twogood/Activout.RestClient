@@ -8,10 +8,6 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Title>Activout Rest Client</Title>
     <Description>Create a REST(ish) API client only by defining the C# interface you want.</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/twogood/Activout.RestClient</PackageProjectUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/twogood/Activout.RestClient.git</RepositoryUrl>
     <PackageTags>rest;rest-client;http;api;client;interface;code-generation;dotnet</PackageTags>
   </PropertyGroup>
   <ItemGroup>
