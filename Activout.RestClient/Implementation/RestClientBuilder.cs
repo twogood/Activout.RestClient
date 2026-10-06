@@ -19,8 +19,6 @@ internal class RestClientBuilder : IRestClientBuilder
 {
     private static readonly MediaType DefaultContentType = new MediaType("text/plain");
 
-    private IDuckTyping _duckTyping = DuckTyping.Instance;
-
     private readonly List<ISerializer>
         _serializers = new List<ISerializer>(); // SerializationManager.DefaultSerializers.ToList();
 
@@ -61,12 +59,6 @@ internal class RestClientBuilder : IRestClientBuilder
             throw new InvalidOperationException("Use ContentType method to set default content type.");
         }
         _defaultHeaders.AddOrReplaceHeader(name, value, isReplace);
-        return this;
-    }
-
-    public IRestClientBuilder With(IDuckTyping duckTyping)
-    {
-        _duckTyping = duckTyping;
         return this;
     }
 
@@ -173,8 +165,7 @@ internal class RestClientBuilder : IRestClientBuilder
             RequestLogger: _requestLogger ?? DummyRequestLogger.Instance
         );
 
-        var client = new RestClient(type, context);
-        return _duckTyping.DuckType<T>(client);
+        return RestClient.Create<T>(context);
     }
 
     private void HandleAttributes(Type type)

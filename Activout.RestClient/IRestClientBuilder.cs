@@ -13,7 +13,6 @@ public interface IRestClientBuilder
     IRestClientBuilder BaseUri(Uri apiUri);
     IRestClientBuilder ContentType(MediaType contentType);
     IRestClientBuilder Header(string name, object value, bool isReplace = true);
-    IRestClientBuilder With(IDuckTyping duckTyping);
     IRestClientBuilder With(ILogger logger);
     IRestClientBuilder With(HttpClient httpClient);
     IRestClientBuilder With(IRequestLogger requestLogger);

@@ -98,7 +98,6 @@ public class HttpClientFactoryWithDelegatingHandlerTest
 
     private static IServiceCollection AddRestClient(IServiceCollection services)
     {
-        services.TryAddTransient<IDuckTyping, DuckTyping>();
         services.TryAddTransient<IParamConverterManager, ParamConverterManager>();
         services.TryAddTransient<IRestClientFactory, RestClientFactory>();
         services.TryAddTransient<ITaskConverterFactory, TaskConverter3Factory>();

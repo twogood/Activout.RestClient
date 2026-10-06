@@ -75,7 +75,6 @@ This allows for a much more natural coding style, and the underlying implementat
 ```C#
 public static IServiceCollection AddRestClient(this IServiceCollection self)
 {
-  self.TryAddTransient<IDuckTyping, DuckTyping>();
   self.TryAddTransient<IParamConverterManager, ParamConverterManager>();
   self.TryAddTransient<IRestClientFactory, RestClientFactory>();
   self.TryAddTransient<ITaskConverterFactory, TaskConverter3Factory>();
