@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Activout.RestClient.DomainExceptions;
-using System.Diagnostics;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
 using Microsoft.Extensions.Logging;
@@ -48,7 +47,7 @@ internal class RequestHandler
         _actualReturnType = GetActualReturnType();
         _parameters = method.GetParameters();
         _paramConverters = GetParamConverters(context.ParamConverterManager);
-        _converter = CreateConverter();
+        _converter = TaskConverter.Create(_actualReturnType);
         _template = context.BaseTemplate;
         _serializer = context.DefaultSerializer;
         _contentType = context.DefaultContentType;
@@ -135,22 +134,6 @@ internal class RequestHandler
     {
         return attribute.HttpMethod;
     }
-
-    private static readonly MethodInfo ConvertMethod =
-        typeof(RequestHandler).GetMethod(nameof(Convert), BindingFlags.NonPublic | BindingFlags.Static)!;
-
-    private Func<Task<object?>, object>? CreateConverter() =>
-        _actualReturnType == typeof(void)
-            ? null
-            : (Func<Task<object?>, object>)ConvertMethod.MakeGenericMethod(_actualReturnType)
-                .CreateDelegate(typeof(Func<Task<object?>, object>));
-
-    // Convert Task<object?> to Task<T?>. Two methods: the async one cannot return object.
-    [StackTraceHidden]
-    private static object Convert<T>(Task<object?> task) => ConvertAsync<T>(task);
-
-    [StackTraceHidden]
-    private static async Task<T?> ConvertAsync<T>(Task<object?> task) => (T?)await task;
 
     private bool IsVoidTask()
     {
