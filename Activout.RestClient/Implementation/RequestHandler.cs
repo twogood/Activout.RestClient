@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Activout.RestClient.DomainExceptions;
-using Activout.RestClient.Helpers;
+using System.Diagnostics;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
 using Microsoft.Extensions.Logging;
@@ -29,7 +29,7 @@ internal class RequestHandler
     private readonly int _bodyArgumentIndex = -1;
     private readonly MediaType _contentType;
     private readonly RestClientContext _context;
-    private readonly ITaskConverter? _converter;
+    private readonly Func<Task<object?>, object>? _converter;
     private readonly Type _errorResponseType;
     private readonly HttpMethod _httpMethod = HttpMethod.Get;
     private readonly ParameterInfo[] _parameters;
@@ -48,7 +48,7 @@ internal class RequestHandler
         _actualReturnType = GetActualReturnType();
         _parameters = method.GetParameters();
         _paramConverters = GetParamConverters(context.ParamConverterManager);
-        _converter = CreateConverter(context);
+        _converter = CreateConverter();
         _template = context.BaseTemplate;
         _serializer = context.DefaultSerializer;
         _contentType = context.DefaultContentType;
@@ -136,17 +136,21 @@ internal class RequestHandler
         return attribute.HttpMethod;
     }
 
-    private ITaskConverter? CreateConverter(RestClientContext context)
-    {
-        if (_actualReturnType == typeof(void))
-        {
-            return null;
-        }
+    private static readonly MethodInfo ConvertMethod =
+        typeof(RequestHandler).GetMethod(nameof(Convert), BindingFlags.NonPublic | BindingFlags.Static)!;
 
-        return context.TaskConverterFactory.CreateTaskConverter(_actualReturnType) ??
-               throw new InvalidOperationException("Failed to create task converter for return type: " +
-                                                   _actualReturnType);
-    }
+    private Func<Task<object?>, object>? CreateConverter() =>
+        _actualReturnType == typeof(void)
+            ? null
+            : (Func<Task<object?>, object>)ConvertMethod.MakeGenericMethod(_actualReturnType)
+                .CreateDelegate(typeof(Func<Task<object?>, object>));
+
+    // Convert Task<object?> to Task<T?>. Two methods: the async one cannot return object.
+    [StackTraceHidden]
+    private static object Convert<T>(Task<object?> task) => ConvertAsync<T>(task);
+
+    [StackTraceHidden]
+    private static async Task<T?> ConvertAsync<T>(Task<object?> task) => (T?)await task;
 
     private bool IsVoidTask()
     {
@@ -247,7 +251,7 @@ internal class RequestHandler
         if (IsVoidTask())
             return task;
         if (_returnType.BaseType == typeof(Task) && _returnType.IsGenericType && _converter != null)
-            return _converter.ConvertReturnType(task);
+            return _converter(task);
         return task.Result;
     }
 

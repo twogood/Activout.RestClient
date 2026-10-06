@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using Activout.RestClient.DomainExceptions;
-using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
 using Microsoft.Extensions.Logging;
@@ -15,7 +14,6 @@ internal record RestClientContext(
     ISerializer DefaultSerializer,
     ISerializationManager SerializationManager,
     HttpClient HttpClient,
-    ITaskConverterFactory TaskConverterFactory,
     Type? ErrorResponseType,
     MediaType DefaultContentType,
     IParamConverterManager ParamConverterManager,
