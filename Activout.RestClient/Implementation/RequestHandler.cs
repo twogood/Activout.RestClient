@@ -47,7 +47,7 @@ internal class RequestHandler
         _actualReturnType = GetActualReturnType();
         _parameters = method.GetParameters();
         _paramConverters = GetParamConverters(context.ParamConverterManager);
-        _converter = TaskConverter.Create(_actualReturnType);
+        _converter = _actualReturnType == typeof(void) ? null : TaskConverter.Create(_actualReturnType);
         _template = context.BaseTemplate;
         _serializer = context.DefaultSerializer;
         _contentType = context.DefaultContentType;

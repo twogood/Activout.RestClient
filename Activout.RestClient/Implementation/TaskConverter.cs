@@ -13,11 +13,9 @@ internal static class TaskConverter
     private static readonly MethodInfo ConvertMethod =
         typeof(TaskConverter).GetMethod(nameof(Convert), BindingFlags.NonPublic | BindingFlags.Static)!;
 
-    public static Func<Task<object?>, object>? Create(Type actualReturnType) =>
-        actualReturnType == typeof(void)
-            ? null
-            : (Func<Task<object?>, object>)ConvertMethod.MakeGenericMethod(actualReturnType)
-                .CreateDelegate(typeof(Func<Task<object?>, object>));
+    public static Func<Task<object?>, object> Create(Type actualReturnType) =>
+        (Func<Task<object?>, object>)ConvertMethod.MakeGenericMethod(actualReturnType)
+            .CreateDelegate(typeof(Func<Task<object?>, object>));
 
     // Two methods: the async one cannot return object.
     [StackTraceHidden]
