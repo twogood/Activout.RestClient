@@ -4,8 +4,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using Activout.RestClient.DomainExceptions;
-using Activout.RestClient.Helpers;
-using Activout.RestClient.Helpers.Implementation;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.ParamConverter.Implementation;
 using Activout.RestClient.Serialization;
@@ -31,7 +29,6 @@ internal class RestClientBuilder : IRestClientBuilder
     private ISerializer? _defaultSerializer;
     private ISerializationManager? _serializationManager;
     private HttpClient? _httpClient;
-    private ITaskConverterFactory? _taskConverterFactory;
     private Type? _errorResponseType;
     private MediaType? _defaultContentType;
     private IParamConverterManager? _paramConverterManager;
@@ -116,12 +113,6 @@ internal class RestClientBuilder : IRestClientBuilder
         return this;
     }
 
-    public IRestClientBuilder With(ITaskConverterFactory taskConverterFactory)
-    {
-        _taskConverterFactory = taskConverterFactory;
-        return this;
-    }
-
     public IRestClientBuilder With(IDomainExceptionMapperFactory domainExceptionMapperFactory)
     {
         _domainExceptionMapperFactory = domainExceptionMapperFactory;
@@ -153,7 +144,6 @@ internal class RestClientBuilder : IRestClientBuilder
             DefaultSerializer: _defaultSerializer,
             SerializationManager: _serializationManager,
             HttpClient: _httpClient ?? new HttpClient(),
-            TaskConverterFactory: _taskConverterFactory ?? TaskConverter3Factory.Instance,
             ErrorResponseType: _errorResponseType,
             DefaultContentType: _defaultContentType ?? throw new InvalidOperationException("DefaultContentType is not set."),
             ParamConverterManager: _paramConverterManager ?? ParamConverterManager.Instance,

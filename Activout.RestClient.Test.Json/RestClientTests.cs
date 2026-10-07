@@ -1,4 +1,3 @@
-using Activout.RestClient.Helpers.Implementation;
 using Activout.RestClient.Json;
 using Activout.RestClient.Newtonsoft.Json;
 using Activout.RestClient.Test.Json.MovieReviews;

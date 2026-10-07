@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Activout.RestClient.DomainExceptions;
-using Activout.RestClient.Helpers;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.Serialization;
 using Microsoft.Extensions.Logging;
@@ -29,7 +28,7 @@ internal class RequestHandler
     private readonly int _bodyArgumentIndex = -1;
     private readonly MediaType _contentType;
     private readonly RestClientContext _context;
-    private readonly ITaskConverter? _converter;
+    private readonly Func<Task<object?>, object>? _converter;
     private readonly Type _errorResponseType;
     private readonly HttpMethod _httpMethod = HttpMethod.Get;
     private readonly ParameterInfo[] _parameters;
@@ -48,7 +47,7 @@ internal class RequestHandler
         _actualReturnType = GetActualReturnType();
         _parameters = method.GetParameters();
         _paramConverters = GetParamConverters(context.ParamConverterManager);
-        _converter = CreateConverter(context);
+        _converter = _actualReturnType == typeof(void) ? null : TaskConverter.Create(_actualReturnType);
         _template = context.BaseTemplate;
         _serializer = context.DefaultSerializer;
         _contentType = context.DefaultContentType;
@@ -134,18 +133,6 @@ internal class RequestHandler
     private static HttpMethod GetHttpMethod(HttpMethodAttribute attribute)
     {
         return attribute.HttpMethod;
-    }
-
-    private ITaskConverter? CreateConverter(RestClientContext context)
-    {
-        if (_actualReturnType == typeof(void))
-        {
-            return null;
-        }
-
-        return context.TaskConverterFactory.CreateTaskConverter(_actualReturnType) ??
-               throw new InvalidOperationException("Failed to create task converter for return type: " +
-                                                   _actualReturnType);
     }
 
     private bool IsVoidTask()
@@ -247,7 +234,7 @@ internal class RequestHandler
         if (IsVoidTask())
             return task;
         if (_returnType.BaseType == typeof(Task) && _returnType.IsGenericType && _converter != null)
-            return _converter.ConvertReturnType(task);
+            return _converter(task);
         return task.Result;
     }
 

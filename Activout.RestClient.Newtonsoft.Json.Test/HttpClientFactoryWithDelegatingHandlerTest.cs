@@ -5,8 +5,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Activout.RestClient.Helpers;
-using Activout.RestClient.Helpers.Implementation;
 using Activout.RestClient.Newtonsoft.Json.Test.MovieReviews;
 using Activout.RestClient.ParamConverter;
 using Activout.RestClient.ParamConverter.Implementation;
@@ -100,7 +98,6 @@ public class HttpClientFactoryWithDelegatingHandlerTest
     {
         services.TryAddTransient<IParamConverterManager, ParamConverterManager>();
         services.TryAddTransient<IRestClientFactory, RestClientFactory>();
-        services.TryAddTransient<ITaskConverterFactory, TaskConverter3Factory>();
         return services;
     }
 

@@ -77,7 +77,6 @@ public static IServiceCollection AddRestClient(this IServiceCollection self)
 {
   self.TryAddTransient<IParamConverterManager, ParamConverterManager>();
   self.TryAddTransient<IRestClientFactory, RestClientFactory>();
-  self.TryAddTransient<ITaskConverterFactory, TaskConverter3Factory>();
   return self;
 }
 ```
