@@ -17,10 +17,7 @@ internal static class TaskConverter
         (Func<Task<object?>, object>)ConvertMethod.MakeGenericMethod(actualReturnType)
             .CreateDelegate(typeof(Func<Task<object?>, object>));
 
-    // Two methods: the async one cannot return object.
+    // Binds to Func<Task<object?>, object> via return type covariance (Task<T?> is a reference type).
     [StackTraceHidden]
-    private static object Convert<T>(Task<object?> task) => ConvertAsync<T>(task);
-
-    [StackTraceHidden]
-    private static async Task<T?> ConvertAsync<T>(Task<object?> task) => (T?)await task;
+    private static async Task<T?> Convert<T>(Task<object?> task) => (T?)await task;
 }
