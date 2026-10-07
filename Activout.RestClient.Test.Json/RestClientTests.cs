@@ -170,6 +170,47 @@ public class RestClientTests(ITestOutputHelper outputHelper)
         Assert.Equal("Sorry, that page does not exist", error.Errors[0].Message);
     }
 
+    // Simulates a UI thread: continuations posted to it never run while it is blocked.
+    private sealed class NonPumpingSynchronizationContext : SynchronizationContext
+    {
+        public override void Post(SendOrPostCallback d, object? state)
+        {
+        }
+    }
+
+    [Theory]
+    [InlineData(JsonImplementation.SystemTextJson)]
+    [InlineData(JsonImplementation.NewtonsoftJson)]
+    public void TestSyncCallDoesNotDeadlockUnderSynchronizationContext(JsonImplementation jsonImplementation)
+    {
+        // arrange
+        _mockHttp
+            .When(HttpMethod.Get, $"{BaseUri}/movies/{MovieId}/reviews/{ReviewId}")
+            .Respond(async () =>
+            {
+                await Task.Delay(50).ConfigureAwait(false); // force SendAsync to complete asynchronously
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("""{"Stars":5,"Text":"ok"}""", Encoding.UTF8, "application/json")
+                };
+            });
+
+        var reviewSvc = CreateMovieReviewService(jsonImplementation);
+        Review? result = null;
+
+        // act
+        var thread = new Thread(() =>
+        {
+            SynchronizationContext.SetSynchronizationContext(new NonPumpingSynchronizationContext());
+            result = reviewSvc.GetReview(MovieId, ReviewId);
+        }) { IsBackground = true };
+        thread.Start();
+
+        // assert
+        Assert.True(thread.Join(TimeSpan.FromSeconds(10)), "Sync call deadlocked under a SynchronizationContext");
+        Assert.Equal(5, result?.Stars);
+    }
+
     [Theory]
     [InlineData(JsonImplementation.SystemTextJson)]
     [InlineData(JsonImplementation.NewtonsoftJson)]
