@@ -66,7 +66,7 @@ This allows for a much more natural coding style, and the underlying implementat
 ## Usage notes
 
 - Built for ASP.NET 8 and 9
-- Both synchronous and asynchronous calls are supported. Asynchronous is recommended.
+- Asynchronous calls (`Task`, `Task<T>`) are recommended. Synchronous calls are deprecated: a warning is logged when such a method is first used, and support will be removed in the next major version.
 - Additional serializers and deserializers can be added at will.
 - Support for custom error objects via \[ErrorResponse\] attribute. These will be included in a RestClientException that is thrown if the API call fails.
 
