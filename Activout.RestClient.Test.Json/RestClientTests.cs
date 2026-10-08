@@ -170,7 +170,6 @@ public class RestClientTests(ITestOutputHelper outputHelper)
         Assert.Equal("Sorry, that page does not exist", error.Errors[0].Message);
     }
 
-    // Simulates a UI thread: continuations posted to it never run while it is blocked.
     private sealed class NonPumpingSynchronizationContext : SynchronizationContext
     {
         public override void Post(SendOrPostCallback d, object? state)
