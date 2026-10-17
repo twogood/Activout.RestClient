@@ -10,7 +10,7 @@ internal class StringDeserializer : IDeserializer
 
     public async Task<object?> Deserialize(HttpContent content, Type type)
     {
-        var stringData = await content.ReadAsStringAsync();
+        var stringData = await content.ReadAsStringAsync().ConfigureAwait(false);
         return type == typeof(string)
             ? stringData
             : Activator.CreateInstance(type, stringData);

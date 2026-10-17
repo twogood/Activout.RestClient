@@ -29,7 +29,8 @@ public class SystemTextJsonDeserializer(
     /// <returns>The deserialized object.</returns>
     public async Task<object?> Deserialize(HttpContent content, Type type)
     {
-        await using var stream = await content.ReadAsStreamAsync();
+        var stream = await content.ReadAsStreamAsync().ConfigureAwait(false);
+        await using var _ = stream.ConfigureAwait(false);
 
         // ReSharper disable once MergeIntoPattern
         if (stream.CanSeek && stream.Length == 0)
@@ -37,7 +38,7 @@ public class SystemTextJsonDeserializer(
             return null;
         }
 
-        return await JsonSerializer.DeserializeAsync(stream, type, _serializerOptions);
+        return await JsonSerializer.DeserializeAsync(stream, type, _serializerOptions).ConfigureAwait(false);
     }
 
     /// <summary>

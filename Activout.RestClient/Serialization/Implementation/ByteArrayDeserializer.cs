@@ -17,7 +17,7 @@ namespace Activout.RestClient.Serialization.Implementation
 
         public async Task<object?> Deserialize(HttpContent content, Type type)
         {
-            var bytes = await content.ReadAsByteArrayAsync();
+            var bytes = await content.ReadAsByteArrayAsync().ConfigureAwait(false);
             if (type == typeof(byte[]))
             {
                 return bytes;

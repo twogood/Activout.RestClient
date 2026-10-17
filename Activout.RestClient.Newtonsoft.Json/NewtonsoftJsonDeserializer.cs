@@ -21,15 +21,15 @@ public class NewtonsoftJsonDeserializer : IDeserializer
     {
         if (type == typeof(JObject))
         {
-            return JObject.Parse(await content.ReadAsStringAsync());
+            return JObject.Parse(await content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
         if (type == typeof(JArray))
         {
-            return JArray.Parse(await content.ReadAsStringAsync());
+            return JArray.Parse(await content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
-        return JsonConvert.DeserializeObject(await content.ReadAsStringAsync(), type, _jsonSerializerSettings);
+        return JsonConvert.DeserializeObject(await content.ReadAsStringAsync().ConfigureAwait(false), type, _jsonSerializerSettings);
     }
 
     public bool CanDeserialize(MediaType mediaType)
