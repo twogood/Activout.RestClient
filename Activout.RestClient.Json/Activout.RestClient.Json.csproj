@@ -14,10 +14,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="10.0.14" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Activout.RestClient\Activout.RestClient.csproj" />
   </ItemGroup>
 
