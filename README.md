@@ -127,6 +127,34 @@ for System.Text.Json support) to enable JSON serialization and deserialization.
 
 - Support for cookie parameters, if someone need them
 
+## Comparison with Refit and Kiota
+
+[Refit](https://github.com/reactiveui/refit) and [Kiota](https://github.com/microsoft/kiota) are the most common
+alternatives. An honest summary:
+
+| | Activout.RestClient | Refit | Kiota |
+|---|---|---|---|
+| You write | Attributed C# interface | Attributed C# interface | Nothing, generated from OpenAPI |
+| Client created | Runtime (`DispatchProxy` + reflection) | Compile time (source generator) | Generated code checked in |
+| Trimming / NativeAOT | No | Yes with generated clients (reflection is opt-in via `Refit.Reflection`) | Yes (libraries are `IsAotCompatible`) |
+| Interface errors caught | On first call | Build time (analyzers and code fixes) | N/A |
+| `IHttpClientFactory` / DI | Manual (pass an `HttpClient`) | `Refit.HttpClientFactory` (`AddRefitClient<T>()`) | Documented pattern: `AddKiotaHandlers()` plus your own client factory |
+| Typed error bodies | Declarative `[ErrorResponse]` | `ApiException.GetContentAsAsync<T>()` | Generated per status code from the OpenAPI spec, thrown as typed exceptions |
+| Custom exception mapping | `IDomainExceptionMapperFactory` | `ExceptionFactory` in `RefitSettings` | Only via the spec's error mappings |
+| Serialization | Pluggable per media type (System.Text.Json, Newtonsoft.Json, XML, text, ...) | System.Text.Json (preferred), Newtonsoft.Json, XML | JSON, form, multipart, text |
+| Response wrapper | `HttpResponseMessage` | `ApiResponse<T>` | `NativeResponseHandler` |
+| Target frameworks | .NET 8+ | .NET 8–11, .NET Framework 4.6.2+ | .NET Standard 2.0+ |
+| Languages | C# | C# | C#, Go, Java, PHP, Python (stable); TypeScript, Dart, Ruby (preview) |
+| Community | Small | Large | Large (Microsoft) |
+
+Rule of thumb:
+
+- **Large API with a good OpenAPI spec, or multiple languages:** Kiota.
+- **Hand-written client in a typical .NET app:** Refit is the safe default, and the only choice of the three for
+  trimmed or NativeAOT apps without an OpenAPI spec.
+- **Activout.RestClient:** if you prefer declaring typed error bodies with an attribute, want pluggable per-media-type
+  serialization, and don't need trimming/AOT.
+
 ## Similar projects
 
 I deliberately implemented my project without even searching for C# projects using the same concept, but afterwards I have found these:
