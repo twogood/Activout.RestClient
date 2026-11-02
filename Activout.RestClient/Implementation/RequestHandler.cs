@@ -24,15 +24,10 @@ internal class RequestHandler
     // https://tools.ietf.org/html/rfc7578#section-4.4
     private static readonly MediaType DefaultPartContentType = new MediaType("text/plain");
 
-    private readonly Type _actualReturnType;
-    private readonly int _bodyArgumentIndex = -1;
+    private readonly RouteMetadata _meta;
     private readonly MediaType _contentType;
     private readonly RestClientContext _context;
-    private readonly Func<Task<object?>, object>? _converter;
     private readonly Type _errorResponseType;
-    private readonly HttpMethod _httpMethod = HttpMethod.Get;
-    private readonly ParameterInfo[] _parameters;
-    private readonly Type _returnType;
     private readonly ISerializer _serializer;
     private readonly string _template;
     private readonly IParamConverter[] _paramConverters;
@@ -43,59 +38,14 @@ internal class RequestHandler
 
     public RequestHandler(MethodInfo method, RestClientContext context)
     {
-        _returnType = method.ReturnType;
-        _actualReturnType = GetActualReturnType();
-        _parameters = method.GetParameters();
+        _meta = RouteMetadata.Get(method);
         _paramConverters = GetParamConverters(context.ParamConverterManager);
-        _converter = _actualReturnType == typeof(void) ? null : TaskConverter.Create(_actualReturnType);
-        _template = context.BaseTemplate;
-        _serializer = context.DefaultSerializer;
-        _contentType = context.DefaultContentType;
-        _errorResponseType = context.ErrorResponseType ?? typeof(string);
+        _template = context.BaseTemplate + _meta.TemplateSuffix;
+        _contentType = _meta.ContentType ?? context.DefaultContentType;
+        _errorResponseType = _meta.ErrorResponseType ?? context.ErrorResponseType ?? typeof(string);
         _requestHeaders.AddRange(context.DefaultHeaders);
-
-        var templateBuilder = new StringBuilder(context.BaseTemplate);
-        foreach (var attribute in method.GetCustomAttributes(true))
-            switch (attribute)
-            {
-                case ContentTypeAttribute contentTypeAttribute:
-                    _contentType = new MediaType(contentTypeAttribute.ContentType);
-                    break;
-
-                case ErrorResponseAttribute errorResponseAttribute:
-                    _errorResponseType = errorResponseAttribute.Type;
-                    break;
-
-                case HeaderAttribute headerAttribute:
-                    _requestHeaders.AddOrReplaceHeader(headerAttribute.Name, headerAttribute.Value,
-                        headerAttribute.Replace);
-                    break;
-
-                case HttpMethodAttribute httpMethodAttribute:
-                    templateBuilder.Append(httpMethodAttribute.Template);
-                    _httpMethod = GetHttpMethod(httpMethodAttribute);
-                    break;
-
-                case PathAttribute pathAttribute:
-                    templateBuilder.Append(pathAttribute.Template);
-                    break;
-            }
-
-        if (IsHttpMethodWithBody())
-        {
-            _bodyArgumentIndex = _parameters.Length - 1;
-
-            if (_parameters.Length > 0 &&
-                _parameters[_bodyArgumentIndex].ParameterType == typeof(CancellationToken))
-            {
-                _bodyArgumentIndex--;
-            }
-
-            if (_bodyArgumentIndex < 0)
-            {
-                throw new InvalidOperationException("No body argument found for method: " + method.Name);
-            }
-        }
+        foreach (var header in _meta.Headers)
+            _requestHeaders.AddOrReplaceHeader(header.Name, header.Value, header.Replace);
 
         _serializer = context.SerializationManager.GetSerializer(_contentType) ??
                       throw new InvalidOperationException("No serializer found for content type: " + _contentType);
@@ -108,50 +58,21 @@ internal class RequestHandler
                 context.DomainExceptionType);
         }
 
-        _template = templateBuilder.ToString();
         _context = context;
-    }
-
-    private bool IsHttpMethodWithBody()
-    {
-        return _httpMethod == HttpMethod.Post || _httpMethod == HttpMethod.Put || _httpMethod == HttpMethod.Patch;
     }
 
     private IParamConverter[] GetParamConverters(IParamConverterManager paramConverterManager)
     {
-        var paramConverters = new IParamConverter[_parameters.Length];
-        for (var i = 0; i < _parameters.Length; i++)
+        var parameters = _meta.Parameters;
+        var paramConverters = new IParamConverter[parameters.Length];
+        for (var i = 0; i < parameters.Length; i++)
         {
-            paramConverters[i] = paramConverterManager.GetConverter(_parameters[i].ParameterType, _parameters[i])
+            paramConverters[i] = paramConverterManager.GetConverter(parameters[i].ParameterType, parameters[i])
                                  ?? throw new InvalidOperationException(
-                                     "No parameter converter found for type: " + _parameters[i].ParameterType);
+                                     "No parameter converter found for type: " + parameters[i].ParameterType);
         }
 
         return paramConverters;
-    }
-
-    private static HttpMethod GetHttpMethod(HttpMethodAttribute attribute)
-    {
-        return attribute.HttpMethod;
-    }
-
-    private bool IsVoidTask()
-    {
-        return _returnType == typeof(Task);
-    }
-
-    private bool IsGenericTask()
-    {
-        return _returnType.BaseType == typeof(Task) && _returnType.IsGenericType;
-    }
-
-    private Type GetActualReturnType()
-    {
-        if (IsVoidTask())
-            return typeof(void);
-        if (IsGenericTask())
-            return _returnType.GenericTypeArguments[0];
-        return _returnType;
     }
 
     private string ExpandTemplate(Dictionary<string, object> routeParams)
@@ -209,11 +130,11 @@ internal class RequestHandler
 
         var requestUri = new Uri(requestUriString, UriKind.RelativeOrAbsolute);
 
-        var request = new HttpRequestMessage(_httpMethod, requestUri);
+        var request = new HttpRequestMessage(_meta.HttpMethod, requestUri);
 
         SetHeaders(request, headers);
 
-        if (IsHttpMethodWithBody())
+        if (_meta.IsHttpMethodWithBody)
         {
             if (partParams.Count != 0)
             {
@@ -225,16 +146,16 @@ internal class RequestHandler
             }
             else if (args != null)
             {
-                request.Content = GetHttpContent(_serializer, args[_bodyArgumentIndex], _contentType);
+                request.Content = GetHttpContent(_serializer, args[_meta.BodyArgumentIndex], _contentType);
             }
         }
 
         var task = SendRequestAndHandleResponse(request, cancellationToken);
 
-        if (IsVoidTask())
+        if (_meta.IsVoidTask)
             return task;
-        if (_returnType.BaseType == typeof(Task) && _returnType.IsGenericType && _converter != null)
-            return _converter(task);
+        if (_meta.IsGenericTask && _meta.Converter != null)
+            return _meta.Converter(task);
         return task.Result;
     }
 
@@ -285,13 +206,14 @@ internal class RequestHandler
     {
         var cancellationToken = CancellationToken.None;
 
-        if (_parameters.Length > 0 && args == null || _parameters.Length != args?.Length)
+        var parameters = _meta.Parameters;
+        if (parameters.Length > 0 && args == null || parameters.Length != args?.Length)
         {
             throw new InvalidOperationException(
-                $"Argument count mismatch. Expected: {_parameters.Length}, Actual: {args?.Length ?? 0}");
+                $"Argument count mismatch. Expected: {parameters.Length}, Actual: {args?.Length ?? 0}");
         }
 
-        for (var i = 0; i < _parameters.Length; i++)
+        for (var i = 0; i < parameters.Length; i++)
         {
             var rawValue = args[i];
             if (rawValue is CancellationToken ct)
@@ -305,8 +227,8 @@ internal class RequestHandler
                 continue;
             }
 
-            var parameterAttributes = _parameters[i].GetCustomAttributes(false);
-            var parameterName = _parameters[i].Name ?? throw new InvalidOperationException(
+            var parameterAttributes = _meta.ParameterAttributes[i];
+            var parameterName = parameters[i].Name ?? throw new InvalidOperationException(
                 "Parameter name not found for parameter at index: " + i);
             var handled = false;
 
@@ -314,7 +236,7 @@ internal class RequestHandler
             {
                 if (attribute is PartParamAttribute partAttribute)
                 {
-                    if (_parameters[i].ParameterType.IsArray)
+                    if (parameters[i].ParameterType.IsArray)
                     {
                         if (rawValue is IEnumerable items and not string)
                         {
@@ -344,7 +266,7 @@ internal class RequestHandler
                         foreach (DictionaryEntry entry in dictionary)
                         {
                             var key = entry.Key.ToString();
-                            var value = ConvertValueToString(entry.Value, _parameters[i]);
+                            var value = ConvertValueToString(entry.Value, parameters[i]);
                             if (key != null && value != null)
                             {
                                 queryParams.Add(Uri.EscapeDataString(key) + "=" + Uri.EscapeDataString(value));
@@ -367,7 +289,7 @@ internal class RequestHandler
                         foreach (DictionaryEntry entry in dictionary)
                         {
                             var key = entry.Key.ToString();
-                            var value = ConvertValueToString(entry.Value, _parameters[i]);
+                            var value = ConvertValueToString(entry.Value, parameters[i]);
                             if (key != null && value != null)
                             {
                                 formParams.Add(new KeyValuePair<string, string>(key, value));
@@ -390,7 +312,7 @@ internal class RequestHandler
                         foreach (DictionaryEntry entry in dictionary)
                         {
                             var key = entry.Key.ToString();
-                            var value = ConvertValueToString(entry.Value, _parameters[i]);
+                            var value = ConvertValueToString(entry.Value, parameters[i]);
                             if (key != null && value != null)
                             {
                                 headers.AddOrReplaceHeader(key, value, headerParamAttribute.Replace);
@@ -510,7 +432,7 @@ internal class RequestHandler
 
     private async Task<object?> HandleResponse(HttpRequestMessage request, HttpResponseMessage response)
     {
-        if (_actualReturnType == typeof(HttpResponseMessage))
+        if (_meta.ActualReturnType == typeof(HttpResponseMessage))
         {
             return response;
         }
@@ -518,13 +440,13 @@ internal class RequestHandler
         var shouldDisposeResponse = true;
         try
         {
-            if (_actualReturnType == typeof(HttpStatusCode))
+            if (_meta.ActualReturnType == typeof(HttpStatusCode))
             {
                 return response.StatusCode;
             }
 
             object? data;
-            var type = response.IsSuccessStatusCode ? _actualReturnType : _errorResponseType;
+            var type = response.IsSuccessStatusCode ? _meta.ActualReturnType : _errorResponseType;
 
             if (type == typeof(void))
             {
