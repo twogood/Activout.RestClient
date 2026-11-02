@@ -1,4 +1,5 @@
-// Performance check, not part of `dotnet test`. Run: dotnet run -c Release --project Activout.RestClient.Perf
+// Performance check, not part of `dotnet test`.
+// Run: dotnet run -c Release --project Activout.RestClient.Perf [scenario name filter]
 using System.Diagnostics;
 using Activout.RestClient;
 using RichardSzalay.MockHttp;
@@ -13,14 +14,43 @@ IPerfClient Build() => factory.CreateBuilder()
     .BaseUri(new Uri("https://example.com/api"))
     .Build<IPerfClient>();
 
-Measure("warmup", 2_000, () => Build().Get(1, "q").GetAwaiter().GetResult());
 Measure("new client per call (GET)", 20_000, () => Build().Get(1, "q").GetAwaiter().GetResult());
 Measure("new client per call (POST)", 20_000, () => Build().Post(1, "body").GetAwaiter().GetResult());
+T BuildMany<T>() where T : class => factory.CreateBuilder()
+    .With(httpClient)
+    .BaseUri(new Uri("https://example.com/api"))
+    .Build<T>();
+
+Measure("new client, 5 methods", 20_000, () =>
+{
+    var c = BuildMany<IFiveMethods>();
+    c.M0(1, "q").GetAwaiter().GetResult();
+    c.M1(1, "q").GetAwaiter().GetResult();
+    c.M2(1, "q").GetAwaiter().GetResult();
+    c.M3(1, "q").GetAwaiter().GetResult();
+    c.M4(1, "q").GetAwaiter().GetResult();
+});
+Measure("new client, 10 methods", 20_000, () =>
+{
+    var c = BuildMany<ITenMethods>();
+    c.M0(1, "q").GetAwaiter().GetResult();
+    c.M1(1, "q").GetAwaiter().GetResult();
+    c.M2(1, "q").GetAwaiter().GetResult();
+    c.M3(1, "q").GetAwaiter().GetResult();
+    c.M4(1, "q").GetAwaiter().GetResult();
+    c.M5(1, "q").GetAwaiter().GetResult();
+    c.M6(1, "q").GetAwaiter().GetResult();
+    c.M7(1, "q").GetAwaiter().GetResult();
+    c.M8(1, "q").GetAwaiter().GetResult();
+    c.M9(1, "q").GetAwaiter().GetResult();
+});
 var client = Build();
 Measure("same client (GET)", 200_000, () => client.Get(1, "q").GetAwaiter().GetResult());
 
-static void Measure(string name, int n, Action action)
+void Measure(string name, int n, Action action)
 {
+    if (args.Length > 0 && !name.Contains(args[0])) return; // run one scenario per process: order skews results
+    for (var i = 0; i < n / 10; i++) action(); // warm up (JIT tiering) before timing
     var sw = Stopwatch.StartNew();
     for (var i = 0; i < n; i++) action();
     sw.Stop();
@@ -36,4 +66,59 @@ public interface IPerfClient
 
     [Post("/{id}")]
     Task<string> Post([PathParam] int id, string body);
+}
+
+[Path("items")]
+[Header("X-Perf", "1")]
+public interface IFiveMethods
+{
+    [Get("/m0/{id}")]
+    Task<string> M0([PathParam] int id, [QueryParam] string q);
+
+    [Get("/m1/{id}")]
+    Task<string> M1([PathParam] int id, [QueryParam] string q);
+
+    [Get("/m2/{id}")]
+    Task<string> M2([PathParam] int id, [QueryParam] string q);
+
+    [Get("/m3/{id}")]
+    Task<string> M3([PathParam] int id, [QueryParam] string q);
+
+    [Get("/m4/{id}")]
+    Task<string> M4([PathParam] int id, [QueryParam] string q);
+}
+
+[Path("items")]
+[Header("X-Perf", "1")]
+public interface ITenMethods
+{
+    [Get("/m0/{id}")]
+    Task<string> M0([PathParam] int id, [QueryParam] string q);
+
+    [Get("/m1/{id}")]
+    Task<string> M1([PathParam] int id, [QueryParam] string q);
+
+    [Get("/m2/{id}")]
+    Task<string> M2([PathParam] int id, [QueryParam] string q);
+
+    [Get("/m3/{id}")]
+    Task<string> M3([PathParam] int id, [QueryParam] string q);
+
+    [Get("/m4/{id}")]
+    Task<string> M4([PathParam] int id, [QueryParam] string q);
+
+    [Get("/m5/{id}")]
+    Task<string> M5([PathParam] int id, [QueryParam] string q);
+
+    [Get("/m6/{id}")]
+    Task<string> M6([PathParam] int id, [QueryParam] string q);
+
+    [Get("/m7/{id}")]
+    Task<string> M7([PathParam] int id, [QueryParam] string q);
+
+    [Get("/m8/{id}")]
+    Task<string> M8([PathParam] int id, [QueryParam] string q);
+
+    [Get("/m9/{id}")]
+    Task<string> M9([PathParam] int id, [QueryParam] string q);
 }
