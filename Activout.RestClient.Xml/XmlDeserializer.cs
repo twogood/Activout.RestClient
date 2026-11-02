@@ -9,7 +9,8 @@ public class XmlDeserializer : IDeserializer
     public async Task<object?> Deserialize(HttpContent content, Type type)
     {
         var serializer = new System.Xml.Serialization.XmlSerializer(type);
-        await using var stream = await content.ReadAsStreamAsync();
+        var stream = await content.ReadAsStreamAsync().ConfigureAwait(false);
+        await using var _ = stream.ConfigureAwait(false);
         return serializer.Deserialize(stream) ?? new object();
     }
 
