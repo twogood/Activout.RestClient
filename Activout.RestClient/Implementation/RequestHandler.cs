@@ -40,6 +40,10 @@ internal class RequestHandler
     {
         _meta = RouteMetadata.Get(method);
         _paramConverters = GetParamConverters(context.ParamConverterManager);
+        if (!_meta.IsVoidTask && !_meta.IsGenericTask)
+            context.Logger.LogWarning(
+                "Synchronous method {Type}.{Method} is deprecated and will not be supported in the next major version. Return Task or Task<T> instead.",
+                method.DeclaringType?.Name, method.Name);
         _template = context.BaseTemplate + _meta.TemplateSuffix;
         _contentType = _meta.ContentType ?? context.DefaultContentType;
         _errorResponseType = _meta.ErrorResponseType ?? context.ErrorResponseType ?? typeof(string);
@@ -392,8 +396,8 @@ internal class RequestHandler
     private async Task<object?> SendRequestAndHandleResponse(HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
-        var response = await SendRequest(request, cancellationToken);
-        return await HandleResponse(request, response);
+        var response = await SendRequest(request, cancellationToken).ConfigureAwait(false);
+        return await HandleResponse(request, response).ConfigureAwait(false);
     }
 
     private async Task<HttpResponseMessage> SendRequest(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -406,25 +410,25 @@ internal class RequestHandler
 
             if (request.Content != null)
             {
-                await request.Content.LoadIntoBufferAsync();
+                await request.Content.LoadIntoBufferAsync().ConfigureAwait(false);
                 _context.Logger.LogDebug("{RequestContent}",
-                    (await request.Content.ReadAsStringAsync(cancellationToken)).SafeSubstring(0, 1000));
+                    (await request.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false)).SafeSubstring(0, 1000));
             }
         }
 
         HttpResponseMessage response;
         using (_context.RequestLogger.TimeOperation(request))
         {
-            response = await _context.HttpClient.SendAsync(request, cancellationToken);
+            response = await _context.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
         if (IsDebugLoggingEnabled)
         {
             _context.Logger.LogDebug("{Response}", response);
 
-            await response.Content.LoadIntoBufferAsync();
+            await response.Content.LoadIntoBufferAsync().ConfigureAwait(false);
             _context.Logger.LogDebug("{ResponseContent}",
-                (await response.Content.ReadAsStringAsync(cancellationToken)).SafeSubstring(0, 1000));
+                (await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false)).SafeSubstring(0, 1000));
         }
 
         return response;
@@ -459,7 +463,7 @@ internal class RequestHandler
             }
             else
             {
-                data = await Deserialize(request, response, type);
+                data = await Deserialize(request, response, type).ConfigureAwait(false);
             }
 
             if (response.IsSuccessStatusCode)
@@ -469,7 +473,7 @@ internal class RequestHandler
 
             if (_context.UseDomainException && _domainExceptionMapper != null)
             {
-                throw await _domainExceptionMapper.CreateExceptionAsync(response, data);
+                throw await _domainExceptionMapper.CreateExceptionAsync(response, data).ConfigureAwait(false);
             }
 
             throw new RestClientException(request.RequestUri, response.StatusCode, data);
@@ -492,7 +496,7 @@ internal class RequestHandler
 
         try
         {
-            return await deserializer.Deserialize(response.Content, type);
+            return await deserializer.Deserialize(response.Content, type).ConfigureAwait(false);
         }
         catch (Exception e)
         {
@@ -501,7 +505,7 @@ internal class RequestHandler
                 throw;
             }
 
-            var errorResponse = await response.Content.ReadAsStringAsync();
+            var errorResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             throw new RestClientException(request.RequestUri, response.StatusCode, errorResponse, e);
         }
     }

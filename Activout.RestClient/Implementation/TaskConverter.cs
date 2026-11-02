@@ -19,5 +19,5 @@ internal static class TaskConverter
 
     // Binds to Func<Task<object?>, object> via return type covariance (Task<T?> is a reference type).
     [StackTraceHidden]
-    private static async Task<T?> Convert<T>(Task<object?> task) => (T?)await task;
+    private static async Task<T?> Convert<T>(Task<object?> task) => (T?)await task.ConfigureAwait(false);
 }
