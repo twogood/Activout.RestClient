@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -12,10 +12,6 @@
     <Description>System.Text.Json Support for Activout.RestClient.</Description>
     <PackageTags>rest;json;system.text.json;serialization;dotnet</PackageTags>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="10.0.14" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Activout.RestClient\Activout.RestClient.csproj" />
