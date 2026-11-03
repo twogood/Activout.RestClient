@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,9 +26,10 @@ internal sealed record RouteMetadata(
     HeaderAttribute[] Headers,
     int BodyArgumentIndex)
 {
-    private static readonly ConcurrentDictionary<MethodInfo, RouteMetadata> Cache = new();
+    // Weak keys, so a collectible AssemblyLoadContext can still unload.
+    private static readonly ConditionalWeakTable<MethodInfo, RouteMetadata> Cache = new();
 
-    public static RouteMetadata Get(MethodInfo method) => Cache.GetOrAdd(method, Create);
+    public static RouteMetadata Get(MethodInfo method) => Cache.GetValue(method, Create);
 
     public bool IsVoidTask => ReturnType == typeof(Task);
 
