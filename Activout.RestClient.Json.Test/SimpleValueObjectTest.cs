@@ -8,6 +8,13 @@ namespace Activout.RestClient.Json.Test;
 
 public record MySimpleValueObject(string Value);
 
+public readonly record struct MyStructValueObject(Guid Value);
+
+public class NullableStructData
+{
+    public MyStructValueObject? Id { get; init; }
+}
+
 public class ApiData
 {
     public MySimpleValueObject? FooBar { get; init; }
@@ -113,5 +120,24 @@ public class SimpleValueObjectTest
             .WithSystemTextJson()
             .BaseUri(new Uri(BaseUri))
             .Build<IValueObjectClient>();
+    }
+
+    [Fact]
+    public void TestNullableStructValueObjectRoundTrip()
+    {
+        var converter = new SimpleValueObjectConverter();
+        var options = new JsonSerializerOptions { Converters = { converter } };
+        var guid = Guid.NewGuid();
+
+        var json = JsonSerializer.Serialize(new NullableStructData { Id = new MyStructValueObject(guid) }, options);
+        Assert.Equal($"{{\"Id\":\"{guid}\"}}", json);
+        Assert.Equal(guid, JsonSerializer.Deserialize<NullableStructData>(json, options)!.Id?.Value);
+
+        var nullJson = JsonSerializer.Serialize(new NullableStructData(), options);
+        Assert.Equal("{\"Id\":null}", nullJson);
+        Assert.Null(JsonSerializer.Deserialize<NullableStructData>(nullJson, options)!.Id);
+
+        Assert.True(converter.CanConvert(typeof(MyStructValueObject)));
+        Assert.False(converter.CanConvert(typeof(int?)));
     }
 }

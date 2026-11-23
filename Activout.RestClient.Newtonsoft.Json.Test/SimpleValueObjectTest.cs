@@ -19,6 +19,13 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
         }
     }
 
+    public readonly record struct MyStructValueObject(Guid Value);
+
+    public class NullableStructStuff
+    {
+        public MyStructValueObject? Id { get; init; }
+    }
+
     public class Stuff
     {
         public MySimpleValueObject? FooBar { get; init; }
@@ -116,6 +123,24 @@ namespace Activout.RestClient.Newtonsoft.Json.Test
             _mockHttp.VerifyNoOutstandingExpectation();
             Assert.Null(result.FooBar);
             Assert.Null(result.NullableInteger);
+        }
+
+        [Fact]
+        public void TestNullableStructValueObjectRoundTrip()
+        {
+            var converter = new SimpleValueObjectConverter();
+            var guid = Guid.NewGuid();
+
+            var json = JsonConvert.SerializeObject(new NullableStructStuff { Id = new MyStructValueObject(guid) }, converter);
+            Assert.Equal($"{{\"Id\":\"{guid}\"}}", json);
+            Assert.Equal(guid, JsonConvert.DeserializeObject<NullableStructStuff>(json, converter)!.Id?.Value);
+
+            var nullJson = JsonConvert.SerializeObject(new NullableStructStuff(), converter);
+            Assert.Equal("{\"Id\":null}", nullJson);
+            Assert.Null(JsonConvert.DeserializeObject<NullableStructStuff>(nullJson, converter)!.Id);
+
+            Assert.True(converter.CanConvert(typeof(MyStructValueObject?)));
+            Assert.False(converter.CanConvert(typeof(int?)));
         }
 
         private IValueObjectClient CreateClient()
