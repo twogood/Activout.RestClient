@@ -9,18 +9,27 @@ namespace Activout.RestClient.Newtonsoft.Json
      * 1. No default constructor 
      * 2. A public property named Value
      * 3. A constructor taking the same type as the Value property
-     * 4. A type that is not Nullable<T>
+     *
+     * Nullable<T> wrappers of such types are also supported.
      */
     public class SimpleValueObjectConverter : JsonConverter
     {
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            var valueProperty = GetValueProperty(value!.GetType());
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
+
+            var valueProperty = GetValueProperty(value.GetType());
             serializer.Serialize(writer, valueProperty!.GetValue(value));
         }
 
         public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
+            if (reader.TokenType == JsonToken.Null) return null;
+            objectType = Nullable.GetUnderlyingType(objectType) ?? objectType;
             var valueProperty = GetValueProperty(objectType);
             var value = serializer.Deserialize(reader, valueProperty!.PropertyType);
             return value == null ? null : Activator.CreateInstance(objectType, value);
@@ -28,7 +37,7 @@ namespace Activout.RestClient.Newtonsoft.Json
 
         public override bool CanConvert(Type objectType)
         {
-            if (Nullable.GetUnderlyingType(objectType) != null) return false;
+            objectType = Nullable.GetUnderlyingType(objectType) ?? objectType;
             if (GetDefaultConstructor(objectType) != null) return false;
             var valueProperty = GetValueProperty(objectType);
             if (valueProperty == null) return false;
