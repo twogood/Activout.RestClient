@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using RichardSzalay.MockHttp;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Activout.RestClient.Test
 {
@@ -54,7 +53,7 @@ namespace Activout.RestClient.Test
             Assert.Single(content);
 
             var part = content[0];
-            Assert.Equal("42", await part.ReadAsStringAsync());
+            Assert.Equal("42", await part.ReadAsStringAsync(TestContext.Current.CancellationToken));
             Assert.Equal("bar", part.Headers.ContentDisposition?.Name);
             Assert.Equal("form-data", part.Headers.ContentDisposition?.DispositionType);
         }
@@ -96,17 +95,17 @@ namespace Activout.RestClient.Test
             Assert.Equal(3, content.Length);
 
             var formContent = content[0];
-            Assert.Equal("MyString=foobar&MyInt=42", await formContent.ReadAsStringAsync());
+            Assert.Equal("MyString=foobar&MyInt=42", await formContent.ReadAsStringAsync(TestContext.Current.CancellationToken));
             Assert.Null(formContent.Headers.ContentDisposition?.Name);
             Assert.Null(formContent.Headers.ContentDisposition?.FileName);
 
             var attachment1 = content[1];
-            Assert.Equal("foo", await attachment1.ReadAsStringAsync());
+            Assert.Equal("foo", await attachment1.ReadAsStringAsync(TestContext.Current.CancellationToken));
             Assert.Equal("attachment", attachment1.Headers.ContentDisposition?.Name);
             Assert.Equal("foo.txt", attachment1.Headers.ContentDisposition?.FileName);
 
             var attachment2 = content[2];
-            Assert.Equal("bar", await attachment2.ReadAsStringAsync());
+            Assert.Equal("bar", await attachment2.ReadAsStringAsync(TestContext.Current.CancellationToken));
             Assert.Equal("attachment", attachment2.Headers.ContentDisposition?.Name);
             Assert.Equal("bar.txt", attachment2.Headers.ContentDisposition?.FileName);
         }
@@ -144,12 +143,12 @@ namespace Activout.RestClient.Test
             Assert.Equal(2, content.Length);
 
             var attachment1 = content[0];
-            Assert.Equal("foo", await attachment1.ReadAsStringAsync());
+            Assert.Equal("foo", await attachment1.ReadAsStringAsync(TestContext.Current.CancellationToken));
             Assert.Equal("attachment", attachment1.Headers.ContentDisposition?.Name);
             Assert.Equal("foo.txt", attachment1.Headers.ContentDisposition?.FileName);
 
             var attachment2 = content[1];
-            Assert.Equal("bar", await attachment2.ReadAsStringAsync());
+            Assert.Equal("bar", await attachment2.ReadAsStringAsync(TestContext.Current.CancellationToken));
             Assert.Equal("attachment", attachment2.Headers.ContentDisposition?.Name);
             Assert.Equal("bar.txt", attachment2.Headers.ContentDisposition?.FileName);
         }

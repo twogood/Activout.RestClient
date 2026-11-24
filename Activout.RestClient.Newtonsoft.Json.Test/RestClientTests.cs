@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Activout.RestClient.Newtonsoft.Json.Test
 {

@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using RichardSzalay.MockHttp;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Activout.RestClient.Test;
 
@@ -91,7 +90,7 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
         var reviewSvc = CreateMovieReviewService();
 
         // act
-        var result = await reviewSvc.GetStringCancellable(default);
+        var result = await reviewSvc.GetStringCancellable(TestContext.Current.CancellationToken);
 
         // assert
         Assert.Equal("test string", result);
@@ -192,7 +191,7 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
         var httpContent = reviewSvc.GetHttpContent();
 
         // assert
-        Assert.Equal("test content", await httpContent.ReadAsStringAsync());
+        Assert.Equal("test content", await httpContent.ReadAsStringAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -209,7 +208,7 @@ public class NonJsonRestClientTests(ITestOutputHelper outputHelper)
         var httpResponseMessage = reviewSvc.GetHttpResponseMessage();
 
         // assert
-        Assert.Equal("test content", await httpResponseMessage.Content.ReadAsStringAsync());
+        Assert.Equal("test content", await httpResponseMessage.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]

@@ -2,7 +2,6 @@ using System.Net;
 using System.Xml.Serialization;
 using Microsoft.Extensions.Logging;
 using RichardSzalay.MockHttp;
-using Xunit.Abstractions;
 
 namespace Activout.RestClient.Xml.Test;
 
