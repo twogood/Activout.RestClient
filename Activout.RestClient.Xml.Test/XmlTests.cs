@@ -1,7 +1,6 @@
 using System.Net;
 using Microsoft.Extensions.Logging;
 using RichardSzalay.MockHttp;
-using Xunit.Abstractions;
 
 namespace Activout.RestClient.Xml.Test;
 

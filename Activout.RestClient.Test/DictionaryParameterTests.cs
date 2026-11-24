@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using RichardSzalay.MockHttp;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Activout.RestClient.Test;
 
